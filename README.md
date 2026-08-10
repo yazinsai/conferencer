@@ -68,6 +68,12 @@ password, pointing at the same person.
 - **Next.js 16 App Router**, server-rendered throughout. Client JavaScript exists only
   where it earns its place: the public form wizard (conditional logic without a reload),
   the agenda board's drag-and-drop, the personal schedule, and a handful of counters.
+- **shadcn/ui** (Radix + Tailwind v4) for the design system. Every screen renders through
+  `src/components/ui/index.tsx`, a thin layer over the shadcn primitives, so the whole
+  product restyles from one file. Two deliberate departures from stock shadcn: selects and
+  checkboxes stay **native elements** so forms post to server actions without JavaScript
+  and stay reliable for keyboard and agent users, and the list-view tabs are **links**
+  rather than stateful tabs so every view survives a reload and can be shared as a URL.
 - **SQLite** through `better-sqlite3` with plain SQL in `src/lib/repo/*`. Queries are
   synchronous and sub-millisecond, so pages render in one pass with no loading spinners.
   `schema.sql` is the single source of truth and is applied idempotently at boot.
