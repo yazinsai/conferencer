@@ -93,6 +93,28 @@ export default function ApiDocsPage() {
       </Card>
 
       <Card className="mt-4">
+        <CardHeader title="Webhooks" />
+        <div className="space-y-2 p-4 text-sm text-slate-700">
+          <p>
+            Register an endpoint in <strong>Settings → Webhooks</strong> to receive{" "}
+            <code>submission.created</code>, <code>submission.status_changed</code>,{" "}
+            <code>task.completed</code> and <code>session.scheduled</code> as they happen.
+          </p>
+          <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 font-mono text-xs text-slate-100">
+{`POST https://your-app.example.com/hooks
+X-Conferencer-Event: submission.status_changed
+X-Conferencer-Signature: sha256=<hmac of the raw body with your endpoint secret>
+
+{"type":"submission.status_changed","event_id":"…","created_at":"…",
+ "data":{"id":"…","title":"…","from":"pending","to":"accepted"}}`}
+          </pre>
+          <p className="text-xs text-slate-500">
+            Deliveries time out after 5 seconds and never block the action that triggered them.
+          </p>
+        </div>
+      </Card>
+
+      <Card className="mt-4">
         <CardHeader title="Public feeds without a token" />
         <div className="space-y-2 p-4 text-sm text-slate-700">
           <p>
