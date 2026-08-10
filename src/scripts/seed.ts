@@ -5,6 +5,7 @@ import { getDb, getSqlite, schema } from "../lib/db";
 import { id } from "../lib/id";
 import { nowIso } from "../lib/dates";
 import { hashPassword } from "../lib/auth/password";
+import { DEFAULT_EMAIL_TEMPLATES } from "../lib/email/templates";
 
 const ROOT = process.cwd();
 
