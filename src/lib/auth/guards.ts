@@ -55,7 +55,7 @@ export async function requireAnyAuth(redirectTo = "/") {
   return user;
 }
 
-export function forbidden() {
+export function forbidden(): never {
   redirect("/forbidden");
 }
 
