@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
@@ -13,6 +13,7 @@ import {
   saveSpeakerProfileAction,
   updateSpeakerStatusAction,
 } from "../actions";
+import { addFileCommentAction } from "../../files/actions";
 
 const SPEAKER_STATUSES = [
   "prospect",
@@ -97,6 +98,54 @@ export default async function SpeakerDetailPage({
       ),
     )
     .all();
+
+  const uploads = db
+    .select({
+      upload: schema.uploads,
+      task: schema.tasks,
+    })
+    .from(schema.uploads)
+    .leftJoin(
+      schema.taskAssignments,
+      eq(schema.uploads.taskAssignmentId, schema.taskAssignments.id),
+    )
+    .leftJoin(schema.tasks, eq(schema.taskAssignments.taskId, schema.tasks.id))
+    .where(
+      and(eq(schema.uploads.eventId, event.id), eq(schema.uploads.contactId, contactId)),
+    )
+    .orderBy(desc(schema.uploads.createdAt))
+    .all();
+
+  const fileComments = uploads.length
+    ? db
+        .select({
+          comment: schema.fileComments,
+          author: schema.users,
+        })
+        .from(schema.fileComments)
+        .innerJoin(schema.users, eq(schema.fileComments.authorUserId, schema.users.id))
+        .where(
+          inArray(
+            schema.fileComments.uploadId,
+            uploads.map((u) => u.upload.id),
+          ),
+        )
+        .all()
+    : [];
+
+  const commentsByUpload = new Map<
+    string,
+    Array<{ body: string; createdAt: string; authorName: string }>
+  >();
+  for (const { comment, author } of fileComments) {
+    const list = commentsByUpload.get(comment.uploadId) ?? [];
+    list.push({
+      body: comment.body,
+      createdAt: comment.createdAt,
+      authorName: `${author.firstName} ${author.lastName}`,
+    });
+    commentsByUpload.set(comment.uploadId, list);
+  }
 
   const c = row.contact;
 
@@ -223,6 +272,65 @@ export default async function SpeakerDetailPage({
                     <Badge className={statusBadgeClass(s.status)}>
                       {speakerFacingStatus(s.status)}
                     </Badge>
+                  </div>
+                ))
+              )}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="Files" subtitle={`${uploads.length} upload${uploads.length === 1 ? "" : "s"}`} />
+            <CardBody className="space-y-4">
+              {uploads.length === 0 ? (
+                <p className="text-sm text-slate-500">No files uploaded yet.</p>
+              ) : (
+                uploads.map(({ upload, task }) => (
+                  <div
+                    key={upload.id}
+                    className="rounded-lg border border-slate-200 p-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <Link
+                          href={`/api/files/${upload.storageKey}`}
+                          className="font-medium text-blue-700 hover:underline"
+                        >
+                          {upload.filename}
+                        </Link>
+                        <div className="text-xs text-slate-500">
+                          v{upload.version}
+                          {task ? ` · ${task.name}` : ""} ·{" "}
+                          {new Date(upload.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                    {(commentsByUpload.get(upload.id) ?? []).length > 0 ? (
+                      <ul className="mt-3 space-y-2">
+                        {(commentsByUpload.get(upload.id) ?? []).map((c, i) => (
+                          <li key={i} className="rounded bg-slate-50 p-2 text-sm">
+                            <div className="text-xs text-slate-500">
+                              {c.authorName} · {new Date(c.createdAt).toLocaleString()}
+                            </div>
+                            <p className="mt-1 whitespace-pre-wrap">{c.body}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <form action={addFileCommentAction} className="mt-3 space-y-2">
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="uploadId" value={upload.id} />
+                      <Label htmlFor={`file-comment-${upload.id}`}>Add comment</Label>
+                      <Textarea
+                        id={`file-comment-${upload.id}`}
+                        name="body"
+                        rows={2}
+                        required
+                        placeholder="Internal note about this file…"
+                      />
+                      <Button type="submit" variant="secondary">
+                        Post comment
+                      </Button>
+                    </form>
                   </div>
                 ))
               )}

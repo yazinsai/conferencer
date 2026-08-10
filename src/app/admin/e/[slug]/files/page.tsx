@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
-import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { FilesLibrary } from "./files-library";
 
 export default async function FilesLibraryPage({
   params,
@@ -12,6 +11,7 @@ export default async function FilesLibraryPage({
   const { slug } = await params;
   const { event } = await requireEventRole(slug, ["organizer"]);
   const db = getDb();
+
   const uploads = db
     .select({
       upload: schema.uploads,
@@ -28,57 +28,73 @@ export default async function FilesLibraryPage({
     .where(eq(schema.uploads.eventId, event.id))
     .all();
 
+  const comments = db
+    .select({
+      comment: schema.fileComments,
+      author: schema.users,
+    })
+    .from(schema.fileComments)
+    .innerJoin(schema.uploads, eq(schema.fileComments.uploadId, schema.uploads.id))
+    .innerJoin(schema.users, eq(schema.fileComments.authorUserId, schema.users.id))
+    .where(eq(schema.uploads.eventId, event.id))
+    .all();
+
+  const commentsByUpload = new Map<
+    string,
+    Array<{
+      id: string;
+      body: string;
+      createdAt: string;
+      authorFirstName: string;
+      authorLastName: string;
+    }>
+  >();
+  for (const { comment, author } of comments) {
+    const list = commentsByUpload.get(comment.uploadId) ?? [];
+    list.push({
+      id: comment.id,
+      body: comment.body,
+      createdAt: comment.createdAt,
+      authorFirstName: author.firstName,
+      authorLastName: author.lastName,
+    });
+    commentsByUpload.set(comment.uploadId, list);
+  }
+
+  const taskMap = new Map<string, { id: string; name: string }>();
+  for (const row of uploads) {
+    if (row.task) taskMap.set(row.task.id, { id: row.task.id, name: row.task.name });
+  }
+
+  const rows = uploads.map(({ upload, contact, task }) => ({
+    upload: {
+      id: upload.id,
+      filename: upload.filename,
+      version: upload.version,
+      createdAt: upload.createdAt,
+      storageKey: upload.storageKey,
+      contactId: upload.contactId,
+    },
+    contact: contact
+      ? { firstName: contact.firstName, lastName: contact.lastName }
+      : null,
+    task: task ? { id: task.id, name: task.name } : null,
+    comments: commentsByUpload.get(upload.id) ?? [],
+  }));
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Files</h1>
-        <p className="text-slate-600">All uploads across the event.</p>
+        <p className="text-slate-600">
+          All uploads across the event. Search, filter, comment, and export as ZIP.
+        </p>
       </div>
-      <Card>
-        <CardHeader title={`${uploads.length} files`} />
-        <CardBody className="overflow-x-auto p-0">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-3 py-2 text-left">File</th>
-                <th className="px-3 py-2 text-left">Speaker</th>
-                <th className="px-3 py-2 text-left">Task</th>
-                <th className="px-3 py-2 text-left">Version</th>
-                <th className="px-3 py-2 text-left">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {uploads.map(({ upload, contact, task }) => (
-                <tr key={upload.id} className="border-t">
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/api/files/${upload.storageKey}`}
-                      className="text-blue-700 hover:underline"
-                    >
-                      {upload.filename}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2">
-                    {contact ? `${contact.firstName} ${contact.lastName}` : "—"}
-                  </td>
-                  <td className="px-3 py-2">{task?.name ?? "—"}</td>
-                  <td className="px-3 py-2">v{upload.version}</td>
-                  <td className="px-3 py-2">
-                    {new Date(upload.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-              {uploads.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
-                    No uploads yet.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
+      <FilesLibrary
+        slug={slug}
+        rows={rows}
+        tasks={Array.from(taskMap.values()).sort((a, b) => a.name.localeCompare(b.name))}
+      />
     </div>
   );
 }
