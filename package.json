@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "node -e \"fs.rmSync(\\\".next/dev/types\\\",{recursive:true,force:true})\" && next typegen && tsc --noEmit",
     "seed": "tsx seed/seed.ts",
     "seed:reset": "tsx seed/seed.ts --reset",
     "seed:big": "tsx seed/big.ts",
