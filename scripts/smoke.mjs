@@ -262,6 +262,38 @@ async function main() {
     "submissions CSV export",
   );
 
+  section("Assets");
+  {
+    // The HTML assertions above all pass even when the stylesheet 404s, which is
+    // exactly how a stale server once served a completely unstyled admin area.
+    // Follow the <link rel="stylesheet"> on a page from each area and prove it loads.
+    for (const [label, path, session] of [
+      ["public", `/e/${SLUG}/sessions`, anon],
+      ["admin", `/admin/e/${SLUG}/submissions/new`, organizer],
+      ["settings", `/admin/e/${SLUG}/settings/tracks`, organizer],
+      ["portal", "/portal/profile", speaker],
+    ]) {
+      const page = await session.get(path);
+      const hrefs = [...page.body.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map(
+        (m) => m[1],
+      );
+      if (!hrefs.length) {
+        fail(`${label} page links a stylesheet`, path);
+        continue;
+      }
+      let bytes = 0;
+      let bad = "";
+      for (const href of hrefs) {
+        const response = await session.request(href);
+        if (response.status !== 200) bad = `${href} -> ${response.status}`;
+        else bytes += (await response.text()).length;
+      }
+      if (bad) fail(`${label} stylesheet loads`, bad);
+      else if (bytes < 10_000) fail(`${label} stylesheet looks complete`, `${bytes} bytes`);
+      else ok(`${label} stylesheet loads`, `${Math.round(bytes / 1024)} KB`);
+    }
+  }
+
   section("Guessable admin routes");
   for (const path of [
     "/admin/emails",
