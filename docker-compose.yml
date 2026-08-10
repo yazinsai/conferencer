@@ -1,0 +1,21 @@
+services:
+  conferencer:
+    build: .
+    image: conferencer:latest
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      DATABASE_PATH: /app/data/conferencer.db
+      UPLOAD_DIR: /app/uploads
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Conferencer <noreply@example.com>}
+    volumes:
+      - conferencer-data:/app/data
+      - conferencer-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  conferencer-data:
+  conferencer-uploads:

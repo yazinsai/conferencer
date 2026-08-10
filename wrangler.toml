@@ -1,0 +1,23 @@
+# Conferencer — Cloudflare Containers (optional)
+#
+# Conferencer uses Next.js + better-sqlite3 and is NOT compatible with
+# Workers/D1 without a major rewrite (see deploy/cloudflare.md).
+# This file is a starting point for Cloudflare Containers, which run the
+# Docker image on Cloudflare's edge container platform.
+#
+# Prerequisites: wrangler v4+, Cloudflare Containers enabled on your account.
+# Docs: https://developers.cloudflare.com/containers/
+
+name = "conferencer"
+compatibility_date = "2025-01-01"
+main = "src/worker-stub.ts"
+
+# Uncomment and adjust when deploying via Cloudflare Containers:
+# [[containers]]
+# class_name = "Conferencer"
+# image = "./Dockerfile"
+# instance_type = "standard-1"
+# max_instances = 3
+
+[vars]
+# NEXT_PUBLIC_APP_URL = "https://conferencer.example.com"
