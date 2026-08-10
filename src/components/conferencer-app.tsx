@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, ReactNode, useMemo, useState } from "react";
+/* eslint-disable @next/next/no-html-link-for-pages */
+import { ReactNode, useMemo, useState } from "react";
 import {
   emails,
   event,
