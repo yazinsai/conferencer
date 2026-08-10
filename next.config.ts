@@ -10,9 +10,6 @@ const nextConfig: NextConfig = {
   // `docker build` / `npm run deploy` ships the standalone server.
   output: "standalone",
   poweredByHeader: false,
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
 };
 
 export default nextConfig;

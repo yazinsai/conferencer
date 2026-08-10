@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import fs from "node:fs";
 import path from "node:path";
 
@@ -15,7 +14,6 @@ import {
   createEvent,
   createLookup,
   ensureLookup,
-  findLookupByName,
   getEventBySlug,
 } from "../src/lib/repo/events";
 import {
@@ -271,7 +269,7 @@ function main() {
     labelOverride: "Abstract",
     helpText: "150–300 words. This is what attendees will read.",
   });
-  const trackQuestion = addQuestion({
+  addQuestion({
     formId: form.id,
     sectionId: submissionSection.id,
     fieldId: sessionField("track").id,

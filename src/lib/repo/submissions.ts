@@ -578,6 +578,39 @@ export function publicSpeakers(eventId: string, q?: string): PublicSpeaker[] {
   );
 }
 
+export type SpeakerBrief = {
+  submission_id: string;
+  contact_id: string;
+  role: string;
+  first_name: string;
+  last_name: string;
+  job_title: string | null;
+  company: string | null;
+  headshot_url: string | null;
+};
+
+/** One query for the speaker lists of many sessions (public cards, exports). */
+export function speakersForSubmissions(ids: string[]): Map<string, SpeakerBrief[]> {
+  const map = new Map<string, SpeakerBrief[]>();
+  if (!ids.length) return map;
+  const placeholders = ids.map(() => "?").join(",");
+  const rows = all<SpeakerBrief>(
+    `SELECT sp.submission_id, sp.contact_id, sp.role, c.first_name, c.last_name,
+            c.job_title, c.company, c.headshot_url
+       FROM submission_participants sp
+       JOIN contacts c ON c.id = sp.contact_id
+      WHERE sp.submission_id IN (${placeholders}) AND sp.role != 'submitter'
+      ORDER BY sp.sort_order`,
+    ...ids,
+  );
+  for (const row of rows) {
+    const list = map.get(row.submission_id) ?? [];
+    list.push(row);
+    map.set(row.submission_id, list);
+  }
+  return map;
+}
+
 export function publicSessionsForSpeaker(eventId: string, contactId: string): PublicSession[] {
   return publicSessions(eventId).filter((session) =>
     listParticipants(session.id).some(

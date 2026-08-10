@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import { buttonClass, cx, inputClass } from "@/components/ui";
 
@@ -118,12 +118,9 @@ export function SearchBox({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const [value, setValue] = useState(params.get(param) ?? "");
+  const current = params.get(param) ?? "";
+  const input = useRef<HTMLInputElement | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setValue(params.get(param) ?? "");
-  }, [params, param]);
 
   function push(next: string) {
     const sp = new URLSearchParams(params.toString());
@@ -140,7 +137,7 @@ export function SearchBox({
       onSubmit={(e) => {
         e.preventDefault();
         if (timer.current) clearTimeout(timer.current);
-        push(value);
+        push(input.current?.value ?? "");
       }}
     >
       {label ? (
@@ -150,18 +147,19 @@ export function SearchBox({
       ) : null}
       <input
         id={`search-${param}`}
+        key={current}
+        ref={input}
         type="search"
         name={param}
         autoFocus={autoFocus}
-        value={value}
+        defaultValue={current}
         placeholder={placeholder}
         aria-label={label ?? placeholder}
         className={cx(inputClass, "pr-16")}
         onChange={(e) => {
           const next = e.target.value;
-          setValue(next);
           if (timer.current) clearTimeout(timer.current);
-          timer.current = setTimeout(() => push(next), 280);
+          timer.current = setTimeout(() => push(next), 320);
         }}
       />
       <button

@@ -11,16 +11,38 @@ export function initials(first: string, last: string): string {
   return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
 }
 
-/** Headshot placeholder as an SVG — renders anywhere an <img> does. */
+/**
+ * Headshot placeholder as an SVG portrait — renders anywhere an <img> does, and
+ * reads as a photo tile in the gallery rather than a broken image.
+ */
 export function avatarSvg(first: string, last: string): string {
   const { bg, fg } = colorFor(`${first} ${last}`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="${first} ${last}">
-  <rect width="400" height="400" fill="${bg}"/>
-  <circle cx="200" cy="158" r="72" fill="${fg}" opacity="0.22"/>
-  <path d="M60 400c0-79 63-132 140-132s140 53 140 132z" fill="${fg}" opacity="0.22"/>
-  <text x="200" y="232" font-family="ui-sans-serif, system-ui, Arial" font-size="132" font-weight="700"
-        fill="${fg}" text-anchor="middle">${initials(first, last)}</text>
+  const { bg: bg2 } = colorFor(`${last}${first}`);
+  const gradId = `g${Math.abs(hashOf(`${first}${last}`))}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Portrait of ${first} ${last}">
+  <defs>
+    <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${bg}"/>
+      <stop offset="100%" stop-color="${bg2}"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#${gradId})"/>
+  <g fill="${fg}" opacity="0.72">
+    <circle cx="200" cy="150" r="76"/>
+    <path d="M52 400c0-84 66-140 148-140s148 56 148 140z"/>
+  </g>
+  <g fill="${bg}" opacity="0.95">
+    <rect x="132" y="330" width="136" height="42" rx="21"/>
+  </g>
+  <text x="200" y="361" font-family="ui-sans-serif, system-ui, Arial" font-size="26" font-weight="700"
+        letter-spacing="2" fill="${fg}" text-anchor="middle">${initials(first, last)}</text>
 </svg>`;
+}
+
+function hashOf(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) hash = (hash * 33 + value.charCodeAt(i)) | 0;
+  return hash;
 }
 
 /* ------------------------------------------------------------ PNG writer -- */

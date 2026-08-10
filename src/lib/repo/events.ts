@@ -131,7 +131,7 @@ export function updateEvent(eventId: string, patch: Partial<Event>) {
 
 /* ------------------------------------------------------------- lookups --- */
 
-const LOOKUP_TABLES = ["tracks", "formats", "rooms", "tags", "levels"] as const;
+export const LOOKUP_TABLES = ["tracks", "formats", "rooms", "tags", "levels"] as const;
 export type LookupTable = (typeof LOOKUP_TABLES)[number];
 
 export function listLookup(table: LookupTable, eventId: string): Lookup[] {

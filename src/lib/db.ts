@@ -3,7 +3,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __conferencerDb: Database.Database | undefined;
 }
 

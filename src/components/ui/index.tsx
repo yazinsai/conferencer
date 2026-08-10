@@ -382,8 +382,8 @@ export function Avatar({
     .map((p) => p[0]?.toUpperCase())
     .join("");
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- user uploads streamed from /f/:id
       <img
         src={src}
         alt={name}
