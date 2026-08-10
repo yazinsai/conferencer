@@ -779,3 +779,108 @@ export const savedViews = sqliteTable(
   },
   (t) => [index("saved_views_event_idx").on(t.eventId)],
 );
+
+export const crmNotes = sqliteTable(
+  "crm_notes",
+  {
+    id: text("id").primaryKey(),
+    contactId: text("contact_id")
+      .notNull()
+      .references(() => contacts.id),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id),
+    authorUserId: text("author_user_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [
+    index("crm_notes_contact_idx").on(t.contactId),
+    index("crm_notes_org_idx").on(t.orgId),
+  ],
+);
+
+export const crmTags = sqliteTable(
+  "crm_tags",
+  {
+    id: text("id").primaryKey(),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id),
+    name: text("name").notNull(),
+    color: text("color").notNull().default("#94a3b8"),
+  },
+  (t) => [index("crm_tags_org_idx").on(t.orgId)],
+);
+
+export const crmContactTags = sqliteTable(
+  "crm_contact_tags",
+  {
+    id: text("id").primaryKey(),
+    contactId: text("contact_id")
+      .notNull()
+      .references(() => contacts.id),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => crmTags.id),
+  },
+  (t) => [
+    index("crm_contact_tags_contact_idx").on(t.contactId),
+    index("crm_contact_tags_tag_idx").on(t.tagId),
+  ],
+);
+
+export const crmPipelineCards = sqliteTable(
+  "crm_pipeline_cards",
+  {
+    id: text("id").primaryKey(),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id),
+    contactId: text("contact_id")
+      .notNull()
+      .references(() => contacts.id),
+    stage: text("stage").notNull().default("researching"), // researching|contacted|in_discussion|confirmed|declined
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => [
+    index("crm_pipeline_org_idx").on(t.orgId),
+    index("crm_pipeline_contact_idx").on(t.contactId),
+    index("crm_pipeline_stage_idx").on(t.orgId, t.stage),
+  ],
+);
+
+export const crmStageHistory = sqliteTable(
+  "crm_stage_history",
+  {
+    id: text("id").primaryKey(),
+    cardId: text("card_id")
+      .notNull()
+      .references(() => crmPipelineCards.id),
+    fromStage: text("from_stage"),
+    toStage: text("to_stage").notNull(),
+    actorUserId: text("actor_user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [index("crm_stage_history_card_idx").on(t.cardId)],
+);
+
+export const crmSegments = sqliteTable(
+  "crm_segments",
+  {
+    id: text("id").primaryKey(),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id),
+    name: text("name").notNull(),
+    filter: text("filter").notNull().default("{}"),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [index("crm_segments_org_idx").on(t.orgId)],
+);
