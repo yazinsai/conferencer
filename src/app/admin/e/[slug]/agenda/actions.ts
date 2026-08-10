@@ -243,6 +243,111 @@ export async function scheduleSessionAction(formData: FormData) {
   redirect(agendaUrl(slug, params));
 }
 
+/** Client DnD drop handler — returns error instead of redirecting. */
+export async function scheduleFromDropAction(input: {
+  slug: string;
+  submissionId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  roomId: string;
+  view?: string;
+}): Promise<{ ok: true; warn?: string } | { ok: false; error: string }> {
+  const { event } = await requireEventRole(input.slug, ["organizer"]);
+  const { submissionId, date, startTime, endTime, roomId } = input;
+  if (!submissionId || !date || !startTime || !endTime || !roomId) {
+    return { ok: false, error: "Date, times, and room are required." };
+  }
+
+  const startsAt = combineDateAndTime(date, startTime, event.startsAt);
+  const endsAt = combineDateAndTime(date, endTime, event.startsAt);
+  if (new Date(endsAt) <= new Date(startsAt)) {
+    return { ok: false, error: "End time must be after start time." };
+  }
+
+  const db = getDb();
+  const submission = db
+    .select()
+    .from(schema.submissions)
+    .where(
+      and(
+        eq(schema.submissions.id, submissionId),
+        eq(schema.submissions.eventId, event.id),
+        eq(schema.submissions.status, "accepted"),
+      ),
+    )
+    .get();
+  if (!submission) return { ok: false, error: "Submission not found." };
+
+  const candidate: TimedSession = {
+    id: submissionId,
+    title: submission.title,
+    startsAt,
+    endsAt,
+    locationId: roomId,
+    participantContactIds:
+      loadAgendaSubmissions(event.id).find((s) => s.id === submissionId)
+        ?.participantContactIds ?? [],
+  };
+
+  if (checkRoomConflictForCandidate(event.id, candidate)) {
+    return {
+      ok: false,
+      error: "Cannot save: this room is already booked for an overlapping time.",
+    };
+  }
+
+  const speakerWarnings = speakerConflictsForCandidate(event.id, candidate);
+
+  db.update(schema.submissions)
+    .set({
+      startsAt,
+      endsAt,
+      locationId: roomId,
+      updatedAt: nowIso(),
+    })
+    .where(eq(schema.submissions.id, submissionId))
+    .run();
+
+  const room = db
+    .select()
+    .from(schema.rooms)
+    .where(eq(schema.rooms.id, roomId))
+    .get();
+
+  await sendSessionInvites({
+    event,
+    submissionId,
+    title: submission.title,
+    startsAt,
+    endsAt,
+    roomName: room?.name ?? null,
+  });
+
+  db.insert(schema.auditEntries)
+    .values({
+      id: id("aud"),
+      eventId: event.id,
+      entityType: "submission",
+      entityId: submissionId,
+      action: "schedule_drop",
+      before: JSON.stringify({
+        startsAt: submission.startsAt,
+        endsAt: submission.endsAt,
+        locationId: submission.locationId,
+      }),
+      after: JSON.stringify({ startsAt, endsAt, locationId: roomId }),
+      createdAt: nowIso(),
+    })
+    .run();
+
+  revalidateAgenda(input.slug);
+  return {
+    ok: true,
+    warn: speakerWarnings.length ? "speaker_conflict" : undefined,
+  };
+}
+
 export async function unscheduleSessionAction(formData: FormData) {
   const slug = String(formData.get("slug") || "");
   const submissionId = String(formData.get("submissionId") || "");

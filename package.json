@@ -17,6 +17,7 @@
     "jobs:reminders": "tsx src/scripts/jobs-reminders.ts",
     "mcp": "tsx src/mcp/server.ts",
     "deploy:docker": "docker build -t conferencer .",
+    "smoke": "tsx src/scripts/smoke.ts",
     "test": "vitest run"
   },
   "dependencies": {

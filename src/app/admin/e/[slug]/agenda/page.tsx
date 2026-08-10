@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { AgendaScheduleHost } from "./agenda-schedule-host";
 import { AutoScheduleDraft } from "./auto-schedule-draft";
+import { UnscheduledDnd } from "./unscheduled-dnd";
 import { publishAgendaAction } from "./actions";
 
 const VIEWS = ["list", "day", "rooms", "conflicts"] as const;
@@ -202,30 +203,46 @@ export default async function AgendaPage({
           {unscheduled.length === 0 ? (
             <p className="text-sm text-slate-500">All accepted sessions are scheduled.</p>
           ) : (
-            <ul className="divide-y divide-slate-100">
-              {unscheduled.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <div className="font-medium">{s.title}</div>
-                    <div className="text-xs text-slate-500">
-                      {[s.trackName, s.formatName].filter(Boolean).join(" · ")}
-                      {s.participantNames.length
-                        ? ` · ${s.participantNames.join(", ")}`
-                        : ""}
-                    </div>
-                  </div>
-                  <Link
-                    href={scheduleHref(slug, s.id, view, view === "day" ? day : undefined)}
-                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            <div className="space-y-4">
+              <UnscheduledDnd
+                slug={slug}
+                view={view}
+                day={day}
+                items={unscheduled.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  meta: [
+                    s.trackName,
+                    s.formatName,
+                    s.participantNames.join(", "),
+                  ]
+                    .filter(Boolean)
+                    .join(" · "),
+                }))}
+                rooms={rooms.map((r) => ({ id: r.id, name: r.name }))}
+                times={
+                  timeSlots.length
+                    ? timeSlots
+                    : ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"]
+                }
+              />
+              <ul className="divide-y divide-slate-100 border-t border-slate-100 pt-3">
+                {unscheduled.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                   >
-                    Schedule…
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    <div className="text-sm text-slate-600">{s.title}</div>
+                    <Link
+                      href={scheduleHref(slug, s.id, view, view === "day" ? day : undefined)}
+                      className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      Schedule…
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </CardBody>
       </Card>
