@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Conferencer
 
-## Getting Started
+An open-source conference program operating system: collect speaker proposals, review
+them, onboard accepted speakers, build the agenda, and publish the program.
 
-First, run the development server:
+## Run locally
+
+Requires Node.js 20+.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The DevFlow Conf 2027 demo is
+included automatically, so every screen is populated on first launch.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo entry points
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Surface | URL |
+| --- | --- |
+| Organizer | [http://localhost:3000/admin](http://localhost:3000/admin) |
+| Speaker portal | [http://localhost:3000/portal](http://localhost:3000/portal) |
+| Reviewer | [http://localhost:3000/review](http://localhost:3000/review) |
+| Public program | [http://localhost:3000/e/devflow-conf-2027/sessions](http://localhost:3000/e/devflow-conf-2027/sessions) |
+| Call for speakers | [http://localhost:3000/e/devflow-conf-2027/submit/cfp-main](http://localhost:3000/e/devflow-conf-2027/submit/cfp-main) |
 
-## Learn More
+The sign-in screen includes one-click role switching with the seeded organizer, speaker,
+and reviewer credentials.
 
-To learn more about Next.js, take a look at the following resources:
+## Checks
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Stack
 
-## Deploy on Vercel
+Next.js 16, React 19, TypeScript, and Tailwind CSS 4. The application uses server-rendered
+App Router entry points and limits client state to interactive program workflows.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
