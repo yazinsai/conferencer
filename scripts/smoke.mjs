@@ -262,6 +262,26 @@ async function main() {
     "submissions CSV export",
   );
 
+  section("Guessable admin routes");
+  for (const path of [
+    "/admin/emails",
+    "/admin/settings",
+    "/admin/submissions",
+    "/admin/speakers",
+    "/admin/agenda",
+    "/admin/forms",
+    "/admin/evaluation",
+    "/admin/tasks",
+    "/admin/deliverables",
+    "/admin/reports",
+    "/admin/team",
+    "/admin/search",
+  ]) {
+    const response = await organizer.request(path);
+    if ([307, 308].includes(response.status)) ok(`alias ${path}`, String(response.status));
+    else fail(`alias ${path}`, `expected a redirect, got ${response.status}`);
+  }
+
   section("Reviewer scoping");
   await expectContains(reviewer, "/review", ["Program Committee Review"], "reviewer dashboard");
   await expectMissing(reviewer, "/review", ["Deliverables", "Event Team"], "no organizer nav for reviewers");
