@@ -270,3 +270,39 @@ export function ensureLookup(
     createLookup(table, eventId, { name, ...extra })
   );
 }
+
+/**
+ * How many records point at this lookup row. Deleting it nulls those references,
+ * so the confirmation dialog states the blast radius rather than just asking
+ * "are you sure?" (Appendix B #10 — the buyer's team is non-technical).
+ */
+export function lookupUsage(table: LookupTable, rowId: string): number {
+  const column =
+    table === "tracks"
+      ? "track_id"
+      : table === "formats"
+        ? "format_id"
+        : table === "rooms"
+          ? "location_id"
+          : null;
+  if (column) {
+    return (
+      get<{ n: number }>(
+        `SELECT COUNT(*) AS n FROM submissions WHERE ${column} = ?`,
+        rowId,
+      )?.n ?? 0
+    );
+  }
+  if (table === "levels") {
+    const row = getLookup("levels", rowId);
+    return row
+      ? (get<{ n: number }>("SELECT COUNT(*) AS n FROM submissions WHERE level = ?", row.name)
+          ?.n ?? 0)
+      : 0;
+  }
+  const row = getLookup("tags", rowId);
+  return row
+    ? (get<{ n: number }>("SELECT COUNT(*) AS n FROM submissions WHERE tags LIKE ?", `%"${row.name}"%`)
+        ?.n ?? 0)
+    : 0;
+}

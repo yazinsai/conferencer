@@ -9,7 +9,7 @@ import {
   Th,
 } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/client/basics";
-import type { Lookup, LookupTable } from "@/lib/repo/events";
+import { lookupUsage, type Lookup, type LookupTable } from "@/lib/repo/events";
 import {
   createLookupAction,
   deleteLookupAction,
@@ -47,7 +47,9 @@ export function LookupEditor({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {rows.map((row) => {
+            const usage = lookupUsage(table, row.id);
+            return (
             <tr key={row.id}>
               <Td>
                 <Dot color={row.color} />
@@ -100,13 +102,24 @@ export function LookupEditor({
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="table" value={table} />
                   <input type="hidden" name="id" value={row.id} />
-                  <ConfirmSubmit message={`Delete "${row.name}"?`} variant="ghost">
+                  <ConfirmSubmit
+                    size="sm"
+                    message={
+                      usage
+                        ? `Delete "${row.name}"? ${usage} submission${
+                            usage === 1 ? "" : "s"
+                          } currently use it and will be left without one. This cannot be undone.`
+                        : `Delete "${row.name}"? Nothing is using it, so this is safe.`
+                    }
+                    variant="ghost"
+                  >
                     Delete
                   </ConfirmSubmit>
                 </form>
               </Td>
             </tr>
-          ))}
+            );
+          })}
           {!rows.length ? (
             <tr>
               <Td colSpan={6} className="py-6 text-center text-slate-500">
