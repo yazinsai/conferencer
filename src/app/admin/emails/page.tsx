@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth/session";
-import { getUserRolesForEvent } from "@/lib/auth/guards";
+import { forbidden, getUserRolesForEvent } from "@/lib/auth/guards";
 import { getDefaultEvent } from "@/lib/db/queries";
 import { getDb, schema } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export default async function AdminEmailsShortcutPage() {
   }
 
   const roles = await getUserRolesForEvent(user.id, event.id);
-  if (!roles.includes("organizer")) redirect("/forbidden");
+  if (!roles.includes("organizer")) forbidden();
 
   const db = getDb();
   const messages = db

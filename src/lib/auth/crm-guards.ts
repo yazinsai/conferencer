@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { getUserRolesForEvent } from "@/lib/auth/guards";
+import { forbidden, getUserRolesForEvent } from "@/lib/auth/guards";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { getDefaultEvent } from "@/lib/db/queries";
@@ -18,7 +18,7 @@ export async function requireCrmAccess(redirectTo = "/admin/crm") {
 
   const roles = await getUserRolesForEvent(user.id, event.id);
   if (!roles.includes("organizer")) {
-    redirect("/forbidden");
+    forbidden();
   }
 
   const db = getDb();

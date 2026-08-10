@@ -3,6 +3,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { forbidden } from "@/lib/auth/guards";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { getContactForUser, getDefaultEvent, loadFormQuestions } from "@/lib/db/queries";
@@ -14,10 +15,10 @@ async function getOwnedAssignment(assignmentId: string, userId: string) {
   const event = getDefaultEvent();
   if (!event) throw new Error("Event not found");
   const row = getContactForUser(event.id, userId);
-  if (!row) throw new Error("Contact not found");
+  if (!row) forbidden();
 
   const db = getDb();
-  const assignment = db
+  const owned = db
     .select({
       assignment: schema.taskAssignments,
       task: schema.tasks,
@@ -33,8 +34,17 @@ async function getOwnedAssignment(assignmentId: string, userId: string) {
     )
     .get();
 
-  if (!assignment) throw new Error("Task assignment not found");
-  return { event, contact: row.contact, ...assignment };
+  if (!owned) {
+    // Assignment exists for someone else, or doesn't exist — never leak.
+    const any = db
+      .select({ id: schema.taskAssignments.id })
+      .from(schema.taskAssignments)
+      .where(eq(schema.taskAssignments.id, assignmentId))
+      .get();
+    if (any) forbidden();
+    forbidden();
+  }
+  return { event, contact: row.contact, ...owned };
 }
 
 export async function completeActionTaskAction(formData: FormData) {

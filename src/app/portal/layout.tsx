@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
-import { getUserRolesForEvent } from "@/lib/auth/guards";
+import { forbidden, getUserRolesForEvent } from "@/lib/auth/guards";
 import { getDefaultEvent } from "@/lib/db/queries";
 import { signOutAction } from "@/lib/auth/actions";
 
@@ -16,7 +16,7 @@ export default async function PortalLayout({
   if (!event) redirect("/");
   const roles = await getUserRolesForEvent(user.id, event.id);
   if (!roles.includes("participant") && !roles.includes("organizer")) {
-    redirect("/forbidden");
+    forbidden();
   }
 
   const tabs = [

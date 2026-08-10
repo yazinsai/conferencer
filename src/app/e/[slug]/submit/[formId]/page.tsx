@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation";
-import { and, eq } from "drizzle-orm";
-import { asc } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
+import { and, asc, eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth/session";
 import { getEventBySlug } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
@@ -78,28 +77,36 @@ export default async function PublicSubmitPage({
   const closed = isFormClosed(form);
   const sessionUser = await getSessionUser();
 
-  // Editing an existing submission while closed → read-only wizard if owner
+  // Editing an existing submission — R-ROLE-2: foreign IDs must 404, never a blank form.
   let editSubmission: typeof schema.submissions.$inferSelect | null = null;
-  if (sp.edit && sessionUser) {
+  if (sp.edit) {
+    if (!sessionUser) {
+      redirect(
+        `/sign-in?next=${encodeURIComponent(`/e/${slug}/submit/${formId}?edit=${sp.edit}`)}`,
+      );
+    }
+    const target = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.id, sp.edit),
+          eq(schema.submissions.formId, formId),
+          eq(schema.submissions.eventId, event.id),
+        ),
+      )
+      .get();
+    if (!target) notFound();
+
     const contact = db
       .select()
       .from(schema.contacts)
       .where(eq(schema.contacts.userId, sessionUser.id))
       .get();
-    if (contact) {
-      editSubmission =
-        db
-          .select()
-          .from(schema.submissions)
-          .where(
-            and(
-              eq(schema.submissions.id, sp.edit),
-              eq(schema.submissions.formId, formId),
-              eq(schema.submissions.submitterContactId, contact.id),
-            ),
-          )
-          .get() ?? null;
+    if (!contact || target.submitterContactId !== contact.id) {
+      notFound();
     }
+    editSubmission = target;
   }
 
   if (closed && !editSubmission) {

@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { forbidden as nextForbidden, redirect } from "next/navigation";
 import { getDb, schema } from "@/lib/db";
 import { getSessionUser } from "./session";
 
@@ -44,7 +44,7 @@ export async function requireEventRole(
   }
   const roles = await getUserRolesForEvent(user.id, event.id);
   if (!roles.some((r) => allowed.includes(r))) {
-    redirect("/forbidden");
+    nextForbidden();
   }
   return { user, event, roles };
 }
@@ -55,8 +55,9 @@ export async function requireAnyAuth(redirectTo = "/") {
   return user;
 }
 
+/** Throws Next.js auth interrupt → HTTP 403 + app/forbidden.tsx */
 export function forbidden(): never {
-  redirect("/forbidden");
+  nextForbidden();
 }
 
 export function notFoundPage(): never {
