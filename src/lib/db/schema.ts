@@ -515,6 +515,31 @@ export const reviews = sqliteTable(
   (t) => [index("reviews_assignment_idx").on(t.assignmentId)],
 );
 
+export const aiReviews = sqliteTable(
+  "ai_reviews",
+  {
+    id: text("id").primaryKey(),
+    submissionId: text("submission_id")
+      .notNull()
+      .references(() => submissions.id),
+    planId: text("plan_id")
+      .notNull()
+      .references(() => evaluationPlans.id),
+    roundId: text("round_id")
+      .notNull()
+      .references(() => evaluationRounds.id),
+    score: integer("score").notNull(),
+    reasoning: text("reasoning").notNull(),
+    createdAt: text("created_at").notNull(),
+    overriddenByReviewId: text("overridden_by_review_id").references(() => reviews.id),
+  },
+  (t) => [
+    index("ai_reviews_submission_idx").on(t.submissionId),
+    index("ai_reviews_round_idx").on(t.roundId),
+    index("ai_reviews_plan_idx").on(t.planId),
+  ],
+);
+
 export const tasks = sqliteTable(
   "tasks",
   {

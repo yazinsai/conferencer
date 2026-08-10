@@ -13,6 +13,7 @@ import {
   applyAutoAssign,
   previewAutoAssign,
 } from "@/lib/evaluation/results";
+import { computeAiFirstPassScore } from "@/lib/evaluation/ai-scorer";
 
 type ScorecardQuestion = typeof schema.scorecardQuestions.$inferSelect;
 
@@ -97,6 +98,11 @@ export async function createEvaluationPlanAction(formData: FormData) {
   const opensAt = parseIsoDate(String(formData.get("opensAt") || ""));
   const closesAt = parseIsoDate(String(formData.get("closesAt") || ""));
   const isOpen = formData.get("isOpen") === "on" || formData.get("isOpen") === "true";
+  const allowAbstain =
+    formData.get("allowAbstain") === "on" || formData.get("allowAbstain") === "true";
+  const requireAbstainReason =
+    formData.get("requireAbstainReason") === "on" ||
+    formData.get("requireAbstainReason") === "true";
 
   const { event } = await requireEventRole(slug, ["organizer"]);
   if (!name) throw new Error("Name is required");
@@ -113,11 +119,59 @@ export async function createEvaluationPlanAction(formData: FormData) {
       isOpen,
       opensAt,
       closesAt,
+      allowAbstain,
+      requireAbstainReason: allowAbstain ? requireAbstainReason : false,
       createdAt,
     })
     .run();
 
   revalidateEvaluation(slug);
+}
+
+export async function updateEvaluationPlanAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const planId = String(formData.get("planId") || "");
+  const name = String(formData.get("name") || "").trim();
+  const instructions = String(formData.get("instructions") || "");
+  const opensAt = parseIsoDate(String(formData.get("opensAt") || ""));
+  const closesAt = parseIsoDate(String(formData.get("closesAt") || ""));
+  const isOpen = formData.get("isOpen") === "on" || formData.get("isOpen") === "true";
+  const allowAbstain =
+    formData.get("allowAbstain") === "on" || formData.get("allowAbstain") === "true";
+  const requireAbstainReason =
+    formData.get("requireAbstainReason") === "on" ||
+    formData.get("requireAbstainReason") === "true";
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+  if (!name) throw new Error("Name is required");
+
+  const db = getDb();
+  const plan = db
+    .select()
+    .from(schema.evaluationPlans)
+    .where(
+      and(
+        eq(schema.evaluationPlans.id, planId),
+        eq(schema.evaluationPlans.eventId, event.id),
+      ),
+    )
+    .get();
+  if (!plan) throw new Error("Plan not found");
+
+  db.update(schema.evaluationPlans)
+    .set({
+      name,
+      instructions: instructions || null,
+      isOpen,
+      opensAt,
+      closesAt,
+      allowAbstain,
+      requireAbstainReason: allowAbstain ? requireAbstainReason : false,
+    })
+    .where(eq(schema.evaluationPlans.id, planId))
+    .run();
+
+  revalidateEvaluation(slug, planId);
 }
 
 export async function createRoundAction(formData: FormData) {
@@ -805,7 +859,9 @@ export async function saveReviewAction(formData: FormData) {
     .where(eq(schema.reviews.assignmentId, assignmentId))
     .get();
 
+  let reviewId: string;
   if (existing) {
+    reviewId = existing.id;
     db.update(schema.reviews)
       .set({
         answers: JSON.stringify(answers),
@@ -817,9 +873,10 @@ export async function saveReviewAction(formData: FormData) {
       .where(eq(schema.reviews.id, existing.id))
       .run();
   } else {
+    reviewId = id("rev");
     db.insert(schema.reviews)
       .values({
-        id: id("rev"),
+        id: reviewId,
         assignmentId,
         answers: JSON.stringify(answers),
         score,
@@ -835,10 +892,184 @@ export async function saveReviewAction(formData: FormData) {
     .where(eq(schema.evaluationAssignments.id, assignmentId))
     .run();
 
+  const aiReview = db
+    .select()
+    .from(schema.aiReviews)
+    .where(
+      and(
+        eq(schema.aiReviews.submissionId, assignment.submissionId),
+        eq(schema.aiReviews.roundId, roundId),
+      ),
+    )
+    .get();
+  if (aiReview && !aiReview.overriddenByReviewId) {
+    db.update(schema.aiReviews)
+      .set({ overriddenByReviewId: reviewId })
+      .where(eq(schema.aiReviews.id, aiReview.id))
+      .run();
+  }
+
   updateSubmissionAverageScore(assignment.submissionId);
 
   revalidatePath(`/review/plans/${planId}/rounds/${roundId}`);
   revalidatePath(
     `/review/plans/${planId}/rounds/${roundId}/submissions/${assignmentId}`,
   );
+}
+
+export async function abstainAssignmentAction(formData: FormData) {
+  const planId = String(formData.get("planId") || "");
+  const roundId = String(formData.get("roundId") || "");
+  const assignmentId = String(formData.get("assignmentId") || "");
+  const abstainReason = String(formData.get("abstainReason") || "").trim();
+
+  const { requireAnyAuth, forbidden } = await import("@/lib/auth/guards");
+  const user = await requireAnyAuth(
+    `/review/plans/${planId}/rounds/${roundId}/submissions/${assignmentId}`,
+  );
+
+  const db = getDb();
+  const row = db
+    .select({
+      assignment: schema.evaluationAssignments,
+      plan: schema.evaluationPlans,
+    })
+    .from(schema.evaluationAssignments)
+    .innerJoin(
+      schema.evaluationRounds,
+      eq(schema.evaluationAssignments.roundId, schema.evaluationRounds.id),
+    )
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
+    .where(eq(schema.evaluationAssignments.id, assignmentId))
+    .get();
+
+  if (!row || row.assignment.roundId !== roundId) {
+    forbidden();
+    return;
+  }
+  if (row.assignment.reviewerUserId !== user.id) {
+    throw new Error("Forbidden");
+  }
+  if (!row.plan.allowAbstain) {
+    throw new Error("Abstaining is not allowed for this evaluation plan");
+  }
+  if (row.plan.requireAbstainReason && !abstainReason) {
+    throw new Error("A reason is required when abstaining");
+  }
+
+  db.update(schema.evaluationAssignments)
+    .set({
+      status: "abstained",
+      abstainReason: abstainReason || null,
+    })
+    .where(eq(schema.evaluationAssignments.id, assignmentId))
+    .run();
+
+  revalidatePath(`/review/plans/${planId}/rounds/${roundId}`);
+  revalidatePath(
+    `/review/plans/${planId}/rounds/${roundId}/submissions/${assignmentId}`,
+  );
+}
+
+export async function runAiFirstPassAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const planId = String(formData.get("planId") || "");
+  const roundId = String(formData.get("roundId") || "");
+  const submissionIds = formData.getAll("submissionIds").map(String).filter(Boolean);
+  const runAllPending = formData.get("runAllPending") === "on";
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+
+  const db = getDb();
+  const round = db
+    .select()
+    .from(schema.evaluationRounds)
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
+    .where(
+      and(
+        eq(schema.evaluationRounds.id, roundId),
+        eq(schema.evaluationPlans.eventId, event.id),
+        eq(schema.evaluationPlans.id, planId),
+      ),
+    )
+    .get();
+  if (!round) throw new Error("Round not found");
+
+  let targetSubmissionIds = submissionIds;
+  if (runAllPending || targetSubmissionIds.length === 0) {
+    const assigned = db
+      .select({ submissionId: schema.evaluationAssignments.submissionId })
+      .from(schema.evaluationAssignments)
+      .where(eq(schema.evaluationAssignments.roundId, roundId))
+      .all();
+    targetSubmissionIds = [...new Set(assigned.map((a) => a.submissionId))];
+  }
+
+  const createdAt = nowIso();
+  let processed = 0;
+
+  for (const submissionId of targetSubmissionIds) {
+    const submission = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.id, submissionId),
+          eq(schema.submissions.eventId, event.id),
+        ),
+      )
+      .get();
+    if (!submission) continue;
+
+    const { score, reasoning } = computeAiFirstPassScore({
+      title: submission.title,
+      description: submission.description,
+      level: submission.level,
+    });
+
+    const existing = db
+      .select()
+      .from(schema.aiReviews)
+      .where(
+        and(
+          eq(schema.aiReviews.submissionId, submissionId),
+          eq(schema.aiReviews.roundId, roundId),
+        ),
+      )
+      .get();
+
+    if (existing) {
+      db.update(schema.aiReviews)
+        .set({
+          score,
+          reasoning,
+          createdAt,
+          overriddenByReviewId: existing.overriddenByReviewId,
+        })
+        .where(eq(schema.aiReviews.id, existing.id))
+        .run();
+    } else {
+      db.insert(schema.aiReviews)
+        .values({
+          id: id("air"),
+          submissionId,
+          planId,
+          roundId,
+          score,
+          reasoning,
+          createdAt,
+        })
+        .run();
+    }
+    processed++;
+  }
+
+  revalidateEvaluation(slug, planId);
+  return { processed };
 }

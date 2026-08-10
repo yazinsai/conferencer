@@ -7,6 +7,14 @@ export type ReviewerScore = {
   reviewerName: string;
   score: number | null;
   status: string;
+  abstainReason: string | null;
+};
+
+export type AiReviewSummary = {
+  score: number;
+  reasoning: string;
+  overridden: boolean;
+  createdAt: string;
 };
 
 export type SubmissionResultRow = {
@@ -15,6 +23,7 @@ export type SubmissionResultRow = {
   averageScore: number | null;
   reviewCount: number;
   reviewerScores: ReviewerScore[];
+  aiReview: AiReviewSummary | null;
 };
 
 export function getRoundResults(roundId: string): SubmissionResultRow[] {
@@ -47,6 +56,7 @@ export function getRoundResults(roundId: string): SubmissionResultRow[] {
         averageScore: null,
         reviewCount: 0,
         reviewerScores: [],
+        aiReview: null,
       };
       bySubmission.set(row.submission.id, entry);
     }
@@ -56,18 +66,46 @@ export function getRoundResults(roundId: string): SubmissionResultRow[] {
       reviewerName: `${row.reviewer.firstName} ${row.reviewer.lastName}`.trim(),
       score: row.review?.score ?? null,
       status: row.assignment.status,
+      abstainReason: row.assignment.abstainReason,
     });
   }
 
   for (const entry of bySubmission.values()) {
-    const completed = entry.reviewerScores.filter((r) => r.score != null);
-    entry.reviewCount = completed.length;
+    const humanCompleted = entry.reviewerScores.filter(
+      (r) => r.status === "complete" && r.score != null,
+    );
+    entry.reviewCount = humanCompleted.length;
     entry.averageScore =
-      completed.length > 0
+      humanCompleted.length > 0
         ? Math.round(
-            completed.reduce((sum, r) => sum + (r.score ?? 0), 0) / completed.length,
+            humanCompleted.reduce((sum, r) => sum + (r.score ?? 0), 0) /
+              humanCompleted.length,
           )
         : null;
+  }
+
+  const aiRows = db
+    .select()
+    .from(schema.aiReviews)
+    .where(eq(schema.aiReviews.roundId, roundId))
+    .all();
+  const aiBySubmission = new Map(aiRows.map((r) => [r.submissionId, r]));
+
+  for (const entry of bySubmission.values()) {
+    const ai = aiBySubmission.get(entry.submissionId);
+    if (!ai) {
+      entry.aiReview = null;
+      continue;
+    }
+    entry.aiReview = {
+      score: ai.score,
+      reasoning: ai.reasoning,
+      overridden: ai.overriddenByReviewId != null,
+      createdAt: ai.createdAt,
+    };
+    if (entry.averageScore == null && !ai.overriddenByReviewId) {
+      entry.averageScore = ai.score;
+    }
   }
 
   return Array.from(bySubmission.values());
@@ -183,7 +221,9 @@ export function getRoundReviewerProgress(roundId: string): ReviewerProgress[] {
       byReviewer.set(row.reviewer.id, entry);
     }
     entry.total++;
-    if (row.assignment.status === "complete") entry.done++;
+    if (row.assignment.status === "complete" || row.assignment.status === "abstained") {
+      entry.done++;
+    }
   }
 
   for (const entry of byReviewer.values()) {
@@ -205,7 +245,10 @@ export function getRoundProgressStats(roundId: string) {
     .all();
 
   const totalEvaluations = assignments.length;
-  const doneAssignments = assignments.filter((a) => a.assignment.status === "complete").length;
+  const doneAssignments = assignments.filter(
+    (a) =>
+      a.assignment.status === "complete" || a.assignment.status === "abstained",
+  ).length;
 
   const submissionStatus = new Map<string, { total: number; done: number }>();
   for (const row of assignments) {

@@ -18,8 +18,10 @@ import {
   createRoundAction,
   createScorecardQuestionAction,
   deleteScorecardQuestionAction,
+  updateEvaluationPlanAction,
   updateScorecardQuestionAction,
 } from "../actions";
+import { AiFirstPassForm } from "./ai-first-pass-form";
 import { AutoAssignForm } from "./auto-assign-form";
 import { BulkReminderForm } from "./bulk-reminder-form";
 import { InviteReviewerForm } from "./invite-reviewer-form";
@@ -34,6 +36,13 @@ function formatOptions(options: string | null) {
   } catch {
     return "";
   }
+}
+
+function toDatetimeLocal(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export default async function EvaluationPlanDetailPage({
@@ -94,7 +103,10 @@ export default async function EvaluationPlanDetailPage({
       .where(
         and(
           eq(schema.evaluationAssignments.roundId, round.id),
-          eq(schema.evaluationAssignments.status, "complete"),
+          or(
+            eq(schema.evaluationAssignments.status, "complete"),
+            eq(schema.evaluationAssignments.status, "abstained"),
+          ),
         ),
       )
       .get();
@@ -201,6 +213,11 @@ export default async function EvaluationPlanDetailPage({
     pending: r.total - r.done,
   }));
 
+  const assignedSubmissionIds = new Set(assignments.map((a) => a.submission.id));
+  const aiFirstPassSubmissions = submissions
+    .filter((s) => assignedSubmissionIds.has(s.id))
+    .map((s) => ({ id: s.id, title: s.title }));
+
   function tabHref(nextTab: string) {
     const params = new URLSearchParams();
     if (activeRoundId) params.set("round", activeRoundId);
@@ -248,6 +265,9 @@ export default async function EvaluationPlanDetailPage({
             >
               {plan.isOpen ? "Open" : "Closed"}
             </Badge>
+            {plan.allowAbstain ? (
+              <Badge className="bg-sky-100 text-sky-800">Abstain allowed</Badge>
+            ) : null}
             <span>
               Progress: {totalDone}/{totalAssignments} reviews complete
             </span>
@@ -351,6 +371,7 @@ export default async function EvaluationPlanDetailPage({
                         </Link>
                       </th>
                       <th className="py-2 pr-4">Reviews</th>
+                      <th className="py-2 pr-4">AI first-pass</th>
                       {Array.from(reviewerColumns.entries()).map(([id, name]) => (
                         <th key={id} className="py-2 pr-4">
                           {name}
@@ -370,11 +391,31 @@ export default async function EvaluationPlanDetailPage({
                             {row.averageScore != null ? row.averageScore : "—"}
                           </td>
                           <td className="py-2 pr-4">{row.reviewCount}</td>
+                          <td className="py-2 pr-4">
+                            {row.aiReview ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Badge className="bg-violet-100 text-violet-800">AI</Badge>
+                                <span>{row.aiReview.score}</span>
+                                {row.aiReview.overridden ? (
+                                  <span className="text-xs text-slate-400">(overridden)</span>
+                                ) : null}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
                           {Array.from(reviewerColumns.keys()).map((id) => {
                             const rs = scoreMap.get(id);
                             return (
                               <td key={id} className="py-2 pr-4">
-                                {rs?.score != null ? (
+                                {rs?.status === "abstained" ? (
+                                  <span
+                                    className="text-slate-500"
+                                    title={rs.abstainReason ?? "Abstained"}
+                                  >
+                                    abstained
+                                  </span>
+                                ) : rs?.score != null ? (
                                   rs.score
                                 ) : rs ? (
                                   <span className="text-slate-400">pending</span>
@@ -395,6 +436,79 @@ export default async function EvaluationPlanDetailPage({
         </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-3">
+          <CardHeader title="Plan settings" subtitle="Name, schedule, and abstain options" />
+          <CardBody>
+            <form action={updateEvaluationPlanAction} className="grid gap-4 sm:grid-cols-2">
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="planId" value={planId} />
+              <div>
+                <Label htmlFor="planName">Name</Label>
+                <Input id="planName" name="name" defaultValue={plan.name} required />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="planInstructions">Instructions</Label>
+                <Textarea
+                  id="planInstructions"
+                  name="instructions"
+                  rows={2}
+                  defaultValue={plan.instructions ?? ""}
+                />
+              </div>
+              <div>
+                <Label htmlFor="planOpensAt">Opens</Label>
+                <Input
+                  id="planOpensAt"
+                  name="opensAt"
+                  type="datetime-local"
+                  defaultValue={toDatetimeLocal(plan.opensAt)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="planClosesAt">Closes</Label>
+                <Input
+                  id="planClosesAt"
+                  name="closesAt"
+                  type="datetime-local"
+                  defaultValue={toDatetimeLocal(plan.closesAt)}
+                />
+              </div>
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="isOpen"
+                    defaultChecked={plan.isOpen}
+                    className="rounded"
+                  />
+                  Plan is open
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="allowAbstain"
+                    defaultChecked={plan.allowAbstain}
+                    className="rounded"
+                  />
+                  Allow reviewers to abstain (conflict of interest)
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="requireAbstainReason"
+                    defaultChecked={plan.requireAbstainReason}
+                    className="rounded"
+                  />
+                  Require reason when abstaining
+                </label>
+              </div>
+              <div className="sm:col-span-2">
+                <Button type="submit">Save plan settings</Button>
+              </div>
+            </form>
+          </CardBody>
+        </Card>
+
         <Card className="lg:col-span-1">
           <CardHeader title="Rounds" subtitle="Select a round to configure" />
           <CardBody className="space-y-4">
@@ -666,6 +780,21 @@ export default async function EvaluationPlanDetailPage({
 
               <Card>
                 <CardHeader
+                  title="AI first-pass"
+                  subtitle="Heuristic pre-scoring for assigned submissions"
+                />
+                <CardBody>
+                  <AiFirstPassForm
+                    slug={slug}
+                    planId={planId}
+                    roundId={activeRound.id}
+                    submissions={aiFirstPassSubmissions}
+                  />
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardHeader
                   title="Bulk reminder"
                   subtitle="Email reviewers with outstanding assignments"
                 />
@@ -770,15 +899,24 @@ export default async function EvaluationPlanDetailPage({
                                   {reviewer.firstName} {reviewer.lastName}
                                 </td>
                                 <td className="py-2">
-                                  <Badge
-                                    className={
-                                      assignment.status === "complete"
-                                        ? "bg-emerald-100 text-emerald-800"
-                                        : "bg-amber-100 text-amber-800"
-                                    }
-                                  >
-                                    {assignment.status === "complete" ? "Complete" : "Pending"}
-                                  </Badge>
+                                  {assignment.status === "complete" ? (
+                                    <Badge className="bg-emerald-100 text-emerald-800">
+                                      Complete
+                                    </Badge>
+                                  ) : assignment.status === "abstained" ? (
+                                    <div className="space-y-1">
+                                      <Badge className="bg-slate-200 text-slate-800">
+                                        Abstained
+                                      </Badge>
+                                      {assignment.abstainReason ? (
+                                        <p className="max-w-xs text-xs text-slate-500">
+                                          {assignment.abstainReason}
+                                        </p>
+                                      ) : null}
+                                    </div>
+                                  ) : (
+                                    <Badge className="bg-amber-100 text-amber-800">Pending</Badge>
+                                  )}
                                 </td>
                               </tr>
                             ))}

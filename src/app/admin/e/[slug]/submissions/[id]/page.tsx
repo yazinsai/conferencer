@@ -55,6 +55,8 @@ export default async function SubmissionDetailPage({
       assignment: schema.evaluationAssignments,
       review: schema.reviews,
       reviewer: schema.users,
+      round: schema.evaluationRounds,
+      plan: schema.evaluationPlans,
     })
     .from(schema.evaluationAssignments)
     .leftJoin(
@@ -65,7 +67,21 @@ export default async function SubmissionDetailPage({
       schema.users,
       eq(schema.evaluationAssignments.reviewerUserId, schema.users.id),
     )
+    .innerJoin(
+      schema.evaluationRounds,
+      eq(schema.evaluationAssignments.roundId, schema.evaluationRounds.id),
+    )
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
     .where(eq(schema.evaluationAssignments.submissionId, sub.id))
+    .all();
+
+  const aiReviews = db
+    .select()
+    .from(schema.aiReviews)
+    .where(eq(schema.aiReviews.submissionId, sub.id))
     .all();
 
   const uploads = db
@@ -202,15 +218,46 @@ export default async function SubmissionDetailPage({
             <Card>
               <CardHeader title="Reviews" />
               <CardBody className="space-y-3 text-sm">
+                {aiReviews.length > 0 ? (
+                  <div className="space-y-2">
+                    {aiReviews.map((ai) => (
+                      <div
+                        key={ai.id}
+                        className="rounded-md border border-violet-200 bg-violet-50 p-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge className="bg-violet-100 text-violet-800">AI first-pass</Badge>
+                          <span className="font-medium">Score: {ai.score}/10</span>
+                          {ai.overriddenByReviewId ? (
+                            <span className="text-xs text-slate-500">(overridden by human)</span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-slate-700">{ai.reasoning}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 {assignments.length === 0 ? (
                   <p className="text-slate-500">No reviews yet.</p>
                 ) : (
-                  assignments.map(({ assignment, review, reviewer }) => (
+                  assignments.map(({ assignment, review, reviewer, round, plan }) => (
                     <div key={assignment.id} className="rounded-md border border-slate-200 p-3">
                       <div className="font-medium">
                         {reviewer.firstName} {reviewer.lastName}
                       </div>
-                      <div className="text-slate-500">{assignment.status}</div>
+                      <div className="text-xs text-slate-500">
+                        {plan.name} · {round.name}
+                      </div>
+                      {assignment.status === "abstained" ? (
+                        <div className="mt-1">
+                          <Badge className="bg-slate-200 text-slate-800">Abstained</Badge>
+                          {assignment.abstainReason ? (
+                            <p className="mt-1 text-slate-600">{assignment.abstainReason}</p>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div className="text-slate-500">{assignment.status}</div>
+                      )}
                       {review ? (
                         <>
                           <div className="mt-1">Score: {review.score ?? "—"}</div>

@@ -115,6 +115,14 @@ export default async function EvaluationPlansPage({
                 <input type="checkbox" name="isOpen" defaultChecked className="rounded" />
                 Plan is open
               </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowAbstain" className="rounded" />
+                Allow reviewers to abstain (conflict of interest)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="requireAbstainReason" className="rounded" />
+                Require reason when abstaining
+              </label>
               <Button type="submit">Create plan</Button>
             </form>
           </CardBody>

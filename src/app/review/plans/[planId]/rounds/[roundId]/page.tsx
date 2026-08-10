@@ -60,17 +60,32 @@ export default async function ReviewRoundQueuePage({
     .orderBy(schema.submissions.title)
     .all();
 
-  const pendingCount = rows.filter((r) => r.assignment.status !== "complete").length;
+  const pendingCount = rows.filter(
+    (r) => r.assignment.status === "pending" || r.assignment.status === "in_progress",
+  ).length;
   const reviewedCount = rows.filter((r) => r.assignment.status === "complete").length;
+  const abstainedCount = rows.filter((r) => r.assignment.status === "abstained").length;
 
   const q = sp.q?.trim().toLowerCase();
-  const statusFilter = sp.status === "reviewed" ? "reviewed" : sp.status === "pending" ? "pending" : "all";
+  const statusFilter =
+    sp.status === "reviewed"
+      ? "reviewed"
+      : sp.status === "pending"
+        ? "pending"
+        : sp.status === "abstained"
+          ? "abstained"
+          : "all";
 
   let filtered = rows;
   if (statusFilter === "pending") {
-    filtered = filtered.filter((r) => r.assignment.status !== "complete");
+    filtered = filtered.filter(
+      (r) =>
+        r.assignment.status === "pending" || r.assignment.status === "in_progress",
+    );
   } else if (statusFilter === "reviewed") {
     filtered = filtered.filter((r) => r.assignment.status === "complete");
+  } else if (statusFilter === "abstained") {
+    filtered = filtered.filter((r) => r.assignment.status === "abstained");
   }
   if (q) {
     filtered = filtered.filter((r) => {
@@ -94,6 +109,10 @@ export default async function ReviewRoundQueuePage({
               <dt className="text-slate-500">Reviewed</dt>
               <dd className="font-semibold text-emerald-700">{reviewedCount}</dd>
             </div>
+            <div className="flex justify-between">
+              <dt className="text-slate-500">Abstained</dt>
+              <dd className="font-semibold text-slate-600">{abstainedCount}</dd>
+            </div>
           </dl>
         </div>
         <Link href="/review" className="text-sm text-blue-700 hover:underline">
@@ -106,6 +125,7 @@ export default async function ReviewRoundQueuePage({
           <h1 className="text-2xl font-semibold">{round.round.name}</h1>
           <p className="text-slate-600">
             {pendingCount} pending · {reviewedCount} reviewed
+            {abstainedCount > 0 ? ` · ${abstainedCount} abstained` : ""}
           </p>
         </div>
 
@@ -124,6 +144,7 @@ export default async function ReviewRoundQueuePage({
             <option value="all">All</option>
             <option value="pending">Pending</option>
             <option value="reviewed">Reviewed</option>
+            <option value="abstained">Abstained</option>
           </select>
           <button
             type="submit"
@@ -139,6 +160,7 @@ export default async function ReviewRoundQueuePage({
           ) : (
             filtered.map(({ assignment, submission }) => {
               const reviewed = assignment.status === "complete";
+              const abstained = assignment.status === "abstained";
               return (
                 <Link
                   key={assignment.id}
@@ -156,10 +178,12 @@ export default async function ReviewRoundQueuePage({
                         className={
                           reviewed
                             ? "shrink-0 bg-emerald-100 text-emerald-800"
-                            : "shrink-0 bg-amber-100 text-amber-800"
+                            : abstained
+                              ? "shrink-0 bg-slate-200 text-slate-800"
+                              : "shrink-0 bg-amber-100 text-amber-800"
                         }
                       >
-                        {reviewed ? "Reviewed" : "Pending"}
+                        {reviewed ? "Reviewed" : abstained ? "Abstained" : "Pending"}
                       </Badge>
                     </CardBody>
                   </Card>

@@ -5,6 +5,7 @@ import { getSubmissionParticipants } from "@/lib/db/queries";
 import { getDb, schema } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { AbstainDialog } from "./abstain-dialog";
 import { ReviewScorecardForm } from "./review-form";
 
 export default async function ReviewSubmissionPage({
@@ -87,6 +88,9 @@ export default async function ReviewSubmissionPage({
     answers = {};
   }
 
+  const isAbstained = row.assignment.status === "abstained";
+  const isComplete = row.assignment.status === "complete";
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -96,15 +100,27 @@ export default async function ReviewSubmissionPage({
         >
           ← Back to queue
         </Link>
-        <Badge
-          className={
-            row.assignment.status === "complete"
-              ? "bg-emerald-100 text-emerald-800"
-              : "bg-amber-100 text-amber-800"
-          }
-        >
-          {row.assignment.status === "complete" ? "Reviewed" : "Pending"}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          {row.plan.allowAbstain && !isComplete && !isAbstained ? (
+            <AbstainDialog
+              planId={planId}
+              roundId={roundId}
+              assignmentId={assignmentId}
+              requireReason={row.plan.requireAbstainReason}
+            />
+          ) : null}
+          <Badge
+            className={
+              isComplete
+                ? "bg-emerald-100 text-emerald-800"
+                : isAbstained
+                  ? "bg-slate-200 text-slate-800"
+                  : "bg-amber-100 text-amber-800"
+            }
+          >
+            {isComplete ? "Reviewed" : isAbstained ? "Abstained" : "Pending"}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -179,13 +195,25 @@ export default async function ReviewSubmissionPage({
             subtitle={row.round.instructions ?? row.plan.instructions ?? undefined}
           />
           <CardBody>
-            <ReviewScorecardForm
-              planId={planId}
-              roundId={roundId}
-              assignmentId={assignmentId}
-              questions={questions}
-              initialAnswers={initialAnswers}
-            />
+            {isAbstained ? (
+              <div className="space-y-2 text-sm text-slate-600">
+                <p>You have abstained from reviewing this submission.</p>
+                {row.assignment.abstainReason ? (
+                  <p>
+                    <span className="font-medium text-slate-700">Reason:</span>{" "}
+                    {row.assignment.abstainReason}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <ReviewScorecardForm
+                planId={planId}
+                roundId={roundId}
+                assignmentId={assignmentId}
+                questions={questions}
+                initialAnswers={initialAnswers}
+              />
+            )}
           </CardBody>
         </Card>
       </div>
