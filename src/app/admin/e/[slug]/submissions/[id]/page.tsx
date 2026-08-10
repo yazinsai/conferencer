@@ -28,7 +28,7 @@ import {
   setParticipantRoleAction,
   setStatusAction,
   deleteSubmissionAction,
-} from "../actions";
+} from "@/server/submissions-actions";
 import {
   Avatar,
   Button,

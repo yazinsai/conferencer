@@ -12,10 +12,7 @@ import {
   DEFAULT_COLUMNS,
   SubmissionTable,
 } from "@/components/admin/submission-table";
-import {
-  setApprovalAction,
-  setStatusAction,
-} from "@/app/admin/e/[slug]/submissions/actions";
+import { setApprovalAction, setStatusAction } from "@/server/submissions-actions";
 import { Disclosure, FilterSelect, SearchBox } from "@/components/client/basics";
 import { LinkButton, PageHeader, SubNav } from "@/components/ui";
 
