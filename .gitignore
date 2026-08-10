@@ -43,7 +43,7 @@ next-env.d.ts
 .firecrawl/
 
 data/
-uploads/
+/uploads/
 .env
 *.db
 *.db-*
