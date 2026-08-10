@@ -1,0 +1,54 @@
+---
+url: "https://apidocs.sessionboard.com/insights/overview.md"
+title: undefined
+---
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://apidocs.sessionboard.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Reports & Dashboards
+
+> API access to Sessionboard Reports, Dashboards, and SbQL queries
+
+<Note>
+  **Early Access** — Reports, Dashboards, and related query APIs are currently available to select organizations. Reach out to your Sessionboard account manager to get early access.
+</Note>
+
+These endpoints power **Reports** and **Dashboards** in Sessionboard — the same surfaces organizers use in the product to explore session and speaker data, run saved reports, and view dashboard widgets.
+
+Under the hood, queries use **SbQL** (Sessionboard Query Language). You can also convert natural language into SbQL, discover the query schema, and connect AI assistants via the [MCP Server](/insights/mcp-server).
+
+<Info>
+  API tokens need the **`read:insights`** scope (the scope name is historical; it gates Reports, Dashboards, and SbQL access). See [Authentication](/authentication).
+</Info>
+
+## Prerequisites
+
+1. **Organization-level:** AI / analytics features must be enabled for your organization. Contact your Sessionboard account manager.
+2. **Token-level:** Grant **`read:insights`**, and turn on **MCP Access** on the token if you will use the MCP server or Insights-prefixed query routes.
+
+## What this covers
+
+| Capability           | Product mapping           | Description                                        |
+| -------------------- | ------------------------- | -------------------------------------------------- |
+| **Saved reports**    | Reports                   | List and run saved queries created in Sessionboard |
+| **Dashboards**       | Dashboards                | Retrieve dashboard configs and widget data         |
+| **Execute SbQL**     | Reports / ad-hoc analysis | Run SbQL against your event data                   |
+| **Generate SbQL**    | AI assist                 | Turn natural language into SbQL                    |
+| **Schema discovery** | Query builder             | Entities, fields, and relationships you can query  |
+| **Suggestions**      | Query assist              | Contextual query suggestions                       |
+
+Endpoint paths still use the `/v1/insights/...` prefix (for example `POST /v1/insights/execute`, `GET /v1/insights/queries`). That prefix is the public API namespace — not a separate product called Insights.
+
+## Learn more
+
+<CardGroup cols={2}>
+  <Card title="SbQL Reference" icon="code" href="/insights/sbql">
+    Query language syntax, entities, and examples.
+  </Card>
+
+  <Card title="MCP Server" icon="robot" href="/insights/mcp-server">
+    Connect Claude and other AI assistants to your event data.
+  </Card>
+</CardGroup>

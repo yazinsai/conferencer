@@ -1,0 +1,14 @@
+---
+url: "https://learn.sessionboard.com/videos/video-create-a-contact"
+title: "Create a contact | Sessionboard Help Center"
+---
+
+[Skip to content](https://learn.sessionboard.com/videos/video-create-a-contact#_top)
+
+# Create a contact
+
+Embed guidde video
+
+Video transcript
+
+00:00: Welcome to session board in this tutorial. We will guide you through the simple steps 00:04: to create a contact for your event. Contacts can be assigned to 00:08: sessions as speakers. Moderators chairpersons or sessions submitters. 00:12: They can also be linked to sponsor and exhibitor groups as group contacts. 00:18: To start navigate to the contacts, module, on the left hand menu. 00:22: This is where you can manage all your event contacts, including speakers, moderators 00:27: and more. To add a new contact, simply click the add 00:31: button to the right of your screen. 00:33: Note. You can also add contacts through the speakers module. 00:37: However, once created the contact will only be accessible in 00:41: the contacts module until they’re assigned to a session as a speaker. 00:45: After the assignment, the contact will appear in the speaker’s module. 00:50: In the pop-up window, you can search for an existing contact across your organization 00:54: by name or email to add them to your event. 00:57: In addition, you can search to ensure the contact, does not already exist within 01:01: your event. This helps avoid duplicates and keeps your data organized. 01:06: If the contact already exists within your organization, you can easily add 01:10: them to your event by checking the box next to their name and clicking the add to event 01:14: button at the bottom of the pop-up. 01:17: If the contact you are searching for does not already exist. 01:20: Simply select the add new contact button to create the contact. 01:25: Fill in the required, contact details including email first name 01:29: and last name. You may also add optional information such as job 01:34: title company, name and phone number if available. 01:37: If you don’t have these details right away, that’s okay. 01:40: You can request additional information from the contact, through the portal 01:44: or update their profile at a later time. 01:46: Once you are done, don’t forget to click the save button. 01:50: Your new contact is now added to your event. 01:52: You can edit the contact at any time, by clicking the pencil icon to 01:57: the left of the contacts record. 02:00: Additionally, once a contact is created, you can assign them to sessions or 02:04: sponsor and exhibitor groups. 02:07: If you have any questions, feel free to reach out to our support team. 02:11: Thank you for choosing session board.

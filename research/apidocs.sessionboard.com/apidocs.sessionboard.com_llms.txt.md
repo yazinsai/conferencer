@@ -1,0 +1,206 @@
+---
+url: "https://apidocs.sessionboard.com/llms.txt"
+title: undefined
+---
+
+# Sessionboard API
+
+## Docs
+
+- [Bulk draft session operations](https://apidocs.sessionboard.com/api-reference/agenda-planning/bulk-draft-session-operations.md): Batch create, update, or delete session placements in a draft. Requires the `write:events` scope.
+- [Commit an agenda draft](https://apidocs.sessionboard.com/api-reference/agenda-planning/commit-an-agenda-draft.md): Apply all changes in the draft to the live event schedule. Requires the `write:events` scope.
+- [Create a draft session](https://apidocs.sessionboard.com/api-reference/agenda-planning/create-a-draft-session.md): Place a session in an agenda draft. Requires the `write:events` scope.
+- [Create a persona](https://apidocs.sessionboard.com/api-reference/agenda-planning/create-a-persona.md): Create an attendee persona for schedule evaluation. Requires the `write:events` scope.
+- [Create an agenda draft](https://apidocs.sessionboard.com/api-reference/agenda-planning/create-an-agenda-draft.md): Create a new agenda draft workspace. Requires the `write:events` scope.
+- [Create an event rule](https://apidocs.sessionboard.com/api-reference/agenda-planning/create-an-event-rule.md): Create a scheduling constraint. Requires the `write:events` scope.
+- [Delete a persona](https://apidocs.sessionboard.com/api-reference/agenda-planning/delete-a-persona.md): Delete a persona. Requires the `write:events` scope.
+- [Delete an agenda draft](https://apidocs.sessionboard.com/api-reference/agenda-planning/delete-an-agenda-draft.md): Delete an agenda draft. Requires the `write:events` scope.
+- [Delete an event rule](https://apidocs.sessionboard.com/api-reference/agenda-planning/delete-an-event-rule.md): Delete a scheduling rule. Requires the `write:events` scope.
+- [Get a persona](https://apidocs.sessionboard.com/api-reference/agenda-planning/get-a-persona.md): Retrieve a single persona by ID.
+- [Get an agenda draft](https://apidocs.sessionboard.com/api-reference/agenda-planning/get-an-agenda-draft.md): Retrieve a single agenda draft by ID.
+- [Get an event rule](https://apidocs.sessionboard.com/api-reference/agenda-planning/get-an-event-rule.md): Retrieve a single event rule by ID.
+- [List agenda drafts](https://apidocs.sessionboard.com/api-reference/agenda-planning/list-agenda-drafts.md): Returns all agenda drafts for an event.
+- [List draft sessions](https://apidocs.sessionboard.com/api-reference/agenda-planning/list-draft-sessions.md): List session placements within an agenda draft.
+- [List event rules](https://apidocs.sessionboard.com/api-reference/agenda-planning/list-event-rules.md): Returns all scheduling rules for an event.
+- [List personas](https://apidocs.sessionboard.com/api-reference/agenda-planning/list-personas.md): Returns all evaluation personas for an event.
+- [Preview draft changes](https://apidocs.sessionboard.com/api-reference/agenda-planning/preview-draft-changes.md): Preview the pending changes in a draft before committing them to the live schedule.
+- [Remove a draft session](https://apidocs.sessionboard.com/api-reference/agenda-planning/remove-a-draft-session.md): Remove a session from an agenda draft. Requires the `write:events` scope.
+- [Update a draft session](https://apidocs.sessionboard.com/api-reference/agenda-planning/update-a-draft-session.md): Move or update a session placement in a draft. Requires the `write:events` scope.
+- [Update a persona](https://apidocs.sessionboard.com/api-reference/agenda-planning/update-a-persona.md): Update a persona. Requires the `write:events` scope.
+- [Update an agenda draft](https://apidocs.sessionboard.com/api-reference/agenda-planning/update-an-agenda-draft.md): Update an agenda draft. Requires the `write:events` scope.
+- [Update an event rule](https://apidocs.sessionboard.com/api-reference/agenda-planning/update-an-event-rule.md): Update a scheduling rule. Requires the `write:events` scope.
+- [Bulk contact operations](https://apidocs.sessionboard.com/api-reference/contact-writes/bulk-contact-operations.md): Create, update, or delete multiple contacts in a single request (max 100 operations). Requires the `write:contacts` scope.
+- [Create a contact](https://apidocs.sessionboard.com/api-reference/contact-writes/create-a-contact.md): Create a new contact in an event. Requires the `write:contacts` scope. Subject to rate limiting (100 req/15min) and daily write quota (10,000/day per token).
+- [Restore a deleted contact](https://apidocs.sessionboard.com/api-reference/contact-writes/restore-a-deleted-contact.md): Restore a previously soft-deleted contact. Requires the `write:contacts` scope.
+- [Soft-delete a contact](https://apidocs.sessionboard.com/api-reference/contact-writes/soft-delete-a-contact.md): Soft-delete a contact. Can be restored with the restore endpoint. Requires the `write:contacts` scope.
+- [Update a contact](https://apidocs.sessionboard.com/api-reference/contact-writes/update-a-contact.md): Update an existing contact. Requires the `write:contacts` scope. Optionally send `updated_at` for optimistic concurrency control.
+- [Get a contact's sessions](https://apidocs.sessionboard.com/api-reference/contacts/get-a-contacts-sessions.md): Returns all sessions associated with a specific contact within an event, including linked composition sources. Each session summary includes `is_abstract` and `composition_status`. The full `composition` graph is not available on this lightweight endpoint — use session GET or search with `expand=com…
+- [Get an event contact](https://apidocs.sessionboard.com/api-reference/contacts/get-an-event-contact.md): Retrieve a single contact by ID at the event level.
+- [Get an org contact's sessions](https://apidocs.sessionboard.com/api-reference/contacts/get-an-org-contacts-sessions.md): Returns all sessions associated with a specific contact across the organization, including linked composition sources. Each session summary includes `is_abstract`, `composition_status`, and `event_id`. The full `composition` graph is not available on this lightweight endpoint.
+- [Get an organization contact](https://apidocs.sessionboard.com/api-reference/contacts/get-an-organization-contact.md): Retrieve a single contact by ID at the organization level.
+- [Search event contacts](https://apidocs.sessionboard.com/api-reference/contacts/search-event-contacts.md): Search and filter contacts within an event.
+- [Search organization contacts](https://apidocs.sessionboard.com/api-reference/contacts/search-organization-contacts.md): Search and filter contacts across the organization.
+- [Create an org dashboard (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/create-an-org-dashboard-convenience.md): Create a new cross-event dashboard. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Create an org widget (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/create-an-org-widget-convenience.md): Add a widget to an org-level dashboard. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Delete an org dashboard (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/delete-an-org-dashboard-convenience.md): Delete a cross-event dashboard. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Delete an org widget (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/delete-an-org-widget-convenience.md): Delete a widget. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Get an org dashboard (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/get-an-org-dashboard-convenience.md): Retrieve a cross-event dashboard with all widget data. Organization is resolved from the API token. No orgId required. Requires the `read:insights` scope.
+- [List org dashboards (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/list-org-dashboards-convenience.md): Returns all dashboards across all events in the organization. Organization is resolved from the API token. No orgId required. Requires the `read:insights` scope.
+- [Update an org dashboard (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/update-an-org-dashboard-convenience.md): Update dashboard properties. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Update an org widget (convenience)](https://apidocs.sessionboard.com/api-reference/dashboards-&-widgets/update-an-org-widget-convenience.md): Update widget configuration. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [List fields](https://apidocs.sessionboard.com/api-reference/event-settings/list-fields.md): Returns all field definitions for an event.
+- [List formats](https://apidocs.sessionboard.com/api-reference/event-settings/list-formats.md): Returns all session formats for an event.
+- [List languages](https://apidocs.sessionboard.com/api-reference/event-settings/list-languages.md): Returns all languages for an event.
+- [List levels](https://apidocs.sessionboard.com/api-reference/event-settings/list-levels.md): Returns all session levels for an event.
+- [List rooms](https://apidocs.sessionboard.com/api-reference/event-settings/list-rooms.md): Returns all rooms for an event.
+- [List session statuses](https://apidocs.sessionboard.com/api-reference/event-settings/list-session-statuses.md): Returns all session status definitions for an event.
+- [List tags](https://apidocs.sessionboard.com/api-reference/event-settings/list-tags.md): Returns all tags for an event.
+- [List tracks](https://apidocs.sessionboard.com/api-reference/event-settings/list-tracks.md): Returns all tracks for an event.
+- [Search fields](https://apidocs.sessionboard.com/api-reference/event-settings/search-fields.md): Search and filter field definitions for an event, including standard and custom fields.
+- [Search formats](https://apidocs.sessionboard.com/api-reference/event-settings/search-formats.md): Returns a paginated list of session formats for an event.
+- [Search languages](https://apidocs.sessionboard.com/api-reference/event-settings/search-languages.md): Returns a paginated list of languages configured for an event.
+- [Search levels](https://apidocs.sessionboard.com/api-reference/event-settings/search-levels.md): Returns a paginated list of session levels for an event.
+- [Search rooms](https://apidocs.sessionboard.com/api-reference/event-settings/search-rooms.md): Returns a paginated list of rooms for an event.
+- [Search session statuses](https://apidocs.sessionboard.com/api-reference/event-settings/search-session-statuses.md): Returns a paginated list of custom session status definitions for an event.
+- [Search tags](https://apidocs.sessionboard.com/api-reference/event-settings/search-tags.md): Returns a paginated list of tags for an event.
+- [Search tracks](https://apidocs.sessionboard.com/api-reference/event-settings/search-tracks.md): Returns a paginated list of tracks for an event.
+- [List events](https://apidocs.sessionboard.com/api-reference/events/list-events.md): Returns a paginated list of events accessible to the authenticated API key.
+- [Bulk exhibitor operations](https://apidocs.sessionboard.com/api-reference/exhibitor-writes/bulk-exhibitor-operations.md): Create, update, or delete multiple exhibitors in a single request (max 100 operations). Requires the `write:exhibitors` scope.
+- [Create an exhibitor](https://apidocs.sessionboard.com/api-reference/exhibitor-writes/create-an-exhibitor.md): Create a new exhibitor in an event. Requires the `write:exhibitors` scope. Subject to rate limiting (100 req/15min) and daily write quota (10,000/day per token).
+- [Restore a deleted exhibitor](https://apidocs.sessionboard.com/api-reference/exhibitor-writes/restore-a-deleted-exhibitor.md): Restore a previously soft-deleted exhibitor. Requires the `write:exhibitors` scope.
+- [Soft-delete an exhibitor](https://apidocs.sessionboard.com/api-reference/exhibitor-writes/soft-delete-an-exhibitor.md): Soft-delete an exhibitor. Can be restored with the restore endpoint. Requires the `write:exhibitors` scope.
+- [Update an exhibitor](https://apidocs.sessionboard.com/api-reference/exhibitor-writes/update-an-exhibitor.md): Update an existing exhibitor. Requires the `write:exhibitors` scope. Optionally send `updated_at` for optimistic concurrency control.
+- [Get an exhibitor](https://apidocs.sessionboard.com/api-reference/exhibitors/get-an-exhibitor.md): Retrieve a single exhibitor by ID.
+- [Search exhibitors](https://apidocs.sessionboard.com/api-reference/exhibitors/search-exhibitors.md): Search and filter exhibitors within an event.
+- [Create a custom field](https://apidocs.sessionboard.com/api-reference/field-writes/create-a-custom-field.md): Create a new custom field for an event module. Requires the `write:fields` scope.
+- [Delete a custom field](https://apidocs.sessionboard.com/api-reference/field-writes/delete-a-custom-field.md)
+- [Update a custom field](https://apidocs.sessionboard.com/api-reference/field-writes/update-a-custom-field.md)
+- [Create a GDPR request](https://apidocs.sessionboard.com/api-reference/gdpr/create-a-gdpr-request.md): Submit a new GDPR data access or erasure request.
+- [List GDPR requests](https://apidocs.sessionboard.com/api-reference/gdpr/list-gdpr-requests.md): Returns all GDPR data access and erasure requests for the organization.
+- [Create a dashboard](https://apidocs.sessionboard.com/api-reference/insights/create-a-dashboard.md): Create a new dashboard with optional inline widgets. Requires the `write:events` scope.
+- [Create a saved query](https://apidocs.sessionboard.com/api-reference/insights/create-a-saved-query.md): Save a SbQL query as a reusable report. Requires the `write:events` scope.
+- [Create a widget](https://apidocs.sessionboard.com/api-reference/insights/create-a-widget.md): Add a widget to a dashboard. Requires the `write:events` scope.
+- [Delete a dashboard](https://apidocs.sessionboard.com/api-reference/insights/delete-a-dashboard.md): Delete a dashboard. Requires the `write:events` scope.
+- [Delete a saved query](https://apidocs.sessionboard.com/api-reference/insights/delete-a-saved-query.md): Delete a saved query. Requires the `write:events` scope.
+- [Delete a widget](https://apidocs.sessionboard.com/api-reference/insights/delete-a-widget.md): Delete a widget from its dashboard. Requires the `write:events` scope.
+- [Execute a SbQL query](https://apidocs.sessionboard.com/api-reference/insights/execute-a-sbql-query.md): Execute a SbQL query against event data and return results. Requires the `read:insights` scope.
+- [Execute a SbQL query (event-scoped)](https://apidocs.sessionboard.com/api-reference/insights/execute-a-sbql-query-event-scoped.md): Execute a SbQL query scoped to a specific event. Requires the `read:insights` scope.
+- [Generate a SbQL query from natural language](https://apidocs.sessionboard.com/api-reference/insights/generate-a-sbql-query-from-natural-language.md): Use AI to translate a natural language prompt into a SbQL query. Requires the `read:insights` scope.
+- [Generate a SbQL query from natural language (event-scoped)](https://apidocs.sessionboard.com/api-reference/insights/generate-a-sbql-query-from-natural-language-event-scoped.md): Use AI to translate natural language into a SbQL query scoped to a specific event. Requires the `read:insights` scope.
+- [Get a dashboard](https://apidocs.sessionboard.com/api-reference/insights/get-a-dashboard.md): Retrieve a dashboard with all widget data. Requires the `read:insights` scope.
+- [Get a dashboard (event-scoped insights)](https://apidocs.sessionboard.com/api-reference/insights/get-a-dashboard-event-scoped-insights.md): Retrieve a dashboard via the insights proxy. Requires the `read:insights` scope.
+- [Get event-scoped insights schema](https://apidocs.sessionboard.com/api-reference/insights/get-event-scoped-insights-schema.md): Returns the SbQL schema including event-specific custom fields. Requires the `read:insights` scope.
+- [Get event-scoped query suggestions](https://apidocs.sessionboard.com/api-reference/insights/get-event-scoped-query-suggestions.md): Returns contextual query suggestions for a specific event. Requires the `read:insights` scope.
+- [Get event-specific insights schema](https://apidocs.sessionboard.com/api-reference/insights/get-event-specific-insights-schema.md): Returns the SbQL schema scoped to a specific event, including event-specific custom fields. Requires the `read:insights` scope.
+- [Get insights schema](https://apidocs.sessionboard.com/api-reference/insights/get-insights-schema.md): Returns the SbQL schema for the organization, including available entities and fields. Requires the `read:insights` scope.
+- [Get query suggestions](https://apidocs.sessionboard.com/api-reference/insights/get-query-suggestions.md): Returns contextual SbQL query suggestions. Requires the `read:insights` scope.
+- [List dashboards](https://apidocs.sessionboard.com/api-reference/insights/list-dashboards.md): Returns all dashboards for an event. Requires the `read:insights` scope.
+- [List saved queries](https://apidocs.sessionboard.com/api-reference/insights/list-saved-queries.md): Returns a list of saved SbQL queries. Requires the `read:insights` scope.
+- [List saved queries (event-scoped insights)](https://apidocs.sessionboard.com/api-reference/insights/list-saved-queries-event-scoped-insights.md): Returns saved queries via the insights proxy. Requires the `read:insights` scope.
+- [List saved queries for an event](https://apidocs.sessionboard.com/api-reference/insights/list-saved-queries-for-an-event.md): Returns saved SbQL queries scoped to an event. Requires the `read:insights` scope.
+- [Run a saved query](https://apidocs.sessionboard.com/api-reference/insights/run-a-saved-query.md): Execute a previously saved SbQL query by ID. Requires the `read:insights` scope.
+- [Run a saved query (event-scoped insights)](https://apidocs.sessionboard.com/api-reference/insights/run-a-saved-query-event-scoped-insights.md): Execute a saved query via the insights proxy. Requires the `read:insights` scope.
+- [Run a saved query for an event](https://apidocs.sessionboard.com/api-reference/insights/run-a-saved-query-for-an-event.md): Execute a saved SbQL query. Requires the `write:events` scope (reports execute through the write pipeline for quota tracking).
+- [Update a dashboard](https://apidocs.sessionboard.com/api-reference/insights/update-a-dashboard.md): Update dashboard properties. Requires the `write:events` scope.
+- [Update a saved query](https://apidocs.sessionboard.com/api-reference/insights/update-a-saved-query.md): Update a saved query. Requires the `write:events` scope.
+- [Update a widget](https://apidocs.sessionboard.com/api-reference/insights/update-a-widget.md): Update widget configuration. Requires the `write:events` scope.
+- [Abort multipart upload](https://apidocs.sessionboard.com/api-reference/media/abort-multipart-upload.md): Requires `write:media`.
+- [Complete multipart media upload](https://apidocs.sessionboard.com/api-reference/media/complete-multipart-media-upload.md): Finalizes the upload and starts automatic transcription. When you upload on a session URL, transcript lines appear in the session transcription list when processing finishes. Requires `write:media`.
+- [Get media item status](https://apidocs.sessionboard.com/api-reference/media/get-media-item-status.md): Check upload and transcription progress after completing an upload. Requires `read:media` (legacy tokens with empty scopes pass).
+- [Sign multipart upload parts](https://apidocs.sessionboard.com/api-reference/media/sign-multipart-upload-parts.md): Requires `write:media`.
+- [Start multipart media upload](https://apidocs.sessionboard.com/api-reference/media/start-multipart-media-upload.md): Begins a multipart upload for a video or audio file on a session. Requires `write:media`.
+- [Create a format](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-format.md): Create a new session format. Requires the `write:metadata` scope.
+- [Create a language](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-language.md): Create a new language. Requires the `write:metadata` scope.
+- [Create a level](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-level.md): Create a new session level. Requires the `write:metadata` scope.
+- [Create a room](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-room.md): Create a new room. Requires the `write:metadata` scope.
+- [Create a session status](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-session-status.md): Create a new custom session status. Requires the `write:metadata` scope.
+- [Create a tag](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-tag.md): Create a new tag. Requires the `write:metadata` scope.
+- [Create a track](https://apidocs.sessionboard.com/api-reference/metadata-writes/create-a-track.md): Create a new track. Requires the `write:metadata` scope.
+- [Delete a format](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-format.md): Delete a session format. Requires the `write:metadata` scope.
+- [Delete a language](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-language.md): Delete a language. Requires the `write:metadata` scope.
+- [Delete a level](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-level.md): Delete a session level. Requires the `write:metadata` scope.
+- [Delete a room](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-room.md): Delete a room. Requires the `write:metadata` scope.
+- [Delete a session status](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-session-status.md): Delete a custom session status. Requires the `write:metadata` scope.
+- [Delete a tag](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-tag.md): Delete a tag. Requires the `write:metadata` scope.
+- [Delete a track](https://apidocs.sessionboard.com/api-reference/metadata-writes/delete-a-track.md): Delete a track. Requires the `write:metadata` scope.
+- [Restore a deleted session status](https://apidocs.sessionboard.com/api-reference/metadata-writes/restore-a-deleted-session-status.md): Restore a previously soft-deleted session status. Requires the `write:metadata` scope.
+- [Update a format](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-format.md): Update a session format. Requires the `write:metadata` scope.
+- [Update a language](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-language.md): Update a language. Requires the `write:metadata` scope.
+- [Update a level](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-level.md): Update a session level. Requires the `write:metadata` scope.
+- [Update a room](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-room.md): Update a room. Requires the `write:metadata` scope.
+- [Update a session status](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-session-status.md): Update a custom session status. Requires the `write:metadata` scope.
+- [Update a tag](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-tag.md): Update a tag. Requires the `write:metadata` scope.
+- [Update a track](https://apidocs.sessionboard.com/api-reference/metadata-writes/update-a-track.md): Update a track. Requires the `write:metadata` scope.
+- [Authorization server metadata](https://apidocs.sessionboard.com/api-reference/oauth/authorization-server-metadata.md): Returns OAuth 2.0 Authorization Server Metadata per RFC 8414. Includes supported scopes, grant types, and endpoint URLs.
+- [Exchange code for tokens](https://apidocs.sessionboard.com/api-reference/oauth/exchange-code-for-tokens.md): Exchange an authorization code for access and refresh tokens (authorization_code grant), or refresh an expired access token (refresh_token grant). Uses PKCE verification — no client secret required.
+- [Revoke a token](https://apidocs.sessionboard.com/api-reference/oauth/revoke-a-token.md): Revoke an access or refresh token. Conforms to RFC 7009. Always returns 200 regardless of whether the token was found.
+- [Validate authorization request](https://apidocs.sessionboard.com/api-reference/oauth/validate-authorization-request.md): Validates OAuth authorization request parameters (client_id, redirect_uri, scopes, PKCE challenge). Returns the validated request for display on the consent page. No authentication required.
+- [API Reference](https://apidocs.sessionboard.com/api-reference/overview.md): Complete reference for the Sessionboard Public API
+- [Create an org saved query (convenience)](https://apidocs.sessionboard.com/api-reference/reports-&-queries/create-an-org-saved-query-convenience.md): Save a cross-event SbQL query. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Delete an org saved query (convenience)](https://apidocs.sessionboard.com/api-reference/reports-&-queries/delete-an-org-saved-query-convenience.md): Delete a saved query. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [List org saved queries (convenience)](https://apidocs.sessionboard.com/api-reference/reports-&-queries/list-org-saved-queries-convenience.md): Returns all saved SbQL queries across the organization. Organization is resolved from the API token. No orgId required. Requires the `read:insights` scope.
+- [Run an org saved query (convenience)](https://apidocs.sessionboard.com/api-reference/reports-&-queries/run-an-org-saved-query-convenience.md): Execute a saved cross-event SbQL query. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope (reports execute through the write pipeline for quota tracking).
+- [Update an org saved query (convenience)](https://apidocs.sessionboard.com/api-reference/reports-&-queries/update-an-org-saved-query-convenience.md): Update a saved query. Organization is resolved from the API token. No orgId required. Requires the `write:events` scope.
+- [Session Files](https://apidocs.sessionboard.com/api-reference/session-files.md): Attach PDFs, PowerPoint decks, and other documents to sessions.
+- [Delete a session file](https://apidocs.sessionboard.com/api-reference/session-files/delete-a-session-file.md): Soft-deletes the file from the session. Requires `write:sessions`.
+- [Finalize session file upload](https://apidocs.sessionboard.com/api-reference/session-files/finalize-session-file-upload.md): Verifies the object in Sessionboard storage, runs security scanning (type deny-list + magic-byte checks; SVG sanitization when applicable), and finalizes the file on the session. Requires `write:sessions`.
+- [Initiate session file upload](https://apidocs.sessionboard.com/api-reference/session-files/initiate-session-file-upload.md): Creates a file record and returns a short-lived S3 upload URL. Requires `write:sessions`.
+- [List files attached to a session](https://apidocs.sessionboard.com/api-reference/session-files/list-files-attached-to-a-session.md): Returns completed files on the session (latest version per file group). Incomplete uploads (create/replace without complete) are omitted. Requires `read:sessions` scope (legacy tokens with empty scopes pass).
+- [Replace session file bytes](https://apidocs.sessionboard.com/api-reference/session-files/replace-session-file-bytes.md): Issues a new upload URL for the same file record. After `PUT`ing the new bytes, call `complete` again. Requires `write:sessions`. Max **500 MB** (direct-to-storage flow).
+- [Update session file metadata](https://apidocs.sessionboard.com/api-reference/session-files/update-session-file-metadata.md): Updates display title and/or assigned participant. Does not change file bytes — use `replace` for that. Unknown fields are ignored. Requires `write:sessions`.
+- [Upload a session file (simple)](https://apidocs.sessionboard.com/api-reference/session-files/upload-a-session-file-simple.md): Upload a file in one multipart request. Sessionboard detects size and MIME type from the bytes, runs security scanning, and returns the finalized file. Max **50 MB**. Requires `write:sessions`.
+- [Finalize session audio upload](https://apidocs.sessionboard.com/api-reference/session-recordings/finalize-session-audio-upload.md): Marks the recording as completed and normalizes common audio formats for playback. Already-completed recordings return 200 without re-processing. Requires `write:transcriptions`.
+- [Get a session audio recording](https://apidocs.sessionboard.com/api-reference/session-recordings/get-a-session-audio-recording.md): Requires `read:transcriptions` scope (legacy tokens with empty scopes pass).
+- [Initiate session audio upload](https://apidocs.sessionboard.com/api-reference/session-recordings/initiate-session-audio-upload.md): Returns a presigned upload URL for the audio file. Requires `write:transcriptions`.
+- [List session audio recordings](https://apidocs.sessionboard.com/api-reference/session-recordings/list-session-audio-recordings.md): Requires `read:transcriptions` scope (legacy tokens with empty scopes pass).
+- [Bulk session operations](https://apidocs.sessionboard.com/api-reference/session-writes/bulk-session-operations.md): Create, update, or delete multiple sessions in a single request (max 100 operations). Requires the `write:sessions` scope.
+- [Create a session](https://apidocs.sessionboard.com/api-reference/session-writes/create-a-session.md): Create a new session in an event. Requires the `write:sessions` scope. Subject to rate limiting (100 req/15min) and daily write quota (10,000/day per token).
+- [Restore a deleted session](https://apidocs.sessionboard.com/api-reference/session-writes/restore-a-deleted-session.md): Restore a previously soft-deleted session. Requires the `write:sessions` scope.
+- [Soft-delete a session](https://apidocs.sessionboard.com/api-reference/session-writes/soft-delete-a-session.md): Soft-delete a session. Can be restored with the restore endpoint. Requires the `write:sessions` scope.
+- [Update a session](https://apidocs.sessionboard.com/api-reference/session-writes/update-a-session.md): Update an existing session. Requires the `write:sessions` scope. Send `updated_at` from the last-fetched session for optimistic concurrency control.
+- [Update session custom fields](https://apidocs.sessionboard.com/api-reference/session-writes/update-session-custom-fields.md): Update custom field values on a session without touching other session properties. Requires the `write:sessions` scope.
+- [Sessions & Composition](https://apidocs.sessionboard.com/api-reference/sessions-composition.md): Abstract vs program sessions, composition_status, and expand options for linked records.
+- [Get a session](https://apidocs.sessionboard.com/api-reference/sessions/get-a-session.md): Retrieve a single session by ID, optionally expanding related data.
+- [List sessions (CRUD proxy)](https://apidocs.sessionboard.com/api-reference/sessions/list-sessions-crud-proxy.md): Paginated list of top-level sessions via the CRUD proxy. Returns nested `language`, `track`, `level`, `format`, and `room` metadata using the same field sets documented on the `Session` schema (`null` when unassigned). Also includes `is_abstract` and `composition_status`.
+- [Search sessions](https://apidocs.sessionboard.com/api-reference/sessions/search-sessions.md): Search and filter sessions within an event. Supports pagination, sorting, filtering by status and date ranges, and expanding related data.
+- [Search sessions by status](https://apidocs.sessionboard.com/api-reference/sessions/search-sessions-by-status.md): Returns a lightweight list of session statuses, including deleted sessions. Supports filtering by `deletedAt` in addition to standard filters.
+- [Get a speaker](https://apidocs.sessionboard.com/api-reference/speakers/get-a-speaker.md): Retrieve a single speaker by contact ID.
+- [Search speakers](https://apidocs.sessionboard.com/api-reference/speakers/search-speakers.md): Search and filter speakers within an event.
+- [Bulk sponsor operations](https://apidocs.sessionboard.com/api-reference/sponsor-writes/bulk-sponsor-operations.md): Create, update, or delete multiple sponsors in a single request (max 100 operations). Requires the `write:sponsors` scope.
+- [Create a sponsor](https://apidocs.sessionboard.com/api-reference/sponsor-writes/create-a-sponsor.md): Create a new sponsor in an event. Requires the `write:sponsors` scope. Subject to rate limiting (100 req/15min) and daily write quota (10,000/day per token).
+- [Restore a deleted sponsor](https://apidocs.sessionboard.com/api-reference/sponsor-writes/restore-a-deleted-sponsor.md): Restore a previously soft-deleted sponsor. Requires the `write:sponsors` scope.
+- [Soft-delete a sponsor](https://apidocs.sessionboard.com/api-reference/sponsor-writes/soft-delete-a-sponsor.md): Soft-delete a sponsor. Can be restored with the restore endpoint. Requires the `write:sponsors` scope.
+- [Update a sponsor](https://apidocs.sessionboard.com/api-reference/sponsor-writes/update-a-sponsor.md): Update an existing sponsor. Requires the `write:sponsors` scope. Optionally send `updated_at` for optimistic concurrency control.
+- [Get a sponsor](https://apidocs.sessionboard.com/api-reference/sponsors/get-a-sponsor.md): Retrieve a single sponsor by ID.
+- [Search sponsors](https://apidocs.sessionboard.com/api-reference/sponsors/search-sponsors.md): Search and filter sponsors within an event.
+- [Transcriptions & Media](https://apidocs.sessionboard.com/api-reference/transcriptions-and-media.md): Unified transcription API, session recordings, and media upload endpoints.
+- [Create a transcription artifact](https://apidocs.sessionboard.com/api-reference/transcriptions/create-a-transcription-artifact.md): Requires `write:transcriptions` scope.
+- [Delete a transcription artifact](https://apidocs.sessionboard.com/api-reference/transcriptions/delete-a-transcription-artifact.md): Requires `write:transcriptions` scope.
+- [Download a session content document](https://apidocs.sessionboard.com/api-reference/transcriptions/download-a-session-content-document.md): Streams `summary_pdf` or `summary_card`. Requires `read:transcriptions` scope.
+- [Download an event content document](https://apidocs.sessionboard.com/api-reference/transcriptions/download-an-event-content-document.md): Streams `event_report` PDF. Requires `read:transcriptions` scope.
+- [Get a session transcription by ID](https://apidocs.sessionboard.com/api-reference/transcriptions/get-a-session-transcription-by-id.md): Requires `read:transcriptions` scope (legacy tokens with empty scopes pass).
+- [Get a single content item](https://apidocs.sessionboard.com/api-reference/transcriptions/get-a-single-content-item.md): Resolve one content item. `itemId` may be a session UUID (composed transcription), a summary/insight/podcast UUID, or a document type (`summary_pdf`, `summary_card`, `event_report`, `recap`). Document types `summary_pdf` / `summary_card` require `session_id`. Requires `read:transcriptions` scope.
+- [Get a transcription by ID](https://apidocs.sessionboard.com/api-reference/transcriptions/get-a-transcription-by-id.md): Requires `read:transcriptions` scope (legacy tokens with empty scopes pass).
+- [Get composed content for a session](https://apidocs.sessionboard.com/api-reference/transcriptions/get-composed-content-for-a-session.md): Canonical one-call session pack for mobile and partner apps — composed transcription elements, preferred summary, insights, podcast URL/status, and summary PDF/card links. Distinct from session **composition** (abstract/parent-child linking).
+- [Get event-level content artifacts](https://apidocs.sessionboard.com/api-reference/transcriptions/get-event-level-content-artifacts.md): Event report document metadata and recap rollup (quotes, topics, summary excerpts). Requires `read:transcriptions` scope. Default expand is `document,recap`.
+- [List composed session content for an event](https://apidocs.sessionboard.com/api-reference/transcriptions/list-composed-session-content-for-an-event.md): Paginated list of session content packs (composed transcript, preferred summary, insights, podcast status, and document links). Prefer this over the raw polymorphic transcriptions list for mobile and partner apps.
+- [List transcriptions for a session](https://apidocs.sessionboard.com/api-reference/transcriptions/list-transcriptions-for-a-session.md): Requires `read:transcriptions` scope (legacy tokens with empty scopes pass).
+- [List transcriptions for an event](https://apidocs.sessionboard.com/api-reference/transcriptions/list-transcriptions-for-an-event.md): Paginated list of transcription artifacts across all sessions. Filter by type, session_id, or language_code. Requires `read:transcriptions` scope (legacy tokens with empty scopes pass). Prefer `/content` for composed mobile-friendly packs.
+- [Update a transcription artifact](https://apidocs.sessionboard.com/api-reference/transcriptions/update-a-transcription-artifact.md): Requires `write:transcriptions` scope.
+- [Authentication](https://apidocs.sessionboard.com/authentication.md): Authenticate with API tokens or OAuth 2.1
+- [Changelog](https://apidocs.sessionboard.com/changelog.md): What's new in the Sessionboard Public API
+- [Consuming session content](https://apidocs.sessionboard.com/guides/consuming-session-content.md): One-call composed transcripts, summaries, insights, podcasts, and PDFs for mobile and partner apps.
+- [Media & Transcriptions](https://apidocs.sessionboard.com/guides/uploading-media-and-transcriptions.md): Step-by-step playbooks for syncing transcript text, uploading media files, adding session audio, and pulling composed content.
+- [Uploading session files](https://apidocs.sessionboard.com/guides/uploading-session-files.md): Attach PDFs, PowerPoint decks, and other documents to a session via the Public API.
+- [MCP Server](https://apidocs.sessionboard.com/insights/mcp-server.md): Connect AI assistants to Sessionboard via Model Context Protocol
+- [Reports & Dashboards](https://apidocs.sessionboard.com/insights/overview.md): API access to Sessionboard Reports, Dashboards, and SbQL queries
+- [SbQL Reference](https://apidocs.sessionboard.com/insights/sbql.md): Sessionboard Query Language reference
+- [Build an Integration](https://apidocs.sessionboard.com/integrations.md): Methods for syncing Sessionboard data to your platform
+- [Introduction](https://apidocs.sessionboard.com/introduction.md): Get started with the Sessionboard Public API
+- [OAuth 2.1 (AI Clients)](https://apidocs.sessionboard.com/oauth.md): Authenticate AI assistants like Claude and ChatGPT using OAuth 2.1 with PKCE
+- [Rate Limiting](https://apidocs.sessionboard.com/rate-limiting.md): Understand API rate limits and how to handle them
+- [Webhooks](https://apidocs.sessionboard.com/webhooks.md): Receive real-time notifications when data changes
+
+## OpenAPI Specs
+
+- [openapi](https://apidocs.sessionboard.com/api-reference/openapi.yaml)

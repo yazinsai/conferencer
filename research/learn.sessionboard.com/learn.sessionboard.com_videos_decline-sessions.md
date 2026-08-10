@@ -1,0 +1,14 @@
+---
+url: "https://learn.sessionboard.com/videos/decline-sessions"
+title: "Accept/Decline sessions | Sessionboard Help Center"
+---
+
+[Skip to content](https://learn.sessionboard.com/videos/decline-sessions#_top)
+
+# Accept/Decline sessions
+
+Embed guidde video
+
+Video transcript
+
+00:00: Welcome to session board in this video, we will walk through how to change the 00:04: status of your sessions after your submission form has closed. 00:08: There are five session statuses accepted except Q pending 00:12: decline, queue, and declined. Accepted is assigned to 00:16: sessions that have been officially approved and will be included in the event. 00:20: Accepted Q sessions have been recommended or are being held for acceptance but 00:24: not yet finalized. Pending is the default status, for newly 00:29: submitted sessions. These sessions are awaiting review or a decision. 00:33: Declined. Q is assigned to sessions that are being considered for rejection, but 00:37: have not yet been officially marked as declined. 00:40: Declined. Sessions have been officially rejected and will not be included in the event. 00:45: Watch the session settings training video to learn how to create custom statuses. 00:51: Session, statuses are visible to speakers, and submitters within the portal, however, 00:55: sessions in accept Q or declined, Q will display a pending 00:59: icon without showing the specific status name. 01:02: These Q statuses are typically used by teams that prefer to notify speakers 01:07: of their session outcomes via email before the status becomes visible in the portal. 01:13: To change a session status, navigate to the session’s module to view all of your 01:17: submitted sessions. 01:19: To update a session status, click on the current status in the status column 01:23: then choose the new status from the drop-down menu. 01:27: Alternatively. You can update statuses in bulk. 01:30: Simply check the box next to each session. 01:32: You’d like to update, then click the edit button at the top of the page and select 01:36: the desired status from the list of actions. 01:40: In the pop-up window, select the field you want to update status in this case. 01:45: Then choose the status. You’d like to assign to the selected sessions. 01:49: Once finished, click the update button to apply the changes. 01:53: Please note that updating a session status will not automatically, send an email 01:57: to the submitter’s or speakers. To notify them of their updated status 02:01: and next steps. Be sure to watch the creating and sending emails training video. 02:06: You have successfully updated your session statuses. 02:10: If you have any questions, feel free to reach out to our support team. 02:14: Thank you for choosing session board.

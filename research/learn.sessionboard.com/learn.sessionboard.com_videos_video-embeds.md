@@ -1,0 +1,14 @@
+---
+url: "https://learn.sessionboard.com/videos/video-embeds"
+title: "Embeds | Sessionboard Help Center"
+---
+
+[Skip to content](https://learn.sessionboard.com/videos/video-embeds#_top)
+
+# Embeds
+
+Embed guidde video
+
+Video transcript
+
+00:00: Welcome to session board in this video, we’ll walk you through how to create embeds, 00:04: to Showcase your event agenda and speakers on your event website. 00:09: To begin navigate to the agenda page, within the sessions module. 00:14: On the agenda page, select the embeds tab and click add, embed to 00:18: create a new embed for your event. You can create multiple embeds as 00:22: needed each with filters to display specific sessions and or speakers. 00:27: For example, you may want to create a separate embed per track to Showcase your 00:31: schedule across different pages of your website. 00:35: In the pop-up window, enter an internal name for your embed and choose the desired 00:39: format type. 00:41: Depending on the selected, embed format page 2 allows you to customize 00:45: styling options such as light or dark theme primary color, and your 00:50: preferred date. And time format for displaying session details. 00:53: You can also enhance the embed with additional features such as allowing Nintendo’s 00:58: to filter sessions by format or track and enabling calendar integration 01:02: so attendees can add sessions directly to their personal calendars. 01:07: Next, apply a filter to your embed to control, which sessions and speakers are 01:11: displayed. For example, you can create an embed filtered by The 01:15: Format keynote to Showcase. 01:17: All keynote speakers on the main page of your website. 01:21: Lastly, choose which Fields you’d like to include in your embed. 01:25: The agenda column determines, which fields are shown, when clicking on a session 01:29: card in the agenda, embed The speaker column controls the fields, 01:33: displayed on each speaker card. In the session column defines the 01:37: fields shown when clicking on a session card in the schedule itinerary or 01:41: session list, embed. 01:44: Once you’ve finished configuring, your embed preview it to ensure. 01:47: Everything looks as expected before adding the code into your website builder. 01:52: Embeds automatically update every 60 minutes with any changes made to 01:56: sessions and speakers and session board. However, if you’d like to push an 02:00: immediate update, you can select refresh cache from the actions column. 02:06: You’re all set to seamlessly showcase your sessions and speakers on your website. 02:10: If you have any questions, don’t hesitate to reach out to our support team. 02:14: Thank you for choosing session board.

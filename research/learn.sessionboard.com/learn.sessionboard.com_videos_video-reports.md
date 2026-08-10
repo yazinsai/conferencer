@@ -1,0 +1,14 @@
+---
+url: "https://learn.sessionboard.com/videos/video-reports"
+title: "Reports | Sessionboard Help Center"
+---
+
+[Skip to content](https://learn.sessionboard.com/videos/video-reports#_top)
+
+# Reports
+
+Embed guidde video
+
+Video transcript
+
+00:00: Welcome to session board in this tutorial. We will walk you through how to create and 00:04: manage reports within your event. 00:07: To begin navigate to the reports module. 00:11: There are four types of reports. You can create and manage session, reports, 00:15: display sessions vertically, with their Associated details and relationships 00:19: such as speakers. And moderators, organized, horizontally across the report. 00:25: Contact reports display contacts vertically, with their Associated details 00:29: and relationships such as sessions. 00:31: Organized horizontally across the report 00:35: Group reports, display companies, and organizations vertically with their 00:39: Associated details and relationships such as contacts and sessions. 00:43: Organized horizontally across the report. 00:47: Evaluation plan reports show the progress of each evaluator within their assigned 00:51: plans. Admins cannot create additional evaluation, plan 00:56: reports, however, evaluator ratings and responses can be exported 01:00: through the evaluation module. 01:03: To create a report, click add report next to the report type, you want to generate. 01:09: Within the pop-up, add a report name and provide a brief description that explains 01:13: what the report includes. Enable the toggles to the left of the relationships. 01:17: You would like included within your report. 01:21: Within the choose Fields page of the report Builder you can select, which fields 01:25: to include in your report by toggling Between the tabs below the search bar. 01:29: Simply check the boxes next to the desired fields and they will appear in the right hand 01:33: panel, as part of your report layout drag and drop fields on the 01:37: left side to reorder their appearance. 01:41: In the filters and sorting step, you can narrow down your report results by applying 01:45: filters. You can also sort the data in ascending or descending 01:49: order based on a specific field. 01:52: On the final page review your report. Configuration once complete, 01:56: click the add report button at the bottom of the pop-up to create your customer port. 02:02: To download your report, select run report to generate a xlsx 02:06: or CSV file. 02:09: To edit or delete your report, select the gear icon. 02:13: You have successfully created a new report within your event that you can generate at 02:17: any time. If you have any questions, feel free to contact our support 02:21: team. Thank you for choosing session board.

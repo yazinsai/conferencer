@@ -1,0 +1,311 @@
+---
+url: "https://www.sessionboard.com/compare/sessionboard-vs-morressier"
+title: "Sessionboard vs Morressier — ePoster & Program Software"
+---
+
+# Sessionboard vs Morressier
+
+Morressier invests in scholarly posters, pre-print infrastructure, and research integrity for conferences.
+
+[Request a demo](https://www.sessionboard.com/compare/sessionboard-vs-morressier#demo-form) [Read customer stories](https://www.sessionboard.com/blog?utm_source=growth-pages&utm_medium=compare&utm_campaign=sessionboard-vs-morressier&utm_content=site-handoff&sb_growth_page=sessionboard-vs-morressier&sb_growth_type=compare&sb_growth_competitor=Morressier&sb_cta_variant=site-handoff&sb_first_touch_page=sessionboard-vs-morressier&sb_referrer=https%3A%2F%2Fwww.google.com%2F)
+
+![Morressier](https://www.sessionboard.com/assets/vendor-logos/morressier.svg)Morressier — their scope
+
+vs
+
+![Sessionboard](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/68537e8fa31125742db75a69_session-board.webp)Program, CRM & marketing
+
+Trusted by teams running Informa, FT Live, medical societies, and global enterprises
+
+![Informa](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8496b5d1c339a87a_informa.avif)
+
+![Clarion Events](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee9c257a13338c2d77_clarion-events.avif)
+
+![Financial Times](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07eee288aef7f1e25e1f_financial-times.avif)
+
+![Dynatrace](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8530a63267702404_dynatrace.avif)
+
+![ACEP](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07eea92b1e6854a1c0c2_acep.avif)
+
+![AVIXA](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee2c8a86f7218d4536_avixa.avif)
+
+![NACD](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee79e7896d4c952820_nacd.avif)
+
+![ASHG](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07edc1cb0eda968ebe13_ashg.avif)
+
+![American Society of Anesthesiologists](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed8a4c44ac62d7246b_american-society-anesthesiologists.avif)
+
+![Google](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee24800f4eb628d559_google.avif)
+
+![Docebo](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed37a7892691922738_docebo.avif)
+
+![NRECA](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8496b5d1c339a89a_nreca.avif)
+
+![CyberRisk Alliance](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c090108eaf9906b536726_cybe_risk.avif)
+
+![AdventHealth](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed7dd82845c8358e3e_advent-health.avif)
+
+![Questex](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee9ee09758635bc286_questex.avif)
+
+![IAAPA Expo](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee6cab22f142e81c59_iaapa-expo.avif)
+
+![NAEYC](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c0a803db8cea2a9c65b75_naeyc.avif)
+
+![Informa](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8496b5d1c339a87a_informa.avif)
+
+![Clarion Events](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee9c257a13338c2d77_clarion-events.avif)
+
+![Financial Times](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07eee288aef7f1e25e1f_financial-times.avif)
+
+![Dynatrace](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8530a63267702404_dynatrace.avif)
+
+![ACEP](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07eea92b1e6854a1c0c2_acep.avif)
+
+![AVIXA](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee2c8a86f7218d4536_avixa.avif)
+
+![NACD](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee79e7896d4c952820_nacd.avif)
+
+![ASHG](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07edc1cb0eda968ebe13_ashg.avif)
+
+![American Society of Anesthesiologists](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed8a4c44ac62d7246b_american-society-anesthesiologists.avif)
+
+![Google](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee24800f4eb628d559_google.avif)
+
+![Docebo](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed37a7892691922738_docebo.avif)
+
+![NRECA](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee8496b5d1c339a89a_nreca.avif)
+
+![CyberRisk Alliance](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c090108eaf9906b536726_cybe_risk.avif)
+
+![AdventHealth](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed7dd82845c8358e3e_advent-health.avif)
+
+![Questex](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee9ee09758635bc286_questex.avif)
+
+![IAAPA Expo](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ee6cab22f142e81c59_iaapa-expo.avif)
+
+![NAEYC](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c0a803db8cea2a9c65b75_naeyc.avif)
+
+## Quick answer
+
+Sessionboard is program-native abstract, poster, and speaker software for medical and scientific societies — multi-round review, poster tracks, speaker portal, live transcription, Attendee Hub, and Advocacy on the session record. Morressier fits when scholarly integrity and research-content infrastructure are the primary buy — not operational committee and speaker ops across posters and platform sessions.
+
+## Sound like your team?
+
+Match your role to the job Sessionboard solves — program ops, content reuse, or marketing attribution.
+
+### Research integrity lead
+
+Morressier invests in scholarly infrastructure — operational committee and speaker workflows still need a home.
+
+### Program manager
+
+Sessionboard-style chair tooling and speaker readiness — not only research-content pipelines.
+
+### Speaker operations
+
+Faculty portal and materials outside integrity tooling — you need CRM from acceptance through show day.
+
+### Content marketing
+
+Reusable session assets require capture on the program graph — Live Transcribe, Attendee Hub, and Create natively.
+
+Case study
+
+## Real teams. Real results
+
+See how event and marketing teams use Sessionboard to manage their speakers, scale their content, and prove ROI.
+
+**3,500+** event teams**1.7M+** sessions managed**SOC 2** Type II · GDPR
+
+[Read customer stories](https://www.sessionboard.com/blog?utm_source=growth-pages&utm_medium=compare&utm_campaign=sessionboard-vs-morressier&utm_content=site-handoff&sb_growth_page=sessionboard-vs-morressier&sb_growth_type=compare&sb_growth_competitor=Morressier&sb_cta_variant=site-handoff&sb_first_touch_page=sessionboard-vs-morressier&sb_referrer=https%3A%2F%2Fwww.google.com%2F)
+
+![Docebo](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4c07ed37a7892691922738_docebo.avif)
+
+★★★★★
+
+> “Sessionboard has been one of our most successful investments this year, making our team more efficient and allowing us to focus on the most critical components of our events.”
+
+![Huong Nguyen](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6894e8a6b18c4bd507e95c18_profile.webp)
+
+★★★★★
+
+> “Sessionboard saves significant planning time and makes it easier than ever for speakers and sponsors to participate in our clients' events.”
+
+![EarthX](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4801fafbbf7eb7c15bad76_earthx.png)
+
+★★★★★
+
+> “We used Sessionboard daily. It served as our source of truth for tracking speakers, sending emails, and accessing reports. The ability to set a weekly digest email was a huge time saver.”
+
+![GURU Media Hub](https://cdn.prod.website-files.com/627d5c68d5739644034cfd28/6a4801fa2431046a100de932_guru_media_hub_logo.png)
+
+★★★★★
+
+> “Honestly, I loved it! Getting everything out of the spreadsheet. It collects all the information and gives you a visual of who you might want to invite.”
+
+←→
+
+## Why teams choose Sessionboard
+
+Where Morressier stops, and where program teams keep going with Sessionboard.
+
+## Morressier — where it ends
+
+- **Scholarly integrity positioning**
+Research-content and integrity story for publisher-aligned congresses.
+
+- **Publisher and society partnerships**
+Ecosystem ties for research-forward conference brands.
+
+- **Early research workflow**
+Pre-print and integrity tooling where that is the primary buy.
+
+- **Poster and early-career researcher UX**
+Research-forward poster discovery and integrity features for publisher-aligned congresses.
+
+
+### The narrow case
+
+- Submission and review are the only scope — no speaker portal or post-meeting content requirements
+- Under 100 abstracts with a single review round and no multi-chair workflow
+- Primary buy is research integrity/pre-print infrastructure, not annual society program ops
+
+The way forward
+
+## Sessionboard — program, CRM & content
+
+- **Program layer & committee ops**
+Call for papers (CFP), multi-round review, chair workflows, conflict of interest (COI) tracking, and published agenda — without patching spreadsheets after acceptance.
+
+- **Speaker CRM on one graph**
+Portal, bio, materials, and communications per speaker across years — not reset each submission cycle.
+
+- **Content marketing built in**
+Live transcription, Media Library, AI clips, Attendee Hub, and Create on the session record.
+
+- **Advocacy & Dispatch**
+Advocacy — tracked peer shares from speakers and sponsors with registration attribution. Dispatch — internal team share recipes when content is ready — not generic social buttons.
+
+- **Digital posters on the program graph**
+Poster tracks in call for papers, shared review with platform abstracts, speaker portal, Attendee Hub, and optional capture — not a bolt-on author list.
+
+
+### When Sessionboard wins
+
+- Committee still chases speakers in email after acceptance
+- 500+ abstracts, real committee volume, conflict of interest (COI) rules, and chairs who need tools that work
+- Need transcription, captions, on-demand library, or Attendee Hub on the same graph
+- Registration stays on Cvent, RainFocus, or EventsAir — program layer should not stop at export
+
+## What Sessionboard owns
+
+Program, speaker CRM, content — plus Advocacy and Dispatch marketing tools competitors treat as afterthoughts.
+
+### Program layer
+
+Call for papers (CFP), multi-round review, chair workflows, conflict of interest (COI) tracking, and published agenda — work competitors leave in spreadsheets.
+
+### Speaker CRM
+
+One faculty record: portal, bio, materials, and communications across years — not a fresh CSV every submission cycle.
+
+### Content marketing
+
+Live transcription, Media Library, clips, Attendee Hub, and Create on the session record you already manage.
+
+### Advocacy
+
+Peer shares from speakers, sponsors, and faculty — tracked links to registration when sessions are accepted or confirmed.
+
+### Dispatch
+
+Internal team distribution — automated share recipes for staff when content is ready, beside Hootsuite or Sprout for always-on social.
+
+Event MCP
+
+## Ask your AI about the event — not a spreadsheet export
+
+Sessionboard connects to the assistants your team already uses through MCP. Sessions, speakers, and committee data stay in Sessionboard — Claude, ChatGPT, and Copilot read it live.
+
+![Claude](https://www.sessionboard.com/assets/ai-logos/claude.svg)
+
+![ChatGPT](https://www.sessionboard.com/assets/ai-logos/chatgpt-icon.svg)
+
+![](https://www.sessionboard.com/assets/ai-logos/copilot-icon.svg)![Microsoft Copilot](https://www.sessionboard.com/assets/ai-logos/copilot-wordmark.svg)
+
+- OAuth sign-in — no API keys to copy or rotate
+- Live program graph — sessions, speakers, review rounds, readiness gaps
+- Works beside registration and capture tools you already run
+
+[MCP setup guide →](https://apidocs.sessionboard.com/insights/mcp-server?utm_source=growth-pages&utm_medium=compare&utm_campaign=sessionboard-vs-morressier&utm_content=site-handoff&sb_growth_page=sessionboard-vs-morressier&sb_growth_type=compare&sb_growth_competitor=Morressier&sb_cta_variant=site-handoff&sb_first_touch_page=sessionboard-vs-morressier&sb_referrer=https%3A%2F%2Fwww.google.com%2F) [Event MCP overview →](https://www.sessionboard.com/solutions/event-mcp.html) [API & coexistence →](https://apidocs.sessionboard.com/introduction?utm_source=growth-pages&utm_medium=compare&utm_campaign=sessionboard-vs-morressier&utm_content=site-handoff&sb_growth_page=sessionboard-vs-morressier&sb_growth_type=compare&sb_growth_competitor=Morressier&sb_cta_variant=site-handoff&sb_first_touch_page=sessionboard-vs-morressier&sb_referrer=https%3A%2F%2Fwww.google.com%2F)
+
+![](https://www.sessionboard.com/assets/ai-logos/claude.svg)Sessionboard Event MCP
+
+You
+
+Which accepted speakers still haven’t submitted bios before we publish the app?
+
+Assistant
+
+**12 accepted speakers** are missing bios. **4** also lack headshots. Top gaps: Dr. Rivera (keynote), Panel B moderators (2), Workshop track (3).
+
+Live from Sessionboard · updated 2 min ago
+
+Try askingAgenda changes since yesterdayRound 2 review statusSessions missing slides
+
+## Evaluating Morressier alternatives?
+
+See how Sessionboard fits beside your existing stack — no rip-and-replace required.
+
+[Request a demo](https://www.sessionboard.com/compare/sessionboard-vs-morressier#demo-form)
+
+## Where Sessionboard displaces Morressier
+
+What winds down on their contract, and what your team gains the day Sessionboard turns on.
+
+#### Morressier — their lane
+
+- Mid-contract abstract forms if not ready to migrate call for papers (CFP)
+
+#### Sessionboard — your advantage
+
+- Annual meeting call for papers (CFP), review, and speaker readiness
+- Transcription, Attendee Hub, Advocacy, and Awards on one speaker CRM
+
+## Frequently asked questions
+
+Evaluating Sessionboard against Morressier for the program layer — not a forced rip-and-replace.
+
+Is Sessionboard a full Morressier replacement?▼
+
+Morressier leads on scholarly integrity infrastructure. Sessionboard competes on operational committee workflow, speaker readiness, Live Transcribe, and turning sessions into reusable content assets.
+
+Can we run one meeting on Sessionboard first?▼
+
+Yes. One annual meeting or specialty track is the common entry point beside an existing registration or abstract stack.
+
+Does Sessionboard include transcription and attendee delivery?▼
+
+Yes — Live Transcribe capture, batch transcription, Media Library, Attendee Hub, and Create are native on Content Marketing.
+
+What about registration?▼
+
+Registration can stay on Cvent, RainFocus, EventsAir, or Cadmium. Sessionboard owns the program layer between acceptance and content reuse.
+
+Does Sessionboard support ePosters and digital poster sessions?▼
+
+Yes — poster submissions run through the same call for papers, multi-round review, speaker portal, and Attendee Hub as platform abstracts. Poster sessions appear on the published program beside platform talks.
+
+How does pricing compare?▼
+
+Sessionboard pricing follows meeting and abstract volume — request a demo for a scoped quote.
+
+Related: [Digital posters and ePosters](https://www.sessionboard.com/solutions/digital-posters-eposters.html) · [Sessionboard vs ePostersLive](https://www.sessionboard.com/compare/sessionboard-vs-eposterslive.html) · [Sessionboard vs Learning Toolbox](https://www.sessionboard.com/compare/sessionboard-vs-learning-toolbox.html) · [Sessionboard vs iPosterSessions](https://www.sessionboard.com/compare/sessionboard-vs-ipostersessions.html) · [Sessionboard vs MULTILEARNING](https://www.sessionboard.com/compare/sessionboard-vs-multilearning.html)
+
+## Evaluating Morressier for posters or abstracts?
+
+Talk through your event workflow — abstracts, speakers, content, and marketing on one program graph.
+
+Evaluating Morressier for posters or abstracts?
+
+[Request a demo](https://www.sessionboard.com/compare/sessionboard-vs-morressier#demo-form)

@@ -1,0 +1,14 @@
+---
+url: "https://learn.sessionboard.com/videos/video"
+title: "Fields | Sessionboard Help Center"
+---
+
+[Skip to content](https://learn.sessionboard.com/videos/video#_top)
+
+# Fields
+
+Embed guidde video
+
+Video transcript
+
+00:00: Welcome to session board in this tutorial. We’ll show you how to create custom 00:04: fields to organize your event data more effectively. 00:08: Enhance your session board experience by customizing the fields module. 00:12: This guide will walk you through optimizing your employee training process from 00:16: organizing groups to managing evaluation plans. 00:20: From the left-hand menu, click on the fields module to manage and create custom 00:24: fields for your event. 00:26: There are four types of fields, contact Fields related to individual people 00:31: like speakers, moderators, sponsor contacts or other participant 00:35: types. 00:37: Group Fields apply to companies or organizations participating in the event, 00:41: as a sponsor or exhibitor. 00:44: Session Fields, help Define the structure and details of the event program such 00:48: as title and description. 00:51: Evaluation plan fields are questions that can be included within your evaluation 00:55: plans for evaluators to answer as they are reviewing, your submissions 01:00: Before creating a field, ensure you have selected the appropriate field type at 01:04: the top of your page and then select the add field button. 01:08: Start by giving your field a name such as preferred language or dietary 01:12: restrictions 01:13: Then choose the appropriate field type from the drop-down menu field 01:17: types include options, like text drop-down checkbox and more, depending 01:22: on how you want users to provide the information. 01:26: You can add a description to clarify the purpose of this field for your internal team. 01:31: Finally, select the field level whether this field can only be used within 01:35: the event. You are creating the field within or can be utilized within all events in 01:40: your organization. 01:42: Once you’ve completed all the details, click save to add your new field, the 01:46: custom field will now appear in the list of fields, under the selected category 01:51: and is ready to use within forms or managing your contacts speakers or sessions 01:55: internally. 01:57: You’ve successfully created a custom field in session board. 02:00: Remember to select the correct field type before creating your field to ensure 02:04: your fields are organized appropriately. If you have any questions, feel free 02:09: to reach out to our support team. Thank you for choosing session board.
