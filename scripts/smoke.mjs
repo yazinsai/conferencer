@@ -325,6 +325,127 @@ async function main() {
     }
   }
 
+  section("Enforced rules");
+  {
+    // These are the checks a clone usually fails: the constraint has to be real,
+    // not just hidden in the UI.
+    const Database = (await import("better-sqlite3")).default;
+    const db = new Database(process.env.SMOKE_DB ?? "data/conferencer.db");
+
+    // 1. Close the CFP and prove the public form and the speaker's edit both lock.
+    const form = db
+      .prepare("SELECT id, closes_at FROM submission_forms ORDER BY created_at LIMIT 1")
+      .get();
+    db.prepare("UPDATE submission_forms SET closes_at = '2020-01-01T00:00' WHERE id = ?").run(
+      form.id,
+    );
+    const closed = await anon.get(`/e/${SLUG}/submit/${form.id}`);
+    if (/Submissions closed|no longer accepting/i.test(closed.body)) {
+      ok("closed CFP shows a closed state to the public");
+    } else {
+      fail("closed CFP shows a closed state to the public");
+    }
+    const portalClosed = await speaker.get("/portal/submissions");
+    if (/Editing closed/i.test(portalClosed.body)) {
+      ok("speaker editing locks once the call closes");
+    } else {
+      fail("speaker editing locks once the call closes", "no 'Editing closed' marker");
+    }
+    db.prepare("UPDATE submission_forms SET closes_at = ? WHERE id = ?").run(
+      form.closes_at,
+      form.id,
+    );
+    const reopened = await anon.get(`/e/${SLUG}/submit/${form.id}`);
+    if (!/Submissions closed/i.test(reopened.body)) ok("reopening the CFP restores the form");
+    else fail("reopening the CFP restores the form");
+
+    // 2. Blind round: no author identity anywhere in the reviewer's page.
+    const assignment = db
+      .prepare(
+        `SELECT a.id FROM evaluation_assignments a
+           JOIN evaluation_rounds r ON r.id = a.round_id
+           JOIN users u ON u.id = a.reviewer_user_id
+          WHERE r.anonymize = 1 AND u.email = ? LIMIT 1`,
+      )
+      .get(ACCOUNTS.reviewer.email);
+    if (assignment) {
+      const page = await reviewer.get(`/review/a/${assignment.id}`);
+      const leaks = ["Priya Raman", "Marcus Okafor", "Latticework Systems"].filter((needle) =>
+        page.body.includes(needle),
+      );
+      if (page.status === 200 && !leaks.length) {
+        ok("blind round hides author identity from the reviewer");
+      } else {
+        fail("blind round hides author identity from the reviewer", leaks.join(", "));
+      }
+      const organizerView = await organizer.get(
+        `/admin/e/${SLUG}/submissions/${db.prepare("SELECT submission_id FROM evaluation_assignments WHERE id = ?").get(assignment.id).submission_id}?tab=participants`,
+      );
+      if (organizerView.body.includes("Priya")) {
+        ok("the organizer still sees author identity on the same submission");
+      } else {
+        fail("the organizer still sees author identity on the same submission");
+      }
+    } else {
+      fail("found a blinded assignment to test");
+    }
+
+    // 3. Room clash is refused, not just warned about.
+    const scheduled = db
+      .prepare(
+        `SELECT id, starts_at, location_id FROM submissions
+          WHERE event_id = (SELECT id FROM events WHERE slug = ?) AND starts_at IS NOT NULL
+            AND location_id IS NOT NULL LIMIT 1`,
+      )
+      .get(SLUG);
+    const free = db
+      .prepare(
+        `SELECT id FROM submissions WHERE event_id = (SELECT id FROM events WHERE slug = ?)
+            AND status = 'accepted' AND starts_at IS NULL LIMIT 1`,
+      )
+      .get(SLUG);
+    if (scheduled && free) {
+      const page = await organizer.get(`/admin/e/${SLUG}/agenda`);
+      // Pick the action id belonging to the scheduling form specifically — the
+      // page also carries publish, auto-schedule and calendar-invite forms.
+      const scheduleForm = page.body
+        .split("<form")
+        .find((chunk) => chunk.includes('name="room_id"') && chunk.includes('name="submission_id"'));
+      const actionId = scheduleForm
+        ? /name="\$ACTION_ID_([^"]+)"/.exec(scheduleForm)?.[1]
+        : undefined;
+      if (!actionId) {
+        fail("found the agenda schedule action");
+      } else {
+        const body = new FormData();
+        body.set("$ACTION_ID_" + actionId, "");
+        body.set("slug", SLUG);
+        body.set("submission_id", free.id);
+        body.set("date", scheduled.starts_at.slice(0, 10));
+        body.set("start", scheduled.starts_at.slice(11, 16));
+        body.set("room_id", scheduled.location_id);
+        body.set("view", "rooms");
+        const response = await organizer.request(`/admin/e/${SLUG}/agenda`, {
+          method: "POST",
+          body,
+        });
+        const after = db.prepare("SELECT starts_at FROM submissions WHERE id = ?").get(free.id);
+        if (!after.starts_at) {
+          ok("room double-booking is refused", `${response.status}`);
+        } else {
+          fail("room double-booking is refused", "the clashing session was scheduled anyway");
+          db.prepare(
+            "UPDATE submissions SET starts_at = NULL, ends_at = NULL, location_id = NULL WHERE id = ?",
+          ).run(free.id);
+        }
+      }
+    } else {
+      fail("found sessions to test the room clash with");
+    }
+
+    db.close();
+  }
+
   section("Performance");
   const slow = timings.filter((t) => t.ms > 400).sort((a, b) => b.ms - a.ms);
   const listTimings = timings.filter((t) => t.status === 200);
