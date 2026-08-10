@@ -7,8 +7,6 @@ import {
   listSubmissions,
   submissionStatusCounts,
 } from "@/lib/db/queries";
-import { statusBadgeClass, statusLabel } from "@/lib/domain/status";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import {
@@ -16,6 +14,7 @@ import {
   createManualSubmissionAction,
   sendDecisionsAction,
 } from "./actions";
+import { InlineStatus } from "./inline-status";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -191,12 +190,11 @@ export default async function SubmissionsPage({
                       <input type="checkbox" name="ids" value={r.id} />
                     </td>
                     <td className="px-3 py-2">
-                      <Badge className={statusBadgeClass(r.status)}>
-                        {statusLabel(r.status)}
-                      </Badge>
-                      <div className="mt-1 text-xs text-slate-500">
-                        Change on detail or via bulk
-                      </div>
+                      <InlineStatus
+                        slug={slug}
+                        submissionId={r.id}
+                        status={r.status}
+                      />
                     </td>
                     <td className="px-3 py-2">
                       <Link
