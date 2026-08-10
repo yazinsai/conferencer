@@ -117,7 +117,7 @@ export function DayTabs({
                 : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
             )}
           >
-            Day {index + 1}
+            {`Day ${index + 1}`}
             <span className={cx("ml-1.5 text-xs", active ? "text-slate-300" : "text-slate-500")}>
               {formatDate(day)}
             </span>
