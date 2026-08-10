@@ -6,21 +6,34 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx seed/seed.ts",
+    "seed:reset": "tsx seed/seed.ts --reset",
+    "seed:big": "tsx seed/big.ts",
+    "cron": "tsx scripts/cron.ts",
+    "smoke": "node scripts/smoke.mjs",
+    "deploy": "docker compose up -d --build"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
-  }
+  },
+  "license": "MIT",
+  "description": "Open-source conference program management (Sessionboard Program replacement)"
 }
