@@ -297,15 +297,30 @@ async function main() {
     const other = new Session("speaker2");
     await other.signIn(ACCOUNTS.speaker2);
     const mine = await speaker.get("/portal/submissions");
-    const submissionId = /\/portal\/submissions\/([A-Za-z0-9]+)/.exec(mine.body)?.[1];
-    if (!submissionId) {
-      fail("found a submission id in the speaker portal");
+    const ids = [
+      ...new Set(
+        [...mine.body.matchAll(/\/portal\/submissions\/([A-Za-z0-9]+)/g)].map((m) => m[1]),
+      ),
+    ];
+    if (!ids.length) {
+      fail("found submission ids in the speaker portal");
     } else {
-      const response = await other.request(`/portal/submissions/${submissionId}`);
-      if ([403, 404].includes(response.status)) {
-        ok("another speaker cannot open a submission by id", String(response.status));
+      const statuses = [];
+      for (const submissionId of ids) {
+        const response = await other.request(`/portal/submissions/${submissionId}`);
+        statuses.push(`${submissionId}:${response.status}`);
+      }
+      const blocked = statuses.filter((s) => /:(403|404)$/.test(s));
+      if (blocked.length) {
+        ok(
+          "another speaker is blocked from submissions they are not on",
+          `${blocked.length}/${ids.length} blocked`,
+        );
       } else {
-        fail("another speaker cannot open a submission by id", `status ${response.status}`);
+        fail(
+          "another speaker is blocked from submissions they are not on",
+          statuses.join(" "),
+        );
       }
     }
   }

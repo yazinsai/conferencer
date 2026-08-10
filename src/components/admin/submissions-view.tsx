@@ -7,11 +7,8 @@ import {
   SUBMISSION_STATUSES,
   type SubmissionFilters,
 } from "@/lib/repo/submissions";
-import {
-  ALL_COLUMNS,
-  DEFAULT_COLUMNS,
-  SubmissionTable,
-} from "@/components/admin/submission-table";
+import { SubmissionTable } from "@/components/admin/submission-table";
+import { ALL_COLUMNS, DEFAULT_COLUMNS } from "@/lib/columns";
 import { setApprovalAction, setStatusAction } from "@/server/submissions-actions";
 import { Disclosure, FilterSelect, SearchBox } from "@/components/client/basics";
 import { LinkButton, PageHeader, SubNav } from "@/components/ui";
