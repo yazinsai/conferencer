@@ -2,6 +2,12 @@ import Link from "next/link";
 import { and, count, eq, like, or } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
+import {
+  getRoundProgressStats,
+  getRoundResults,
+  getRoundReviewerProgress,
+  sortResults,
+} from "@/lib/evaluation/results";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -14,6 +20,8 @@ import {
   deleteScorecardQuestionAction,
   updateScorecardQuestionAction,
 } from "../actions";
+import { AutoAssignForm } from "./auto-assign-form";
+import { BulkReminderForm } from "./bulk-reminder-form";
 import { InviteReviewerForm } from "./invite-reviewer-form";
 
 function formatOptions(options: string | null) {
@@ -33,10 +41,13 @@ export default async function EvaluationPlanDetailPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; planId: string }>;
-  searchParams: Promise<{ round?: string; q?: string }>;
+  searchParams: Promise<{ round?: string; q?: string; tab?: string; sort?: string; dir?: string }>;
 }) {
   const { slug, planId } = await params;
   const sp = await searchParams;
+  const tab = sp.tab === "results" ? "results" : "configure";
+  const sortCol = sp.sort === "title" ? "title" : "avg";
+  const sortDir = sp.dir === "asc" ? "asc" : "desc";
   const { event } = await requireEventRole(slug, ["organizer"]);
   const db = getDb();
 
@@ -163,6 +174,55 @@ export default async function EvaluationPlanDetailPage({
   const totalAssignments = roundStats.reduce((a, r) => a + r.total, 0);
   const totalDone = roundStats.reduce((a, r) => a + r.done, 0);
 
+  const tracks = db
+    .select({ id: schema.tracks.id, name: schema.tracks.name })
+    .from(schema.tracks)
+    .where(eq(schema.tracks.eventId, event.id))
+    .orderBy(schema.tracks.sortOrder)
+    .all();
+
+  const progressStats = activeRound ? getRoundProgressStats(activeRound.id) : null;
+  const reviewerProgress = activeRound ? getRoundReviewerProgress(activeRound.id) : [];
+  const resultRows = activeRound
+    ? sortResults(getRoundResults(activeRound.id), sortCol, sortDir)
+    : [];
+
+  const reviewerColumns = new Map<string, string>();
+  for (const row of resultRows) {
+    for (const rs of row.reviewerScores) {
+      reviewerColumns.set(rs.reviewerUserId, rs.reviewerName);
+    }
+  }
+
+  const reminderReviewers = reviewerProgress.map((r) => ({
+    userId: r.userId,
+    name: r.name,
+    email: r.email,
+    pending: r.total - r.done,
+  }));
+
+  function tabHref(nextTab: string) {
+    const params = new URLSearchParams();
+    if (activeRoundId) params.set("round", activeRoundId);
+    if (nextTab !== "configure") params.set("tab", nextTab);
+    if (userQuery) params.set("q", userQuery);
+    const qs = params.toString();
+    return `/admin/e/${slug}/evaluation/${planId}${qs ? `?${qs}` : ""}`;
+  }
+
+  function sortHref(col: "avg" | "title") {
+    const params = new URLSearchParams();
+    if (activeRoundId) params.set("round", activeRoundId);
+    params.set("tab", "results");
+    params.set("sort", col);
+    const nextDir = sortCol === col && sortDir === "desc" ? "asc" : "desc";
+    params.set("dir", nextDir);
+    return `/admin/e/${slug}/evaluation/${planId}?${params.toString()}`;
+  }
+
+  const exportBase = `/admin/e/${slug}/evaluation/${planId}/export`;
+  const exportRound = activeRoundId ? `&round=${activeRoundId}` : "";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -195,7 +255,146 @@ export default async function EvaluationPlanDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      {activeRound && progressStats ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardBody className="py-4">
+              <div className="text-xs uppercase text-slate-500">Total evaluations</div>
+              <div className="text-2xl font-semibold">{progressStats.totalEvaluations}</div>
+              <div className="text-xs text-slate-500">
+                {progressStats.doneAssignments} complete in {activeRound.name}
+              </div>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardBody className="py-4">
+              <div className="text-xs uppercase text-slate-500">Evaluated submissions</div>
+              <div className="text-2xl font-semibold">{progressStats.evaluatedSubmissions}</div>
+              <div className="text-xs text-slate-500">With at least one review</div>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardBody className="py-4">
+              <div className="text-xs uppercase text-slate-500">Reviewers</div>
+              <div className="text-2xl font-semibold">{reviewerProgress.length}</div>
+              <div className="text-xs text-slate-500">
+                {reviewerProgress.filter((r) => r.percent === 100).length} at 100%
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={tabHref("configure")}
+          className={`rounded-full px-3 py-1.5 text-sm ${
+            tab === "configure"
+              ? "bg-blue-600 text-white"
+              : "border border-slate-200 bg-white text-slate-700"
+          }`}
+        >
+          Configure
+        </Link>
+        <Link
+          href={tabHref("results")}
+          className={`rounded-full px-3 py-1.5 text-sm ${
+            tab === "results"
+              ? "bg-blue-600 text-white"
+              : "border border-slate-200 bg-white text-slate-700"
+          }`}
+        >
+          Results
+        </Link>
+      </div>
+
+      {tab === "results" ? (
+        <Card>
+          <CardHeader
+            title={`Results — ${activeRound?.name ?? "No round"}`}
+            subtitle="Aggregate scores per submission for the selected round"
+          />
+          <CardBody className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={`${exportBase}?shape=individual${exportRound}`}
+                className="text-sm text-blue-700 hover:underline"
+              >
+                Export individual CSV
+              </Link>
+              <Link
+                href={`${exportBase}?shape=cumulative${exportRound}`}
+                className="text-sm text-blue-700 hover:underline"
+              >
+                Export cumulative CSV
+              </Link>
+            </div>
+            {!activeRound ? (
+              <p className="text-sm text-slate-500">Add a round to view results.</p>
+            ) : resultRows.length === 0 ? (
+              <p className="text-sm text-slate-500">No assignments yet for this round.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="py-2 pr-4">
+                        <Link href={sortHref("title")} className="hover:text-blue-700">
+                          Submission
+                          {sortCol === "title" ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
+                        </Link>
+                      </th>
+                      <th className="py-2 pr-4">
+                        <Link href={sortHref("avg")} className="hover:text-blue-700">
+                          Avg score
+                          {sortCol === "avg" ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
+                        </Link>
+                      </th>
+                      <th className="py-2 pr-4">Reviews</th>
+                      {Array.from(reviewerColumns.entries()).map(([id, name]) => (
+                        <th key={id} className="py-2 pr-4">
+                          {name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resultRows.map((row) => {
+                      const scoreMap = new Map(
+                        row.reviewerScores.map((rs) => [rs.reviewerUserId, rs]),
+                      );
+                      return (
+                        <tr key={row.submissionId} className="border-t border-slate-100">
+                          <td className="py-2 pr-4 font-medium">{row.submissionTitle}</td>
+                          <td className="py-2 pr-4">
+                            {row.averageScore != null ? row.averageScore : "—"}
+                          </td>
+                          <td className="py-2 pr-4">{row.reviewCount}</td>
+                          {Array.from(reviewerColumns.keys()).map((id) => {
+                            const rs = scoreMap.get(id);
+                            return (
+                              <td key={id} className="py-2 pr-4">
+                                {rs?.score != null ? (
+                                  rs.score
+                                ) : rs ? (
+                                  <span className="text-slate-400">pending</span>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader title="Rounds" subtitle="Select a round to configure" />
           <CardBody className="space-y-4">
@@ -419,6 +618,84 @@ export default async function EvaluationPlanDetailPage({
 
               <Card>
                 <CardHeader
+                  title="Reviewer progress"
+                  subtitle="Completion percentage per reviewer in this round"
+                />
+                <CardBody>
+                  {reviewerProgress.length === 0 ? (
+                    <p className="text-sm text-slate-500">No assignments in this round yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-left text-sm">
+                        <thead className="text-xs uppercase text-slate-500">
+                          <tr>
+                            <th className="py-1 pr-4">Reviewer</th>
+                            <th className="py-1 pr-4">Complete</th>
+                            <th className="py-1">Progress</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reviewerProgress.map((r) => (
+                            <tr key={r.userId} className="border-t border-slate-100">
+                              <td className="py-2 pr-4">
+                                {r.name}
+                                <span className="block text-xs text-slate-500">{r.email}</span>
+                              </td>
+                              <td className="py-2 pr-4">
+                                {r.done}/{r.total}
+                              </td>
+                              <td className="py-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                                    <div
+                                      className="h-full bg-emerald-500"
+                                      style={{ width: `${r.percent}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-slate-600">{r.percent}%</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardHeader
+                  title="Bulk reminder"
+                  subtitle="Email reviewers with outstanding assignments"
+                />
+                <CardBody>
+                  <BulkReminderForm
+                    slug={slug}
+                    planId={planId}
+                    roundId={activeRound.id}
+                    reviewers={reminderReviewers}
+                  />
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardHeader
+                  title="Auto-assign"
+                  subtitle="Distribute submissions across reviewers at scale"
+                />
+                <CardBody>
+                  <AutoAssignForm
+                    slug={slug}
+                    planId={planId}
+                    roundId={activeRound.id}
+                    tracks={tracks}
+                  />
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardHeader
                   title="Assign submissions"
                   subtitle="Multi-select submissions and assign to a reviewer"
                 />
@@ -521,7 +798,8 @@ export default async function EvaluationPlanDetailPage({
             </Card>
           )}
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -9,6 +9,10 @@ import { getDb, schema } from "@/lib/db";
 import { nowIso } from "@/lib/dates";
 import { sendTemplatedEmail } from "@/lib/email/send";
 import { id } from "@/lib/id";
+import {
+  applyAutoAssign,
+  previewAutoAssign,
+} from "@/lib/evaluation/results";
 
 type ScorecardQuestion = typeof schema.scorecardQuestions.$inferSelect;
 
@@ -526,6 +530,220 @@ export async function assignSubmissionsAction(formData: FormData) {
   revalidateEvaluation(slug, planId);
   revalidatePath(`/review/plans/${planId}/rounds/${roundId}`);
   void created;
+}
+
+export async function previewAutoAssignAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const planId = String(formData.get("planId") || "");
+  const roundId = String(formData.get("roundId") || "");
+  const mode = String(formData.get("mode") || "reviewers_per_submission") as
+    | "reviewers_per_submission"
+    | "max_per_reviewer";
+  const count = Number(formData.get("count") || 0);
+  const trackId = String(formData.get("trackId") || "") || null;
+  const reviewerUserIds = formData.getAll("reviewerUserIds").map(String).filter(Boolean);
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+
+  const db = getDb();
+  const round = db
+    .select()
+    .from(schema.evaluationRounds)
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
+    .where(
+      and(
+        eq(schema.evaluationRounds.id, roundId),
+        eq(schema.evaluationPlans.eventId, event.id),
+        eq(schema.evaluationPlans.id, planId),
+      ),
+    )
+    .get();
+  if (!round) throw new Error("Round not found");
+
+  const reviewerIds =
+    reviewerUserIds.length > 0
+      ? reviewerUserIds
+      : db
+          .select({ userId: schema.evaluationAssignments.reviewerUserId })
+          .from(schema.evaluationAssignments)
+          .where(eq(schema.evaluationAssignments.roundId, roundId))
+          .all()
+          .map((r) => r.userId)
+          .filter((id, i, arr) => arr.indexOf(id) === i);
+
+  if (reviewerIds.length === 0) {
+    const eventReviewers = db
+      .select({ userId: schema.eventMemberships.userId })
+      .from(schema.eventMemberships)
+      .where(
+        and(
+          eq(schema.eventMemberships.eventId, event.id),
+          eq(schema.eventMemberships.role, "reviewer"),
+        ),
+      )
+      .all()
+      .map((r) => r.userId);
+    reviewerIds.push(...eventReviewers);
+  }
+
+  return previewAutoAssign({
+    roundId,
+    eventId: event.id,
+    mode,
+    count,
+    trackId,
+    reviewerUserIds: reviewerIds,
+  });
+}
+
+export async function autoAssignAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const planId = String(formData.get("planId") || "");
+  const roundId = String(formData.get("roundId") || "");
+  const mode = String(formData.get("mode") || "reviewers_per_submission") as
+    | "reviewers_per_submission"
+    | "max_per_reviewer";
+  const count = Number(formData.get("count") || 0);
+  const trackId = String(formData.get("trackId") || "") || null;
+  const reviewerUserIds = formData.getAll("reviewerUserIds").map(String).filter(Boolean);
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+  if (!roundId || !count) throw new Error("Round and count are required");
+
+  const db = getDb();
+  const round = db
+    .select()
+    .from(schema.evaluationRounds)
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
+    .where(
+      and(
+        eq(schema.evaluationRounds.id, roundId),
+        eq(schema.evaluationPlans.eventId, event.id),
+        eq(schema.evaluationPlans.id, planId),
+      ),
+    )
+    .get();
+  if (!round) throw new Error("Round not found");
+
+  let reviewerIds = reviewerUserIds;
+  if (reviewerIds.length === 0) {
+    reviewerIds = db
+      .select({ userId: schema.evaluationAssignments.reviewerUserId })
+      .from(schema.evaluationAssignments)
+      .where(eq(schema.evaluationAssignments.roundId, roundId))
+      .all()
+      .map((r) => r.userId)
+      .filter((id, i, arr) => arr.indexOf(id) === i);
+  }
+  if (reviewerIds.length === 0) {
+    reviewerIds = db
+      .select({ userId: schema.eventMemberships.userId })
+      .from(schema.eventMemberships)
+      .where(
+        and(
+          eq(schema.eventMemberships.eventId, event.id),
+          eq(schema.eventMemberships.role, "reviewer"),
+        ),
+      )
+      .all()
+      .map((r) => r.userId);
+  }
+
+  const created = applyAutoAssign({
+    roundId,
+    eventId: event.id,
+    mode,
+    count,
+    trackId,
+    reviewerUserIds: reviewerIds,
+    createdAt: nowIso(),
+  });
+
+  revalidateEvaluation(slug, planId);
+  revalidatePath(`/review/plans/${planId}/rounds/${roundId}`);
+  return { created };
+}
+
+export async function sendBulkReminderAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const planId = String(formData.get("planId") || "");
+  const roundId = String(formData.get("roundId") || "");
+  const reviewerUserIds = formData.getAll("reviewerUserIds").map(String).filter(Boolean);
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+  if (!roundId) throw new Error("Round is required");
+
+  const db = getDb();
+  const round = db
+    .select()
+    .from(schema.evaluationRounds)
+    .innerJoin(
+      schema.evaluationPlans,
+      eq(schema.evaluationRounds.planId, schema.evaluationPlans.id),
+    )
+    .where(
+      and(
+        eq(schema.evaluationRounds.id, roundId),
+        eq(schema.evaluationPlans.eventId, event.id),
+        eq(schema.evaluationPlans.id, planId),
+      ),
+    )
+    .get();
+  if (!round) throw new Error("Round not found");
+
+  let targetIds = reviewerUserIds;
+  if (targetIds.length === 0) {
+    const pending = db
+      .select({ reviewerUserId: schema.evaluationAssignments.reviewerUserId })
+      .from(schema.evaluationAssignments)
+      .where(
+        and(
+          eq(schema.evaluationAssignments.roundId, roundId),
+          eq(schema.evaluationAssignments.status, "pending"),
+        ),
+      )
+      .all();
+    targetIds = [...new Set(pending.map((p) => p.reviewerUserId))];
+  }
+
+  let sent = 0;
+  for (const userId of targetIds) {
+    const user = db.select().from(schema.users).where(eq(schema.users.id, userId)).get();
+    if (!user) continue;
+
+    const outstanding = db
+      .select({ c: count() })
+      .from(schema.evaluationAssignments)
+      .where(
+        and(
+          eq(schema.evaluationAssignments.roundId, roundId),
+          eq(schema.evaluationAssignments.reviewerUserId, userId),
+          eq(schema.evaluationAssignments.status, "pending"),
+        ),
+      )
+      .get();
+    if (Number(outstanding?.c ?? 0) === 0) continue;
+
+    await sendTemplatedEmail({
+      eventId: event.id,
+      toEmail: user.email,
+      templateKey: "evaluation_reminder",
+      fields: {
+        first_name: user.firstName,
+        event_name: event.name,
+      },
+    });
+    sent++;
+  }
+
+  revalidatePath(`/admin/e/${slug}/emails`);
+  return { sent };
 }
 
 export async function saveReviewAction(formData: FormData) {

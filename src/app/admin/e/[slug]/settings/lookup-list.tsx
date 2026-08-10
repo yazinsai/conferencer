@@ -23,7 +23,7 @@ export function LookupList({
   items,
 }: {
   slug: string;
-  kind: "tracks" | "formats" | "rooms";
+  kind: "tracks" | "formats" | "rooms" | "tags" | "levels";
   title: string;
   subtitle: string;
   items: LookupItem[];

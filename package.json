@@ -14,6 +14,7 @@
     "seed:reset": "tsx src/scripts/seed-reset.ts",
     "seed:big": "tsx src/scripts/seed-big.ts",
     "setup": "npm run db:push && npm run seed",
+    "jobs:reminders": "tsx src/scripts/jobs-reminders.ts",
     "test": "vitest run"
   },
   "dependencies": {

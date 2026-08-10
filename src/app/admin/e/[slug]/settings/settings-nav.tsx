@@ -5,14 +5,20 @@ const links = [
   { href: "/tracks", label: "Tracks" },
   { href: "/formats", label: "Formats" },
   { href: "/rooms", label: "Rooms" },
+  { href: "/tags", label: "Tags" },
+  { href: "/levels", label: "Levels" },
+  { href: "/fields", label: "Fields" },
+  { href: "/records", label: "Records" },
 ] as const;
+
+export type SettingsNavActive = (typeof links)[number]["href"];
 
 export function SettingsNav({
   slug,
   active,
 }: {
   slug: string;
-  active: "" | "/tracks" | "/formats" | "/rooms";
+  active: SettingsNavActive;
 }) {
   const base = `/admin/e/${slug}/settings`;
   return (
