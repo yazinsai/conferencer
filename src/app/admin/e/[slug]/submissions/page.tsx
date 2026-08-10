@@ -3,18 +3,31 @@ import { eq } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
 import {
+  countSubmissions,
   getSubmissionParticipants,
   listSubmissions,
   submissionStatusCounts,
 } from "@/lib/db/queries";
+import { getTemplate } from "@/lib/email/send";
+import { DEFAULT_EMAIL_TEMPLATES } from "@/lib/email/templates";
+import {
+  ListPagination,
+  parsePage,
+  parsePageSize,
+} from "@/components/admin/list-pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import {
   bulkUpdateStatusAction,
   createManualSubmissionAction,
-  sendDecisionsAction,
 } from "./actions";
 import { InlineStatus } from "./inline-status";
+import {
+  BulkSelectionHiddenInputs,
+  SendDecisionsCompose,
+  SubmissionCheckbox,
+  SubmissionSelectionProvider,
+} from "./send-decisions";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -32,17 +45,41 @@ export default async function SubmissionsPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ status?: string; kind?: string; q?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    kind?: string;
+    q?: string;
+    page?: string;
+    pageSize?: string;
+    decisionsSent?: string;
+  }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
   const { event } = await requireEventRole(slug, ["organizer"]);
+  const page = parsePage(sp.page);
+  const pageSize = parsePageSize(sp.pageSize);
+  const listParams = {
+    status: sp.status,
+    kind: sp.kind,
+    q: sp.q,
+    page: String(page),
+    pageSize: String(pageSize),
+  };
   const counts = submissionStatusCounts(event.id);
+  const total = countSubmissions({
+    eventId: event.id,
+    status: sp.status,
+    kind: sp.kind,
+    q: sp.q,
+  });
   const rows = listSubmissions({
     eventId: event.id,
     status: sp.status,
     kind: sp.kind,
     q: sp.q,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
   });
   const db = getDb();
   const tracks = db
@@ -64,6 +101,19 @@ export default async function SubmissionsPage({
   const formatMap = Object.fromEntries(formats.map((f) => [f.id, f.name]));
   const formMap = Object.fromEntries(forms.map((f) => [f.id, f.name]));
 
+  const acceptedDb = await getTemplate(event.id, "decision_accepted");
+  const declinedDb = await getTemplate(event.id, "decision_declined");
+  const acceptedDefault = DEFAULT_EMAIL_TEMPLATES.find((t) => t.key === "decision_accepted")!;
+  const declinedDefault = DEFAULT_EMAIL_TEMPLATES.find((t) => t.key === "decision_declined")!;
+  const acceptedTemplate = {
+    subject: acceptedDb?.subject ?? acceptedDefault.subject,
+    bodyHtml: acceptedDb?.bodyHtml ?? acceptedDefault.bodyHtml,
+  };
+  const declinedTemplate = {
+    subject: declinedDb?.subject ?? declinedDefault.subject,
+    bodyHtml: declinedDb?.bodyHtml ?? declinedDefault.bodyHtml,
+  };
+
   const enriched = rows.map((r) => {
     const speakers = getSubmissionParticipants(r.id)
       .map((p) => `${p.firstName} ${p.lastName}`)
@@ -74,7 +124,13 @@ export default async function SubmissionsPage({
   const totalAll = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
+    <SubmissionSelectionProvider>
     <div className="space-y-6">
+      {sp.decisionsSent ? (
+        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          Sent {sp.decisionsSent} decision email{sp.decisionsSent === "1" ? "" : "s"}.
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Submissions</h1>
@@ -87,20 +143,12 @@ export default async function SubmissionsPage({
           >
             Export CSV
           </Link>
-          <form action={sendDecisionsAction} className="flex gap-2">
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="mode" value="accepted" />
-            <Button type="submit" variant="secondary">
-              Send Decisions (Accepted)
-            </Button>
-          </form>
-          <form action={sendDecisionsAction}>
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="mode" value="declined" />
-            <Button type="submit" variant="secondary">
-              Send Decisions (Declined)
-            </Button>
-          </form>
+          <SendDecisionsCompose
+            slug={slug}
+            eventName={event.name}
+            acceptedTemplate={acceptedTemplate}
+            declinedTemplate={declinedTemplate}
+          />
         </div>
       </div>
 
@@ -153,10 +201,11 @@ export default async function SubmissionsPage({
       </form>
 
       <Card>
-        <CardHeader title={`${enriched.length} results`} />
+        <CardHeader title={`${total} results`} />
         <CardBody className="overflow-x-auto p-0">
           <form action={bulkUpdateStatusAction}>
             <input type="hidden" name="slug" value={slug} />
+            <BulkSelectionHiddenInputs />
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-2">
               <select name="status" className="rounded-md border border-slate-300 px-2 py-1 text-sm">
                 {TABS.filter((t) => t.key !== "all").map((t) => (
@@ -173,6 +222,7 @@ export default async function SubmissionsPage({
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-3 py-2"> </th>
+                  <th className="px-3 py-2 w-10"> </th>
                   <th className="px-3 py-2">Status</th>
                   <th className="px-3 py-2">Title</th>
                   <th className="px-3 py-2">Speakers</th>
@@ -187,7 +237,17 @@ export default async function SubmissionsPage({
                 {enriched.map((r) => (
                   <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="px-3 py-2">
-                      <input type="checkbox" name="ids" value={r.id} />
+                      <SubmissionCheckbox id={r.id} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Link
+                        href={`/admin/e/${slug}/submissions/${r.id}`}
+                        title="Quick edit"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-blue-700"
+                        aria-label="Quick edit"
+                      >
+                        <span aria-hidden="true">✎</span>
+                      </Link>
                     </td>
                     <td className="px-3 py-2">
                       <InlineStatus
@@ -218,6 +278,13 @@ export default async function SubmissionsPage({
               </tbody>
             </table>
           </form>
+          <ListPagination
+            basePath={`/admin/e/${slug}/submissions`}
+            params={listParams}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+          />
         </CardBody>
       </Card>
 
@@ -270,5 +337,6 @@ export default async function SubmissionsPage({
         </CardBody>
       </Card>
     </div>
+    </SubmissionSelectionProvider>
   );
 }

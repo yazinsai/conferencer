@@ -76,7 +76,7 @@ async function sendSessionInvites(opts: {
       acceptanceStatus === "accepted" || speakerStatus === "confirmed";
     if (!confirmed) continue;
 
-    const ics = buildCalendarInvite({
+    const icsEvent = {
       uid: `${opts.submissionId}@${opts.event.id}@conferencer`,
       summary: opts.title,
       description: `Speaking at ${opts.event.name}`,
@@ -89,7 +89,8 @@ async function sendSessionInvites(opts: {
       attendees: [
         { email: contact.email, name: `${contact.firstName} ${contact.lastName}` },
       ],
-    });
+    };
+    const ics = buildCalendarInvite(icsEvent);
 
     const calendarLink =
       contact.calendarToken && appUrl
@@ -101,7 +102,7 @@ async function sendSessionInvites(opts: {
       `<p>Your session <strong>${opts.title}</strong> at <strong>${opts.event.name}</strong> has been scheduled.</p>` +
       `<p><strong>When:</strong> ${new Date(opts.startsAt).toLocaleString()} – ${new Date(opts.endsAt).toLocaleTimeString()}</p>` +
       (location ? `<p><strong>Where:</strong> ${location}</p>` : "") +
-      icsEmailHtml(ics) +
+      icsEmailHtml(icsEvent, ics) +
       (calendarLink
         ? `<p>You can also subscribe to your personal calendar feed: <a href="${calendarLink}">${calendarLink}</a></p>`
         : "");

@@ -25,6 +25,7 @@ export async function sendTemplatedEmail(opts: {
   templateKey: string;
   fields: MergeFields;
   subjectOverride?: string;
+  bodyOverride?: string;
   bodyAppend?: string;
 }) {
   const tpl = await getTemplate(opts.eventId, opts.templateKey);
@@ -33,7 +34,7 @@ export async function sendTemplatedEmail(opts: {
     opts.fields,
   );
   let body = applyMergeFields(
-    tpl?.bodyHtml ?? `<p>${opts.templateKey}</p>`,
+    opts.bodyOverride ?? tpl?.bodyHtml ?? `<p>${opts.templateKey}</p>`,
     opts.fields,
   );
   if (opts.bodyAppend) {

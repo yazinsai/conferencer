@@ -120,9 +120,39 @@ export function icsDownloadDataUrl(ics: string) {
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
 }
 
-export function icsEmailHtml(ics: string, label = "Download calendar invite (.ics)") {
+export function googleCalendarUrl(event: IcsEventInput): string {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: event.summary,
+    dates: `${toIcsUtc(event.startsAt)}/${toIcsUtc(event.endsAt)}`,
+    details: event.description ?? "",
+    location: event.location ?? "",
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+export function outlookCalendarUrl(event: IcsEventInput): string {
+  const params = new URLSearchParams({
+    subject: event.summary,
+    startdt: event.startsAt,
+    enddt: event.endsAt,
+    body: event.description ?? "",
+    location: event.location ?? "",
+  });
+  return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`;
+}
+
+export function icsEmailHtml(
+  event: IcsEventInput,
+  ics: string,
+  label = "Download calendar invite (.ics)",
+) {
   const href = icsDownloadDataUrl(ics);
+  const google = googleCalendarUrl(event);
+  const outlook = outlookCalendarUrl(event);
   return (
+    `<p><a href="${google}">Add to Google Calendar</a></p>` +
+    `<p><a href="${outlook}">Add to Outlook</a></p>` +
     `<p><a href="${href}" download="invite.ics">${label}</a></p>` +
     `<details><summary>Calendar data</summary><pre style="white-space:pre-wrap;font-size:12px;background:#f8fafc;padding:12px;border-radius:8px;">${escapeHtml(ics)}</pre></details>`
   );

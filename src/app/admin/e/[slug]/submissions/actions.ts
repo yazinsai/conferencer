@@ -2,6 +2,7 @@
 
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
 import { nowIso } from "@/lib/dates";
@@ -252,24 +253,48 @@ async function onAccept(
 export async function sendDecisionsAction(formData: FormData) {
   const slug = String(formData.get("slug") || "");
   const mode = String(formData.get("mode") || "accepted");
-  const note = String(formData.get("note") || "");
+  const note = String(formData.get("note") || "").trim();
+  const subjectOverride = String(formData.get("subject") || "").trim() || undefined;
+  const bodyOverride = String(formData.get("bodyHtml") || "").trim() || undefined;
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  const redirectOnSuccess = formData.get("redirectOnSuccess") === "1";
   const { event } = await requireEventRole(slug, ["organizer"]);
   const db = getDb();
-  const status = mode === "declined" ? "declined" : "accepted";
-  const templateKey = mode === "declined" ? "decision_declined" : "decision_accepted";
-  const rows = db
-    .select()
-    .from(schema.submissions)
-    .where(
-      and(
-        eq(schema.submissions.eventId, event.id),
-        eq(schema.submissions.status, status),
-      ),
-    )
-    .all();
+
+  let rows;
+  if (mode === "selected") {
+    if (!ids.length) {
+      if (redirectOnSuccess) redirect(`/admin/e/${slug}/submissions`);
+      return { sent: 0 };
+    }
+    rows = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.eventId, event.id),
+          inArray(schema.submissions.id, ids),
+        ),
+      )
+      .all();
+  } else {
+    const status = mode === "declined" ? "declined" : "accepted";
+    rows = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.eventId, event.id),
+          eq(schema.submissions.status, status),
+        ),
+      )
+      .all();
+  }
 
   let sent = 0;
   for (const sub of rows) {
+    const templateKey =
+      sub.status === "declined" ? "decision_declined" : "decision_accepted";
     const participants = db
       .select({
         contact: schema.contacts,
@@ -290,6 +315,8 @@ export async function sendDecisionsAction(formData: FormData) {
         toEmail: contact.email,
         toContactId: contact.id,
         templateKey,
+        subjectOverride,
+        bodyOverride,
         bodyAppend: note || undefined,
         fields: {
           speaker_name: `${contact.firstName} ${contact.lastName}`,
@@ -309,7 +336,10 @@ export async function sendDecisionsAction(formData: FormData) {
   }
   revalidatePath(`/admin/e/${slug}/submissions`);
   revalidatePath(`/admin/e/${slug}/emails`);
-  void sent;
+  if (redirectOnSuccess) {
+    redirect(`/admin/e/${slug}/submissions?decisionsSent=${sent}`);
+  }
+  return { sent };
 }
 
 export async function createManualSubmissionAction(formData: FormData) {
