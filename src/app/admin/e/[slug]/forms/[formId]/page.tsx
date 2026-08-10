@@ -11,6 +11,8 @@ import {
   listRoleConfigs,
   sectionOfKind,
 } from "@/lib/repo/forms";
+import { listLookup } from "@/lib/repo/events";
+import { listPlans, listRounds } from "@/lib/repo/evaluations";
 import { saveFormStepAction } from "@/server/form-actions";
 import { QuestionList } from "@/components/admin/question-list";
 import {
@@ -18,6 +20,7 @@ import {
   Card,
 
   Chip,
+  Dot,
   Field,
   Input,
   LinkButton,
@@ -72,6 +75,20 @@ export default async function FormBuilderPage({
   const combined = readJson<{ question_keys?: string[]; max?: number; label?: string } | null>(
     form.combined_limit,
     null,
+  );
+  const routing = readJson<
+    Array<{ track_id: string; round_id?: string; reviewer_user_ids?: string[] }>
+  >(form.track_routing, []);
+  const tracks = listLookup("tracks", event.id);
+  const rounds = listPlans(event.id).flatMap((plan) =>
+    listRounds(plan.id).map((round) => ({ id: round.id, name: round.name, planName: plan.name })),
+  );
+  const reviewers = all<{ id: string; first_name: string; last_name: string }>(
+    `SELECT DISTINCT u.id, u.first_name, u.last_name FROM users u
+       JOIN event_memberships m ON m.user_id = u.id
+      WHERE m.event_id = ? AND m.role IN ('reviewer','organizer')
+      ORDER BY u.last_name`,
+    event.id,
   );
 
   return (
@@ -481,6 +498,68 @@ export default async function FormBuilderPage({
                     />
                   </Field>
                 </div>
+
+                <fieldset className="rounded-md border border-slate-200 p-3">
+                  <legend className="px-1 text-sm font-medium text-slate-700">Track routing</legend>
+                  <p className="mb-2 text-xs text-slate-500">
+                    Send a submission straight into a review round the moment it arrives, based on
+                    the track the submitter picked. Leave a track&apos;s round blank to route it by
+                    hand.
+                  </p>
+                  {rounds.length ? (
+                    <div className="space-y-2">
+                      {tracks.map((track) => {
+                        const rule = routing.find((r) => r.track_id === track.id);
+                        return (
+                          <div
+                            key={track.id}
+                            className="grid items-end gap-2 rounded-md border border-slate-100 p-2 sm:grid-cols-3"
+                          >
+                            <input type="hidden" name="routing_tracks" value={track.id} />
+                            <p className="text-sm font-medium text-slate-800">
+                              <Dot color={track.color} /> {track.name}
+                            </p>
+                            <label className="block text-xs font-medium text-slate-600">
+                              Round
+                              <Select
+                                name={`routing_round_${track.id}`}
+                                defaultValue={rule?.round_id ?? ""}
+                              >
+                                <option value="">No automatic routing</option>
+                                {rounds.map((round) => (
+                                  <option key={round.id} value={round.id}>
+                                    {round.planName} · {round.name}
+                                  </option>
+                                ))}
+                              </Select>
+                            </label>
+                            <label className="block text-xs font-medium text-slate-600">
+                              Reviewers (ctrl-click for several)
+                              <select
+                                name={`routing_reviewers_${track.id}`}
+                                multiple
+                                defaultValue={rule?.reviewer_user_ids ?? []}
+                                size={Math.min(4, Math.max(2, reviewers.length))}
+                                className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                              >
+                                {reviewers.map((reviewer) => (
+                                  <option key={reviewer.id} value={reviewer.id}>
+                                    {reviewer.first_name} {reviewer.last_name}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Create an evaluation plan with at least one round first — then you can route
+                      each track to it automatically.
+                    </p>
+                  )}
+                </fieldset>
 
                 <fieldset className="rounded-md border border-slate-200 p-3">
                   <legend className="px-1 text-sm font-medium text-slate-700">
