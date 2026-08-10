@@ -60,6 +60,7 @@ Event slug: **`devflow-conf-2027`**
 | Public widgets | `/e/:slug/sessions` · `speakers` · `agenda` · `itinerary` · `gallery` |
 | Speaker CRM | `/admin/crm` |
 | API tokens | `/admin/e/:slug/settings/api` |
+| Event assistant (keyword chat) | `/admin/e/:slug/agent` |
 | OpenAPI | `/api/v1/openapi.json` |
 
 ## REST API
@@ -80,6 +81,54 @@ curl http://localhost:3000/api/v1/public/devflow-conf-2027/speakers
 
 Full catalog: `/api/v1/openapi.json` or Settings → API → Docs.
 
+## MCP server
+
+A stdio MCP server wraps the REST API for Claude Desktop, Cursor, and other MCP clients.
+
+1. Start Conferencer (`npm run dev` or production).
+2. Create an API token under **Settings → API**.
+3. Set env vars (or export inline):
+
+```bash
+export CONFERENCER_API_URL=http://localhost:3000
+export CONFERENCER_API_TOKEN=cnf_your_token_here
+npm run mcp
+```
+
+**Tools:** `list_submissions`, `get_submission`, `update_submission_status`, `list_contacts`, `list_sessions`, `list_tasks`.
+
+### Cursor / Claude Desktop config
+
+Add to `~/.cursor/mcp.json` or Claude Desktop MCP settings (adjust paths):
+
+```json
+{
+  "mcpServers": {
+    "conferencer": {
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/conferencer/src/mcp/server.ts"],
+      "env": {
+        "CONFERENCER_API_URL": "http://localhost:3000",
+        "CONFERENCER_API_TOKEN": "cnf_your_token_here"
+      }
+    }
+  }
+}
+```
+
+Use `npm run mcp` from the project root if `tsx` is on your PATH via `node_modules/.bin`.
+
+## Deploy (Docker / Cloudflare)
+
+Conferencer uses **SQLite + better-sqlite3** and runs as a Node container — not on vanilla Workers.
+
+```bash
+npm run deploy:docker    # build image
+docker compose up -d     # one-command deploy with persistent volumes
+```
+
+See [deploy/cloudflare.md](./deploy/cloudflare.md) for Cloudflare Containers, Fly, Railway, and why D1/OpenNext is out of scope.
+
 ## Scripts
 
 | Script | What it does |
@@ -89,6 +138,8 @@ Full catalog: `/api/v1/openapi.json` or Settings → API → Docs.
 | `npm run seed:reset` | Wipe DB and reseed |
 | `npm run seed:big` | +60 submissions / +40 speakers for perf demos |
 | `npm run jobs:reminders` | Draft-deadline + task reminder emails |
+| `npm run mcp` | Stdio MCP server for REST API |
+| `npm run deploy:docker` | Build Docker image `conferencer` |
 
 ## Stack
 
