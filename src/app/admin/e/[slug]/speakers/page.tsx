@@ -3,6 +3,11 @@ import Link from "next/link";
 import { and, count, eq, like, or, sql } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
+import {
+  ListPagination,
+  parsePage,
+  parsePageSize,
+} from "@/components/admin/list-pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
@@ -25,11 +30,19 @@ export default async function SpeakersPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; pageSize?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
   const { event } = await requireEventRole(slug, ["organizer"]);
+  const page = parsePage(sp.page);
+  const pageSize = parsePageSize(sp.pageSize);
+  const listParams = {
+    status: sp.status,
+    q: sp.q,
+    page: String(page),
+    pageSize: String(pageSize),
+  };
   const db = getDb();
 
   const filters = [eq(schema.eventContacts.eventId, event.id)];
@@ -49,6 +62,14 @@ export default async function SpeakersPage({
     );
   }
 
+  const totalRow = db
+    .select({ c: count() })
+    .from(schema.eventContacts)
+    .innerJoin(schema.contacts, eq(schema.eventContacts.contactId, schema.contacts.id))
+    .where(and(...filters))
+    .get();
+  const total = Number(totalRow?.c ?? 0);
+
   const speakers = db
     .select({
       contact: schema.contacts,
@@ -58,6 +79,8 @@ export default async function SpeakersPage({
     .innerJoin(schema.contacts, eq(schema.eventContacts.contactId, schema.contacts.id))
     .where(and(...filters))
     .orderBy(schema.contacts.lastName, schema.contacts.firstName)
+    .limit(pageSize)
+    .offset((page - 1) * pageSize)
     .all();
 
   const enriched = speakers.map(({ contact, eventContact }) => {
@@ -165,7 +188,7 @@ export default async function SpeakersPage({
       <SpeakersImportForm slug={slug} />
 
       <Card>
-        <CardHeader title={`${enriched.length} speakers`} />
+        <CardHeader title={`${total} speakers`} />
         <CardBody className="overflow-x-auto p-0">
           <form id="bulk-speaker-email" action={sendBulkSpeakerEmailAction}>
             <input type="hidden" name="slug" value={slug} />
@@ -270,6 +293,13 @@ export default async function SpeakersPage({
               ))}
             </tbody>
           </table>
+          <ListPagination
+            basePath={`/admin/e/${slug}/speakers`}
+            params={listParams}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+          />
         </CardBody>
       </Card>
 

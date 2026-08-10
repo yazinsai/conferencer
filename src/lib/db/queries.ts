@@ -39,15 +39,12 @@ export function submissionStatusCounts(eventId: string) {
   return map;
 }
 
-export function listSubmissions(opts: {
+function submissionFilters(opts: {
   eventId: string;
   status?: string;
   kind?: string;
   q?: string;
-  limit?: number;
-  offset?: number;
 }) {
-  const db = getDb();
   const filters = [eq(schema.submissions.eventId, opts.eventId)];
   if (opts.status && opts.status !== "all") {
     filters.push(eq(schema.submissions.status, opts.status));
@@ -63,14 +60,106 @@ export function listSubmissions(opts: {
       )!,
     );
   }
+  return filters;
+}
+
+export function countSubmissions(opts: {
+  eventId: string;
+  status?: string;
+  kind?: string;
+  q?: string;
+}) {
+  const db = getDb();
+  const row = db
+    .select({ c: count() })
+    .from(schema.submissions)
+    .where(and(...submissionFilters(opts)))
+    .get();
+  return Number(row?.c ?? 0);
+}
+
+export function listSubmissions(opts: {
+  eventId: string;
+  status?: string;
+  kind?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = getDb();
   return db
     .select()
     .from(schema.submissions)
-    .where(and(...filters))
+    .where(and(...submissionFilters(opts)))
     .orderBy(desc(schema.submissions.updatedAt))
     .limit(opts.limit ?? 50)
     .offset(opts.offset ?? 0)
     .all();
+}
+
+export type FormQuestionRow = {
+  id: string;
+  sectionId: string;
+  label: string;
+  helpText: string | null;
+  isRequired: boolean;
+  sortOrder: number;
+  field: {
+    id: string;
+    key: string;
+    type: string;
+    options: string[];
+    maxLength: number | null;
+  };
+};
+
+export function loadFormQuestions(formId: string): FormQuestionRow[] {
+  const db = getDb();
+  const questionRows = db
+    .select({
+      id: schema.formQuestions.id,
+      sectionId: schema.formQuestions.sectionId,
+      labelOverride: schema.formQuestions.labelOverride,
+      helpText: schema.formQuestions.helpText,
+      isRequired: schema.formQuestions.isRequired,
+      sortOrder: schema.formQuestions.sortOrder,
+      fieldId: schema.formQuestions.fieldId,
+      fieldKey: schema.fields.key,
+      fieldType: schema.fields.type,
+      fieldOptions: schema.fields.options,
+      fieldMaxLength: schema.fields.maxLength,
+      fieldLabel: schema.fields.label,
+    })
+    .from(schema.formQuestions)
+    .innerJoin(schema.fields, eq(schema.formQuestions.fieldId, schema.fields.id))
+    .where(eq(schema.formQuestions.formId, formId))
+    .orderBy(asc(schema.formQuestions.sortOrder))
+    .all();
+
+  return questionRows.map((q) => {
+    let options: string[] = [];
+    try {
+      const parsed = JSON.parse(q.fieldOptions ?? "[]");
+      options = Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      options = [];
+    }
+    return {
+      id: q.id,
+      sectionId: q.sectionId,
+      label: q.labelOverride ?? q.fieldLabel,
+      helpText: q.helpText,
+      isRequired: q.isRequired,
+      sortOrder: q.sortOrder,
+      field: {
+        id: q.fieldId,
+        key: q.fieldKey,
+        type: q.fieldType,
+        options,
+        maxLength: q.fieldMaxLength,
+      },
+    };
+  });
 }
 
 export function getSubmissionParticipants(submissionId: string) {

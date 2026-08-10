@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
-import { getContactForUser, getDefaultEvent } from "@/lib/db/queries";
+import { getContactForUser, getDefaultEvent, loadFormQuestions } from "@/lib/db/queries";
 import { saveUpload } from "@/lib/storage/files";
 import { id } from "@/lib/id";
 import { nowIso } from "@/lib/dates";
@@ -147,21 +147,46 @@ export async function submitFormTaskAction(formData: FormData) {
   if (!user) redirect("/sign-in?next=/portal/tasks");
 
   const assignmentId = String(formData.get("assignmentId") || "");
-  const answer = String(formData.get("answer") || "").trim();
   const { assignment, task } = await getOwnedAssignment(assignmentId, user.id);
 
   if (task.type !== "form") throw new Error("Not a form task");
   if (assignment.status === "complete" && assignment.lockOnComplete) {
     throw new Error("Task is locked");
   }
-  if (!answer) throw new Error("Please provide an answer");
+
+  let formAnswers: Record<string, string>;
+
+  if (task.formId) {
+    const questions = loadFormQuestions(task.formId);
+    if (questions.length > 0) {
+      formAnswers = {};
+      for (const q of questions) {
+        const value = String(formData.get(`q_${q.id}`) || "").trim();
+        if (q.isRequired && !value) {
+          throw new Error(`"${q.label}" is required`);
+        }
+        if (value) formAnswers[q.id] = value;
+      }
+      if (Object.keys(formAnswers).length === 0) {
+        throw new Error("Please complete the form");
+      }
+    } else {
+      const answer = String(formData.get("answer") || "").trim();
+      if (!answer) throw new Error("Please provide an answer");
+      formAnswers = { answer };
+    }
+  } else {
+    const answer = String(formData.get("answer") || "").trim();
+    if (!answer) throw new Error("Please provide an answer");
+    formAnswers = { answer };
+  }
 
   const db = getDb();
   db.update(schema.taskAssignments)
     .set({
       status: "complete",
       completedAt: nowIso(),
-      formAnswers: JSON.stringify({ answer }),
+      formAnswers: JSON.stringify(formAnswers),
     })
     .where(eq(schema.taskAssignments.id, assignmentId))
     .run();

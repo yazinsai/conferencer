@@ -2,16 +2,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { Input, Label, Select, Textarea } from "@/components/ui/input";
-import { createTaskAction } from "./actions";
-
-const TASK_TYPES = [
-  { value: "action", label: "Action (mark complete)" },
-  { value: "file_request", label: "File request" },
-  { value: "form", label: "Form (free text)" },
-] as const;
+import { CreateTaskForm } from "./create-task-form";
 
 export default async function AdminTasksPage({
   params,
@@ -56,6 +48,13 @@ export default async function AdminTasksPage({
 
   const confirmedCount = speakers.filter((s) => s.speakerStatus === "confirmed").length;
 
+  const submissionForms = db
+    .select({ id: schema.submissionForms.id, name: schema.submissionForms.name })
+    .from(schema.submissionForms)
+    .where(eq(schema.submissionForms.eventId, event.id))
+    .orderBy(schema.submissionForms.name)
+    .all();
+
   return (
     <div className="space-y-6">
       <div>
@@ -97,94 +96,12 @@ export default async function AdminTasksPage({
       <Card>
         <CardHeader title="Create task" />
         <CardBody>
-          <form action={createTaskAction} className="space-y-4">
-            <input type="hidden" name="slug" value={slug} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
-              </div>
-              <div>
-                <Label htmlFor="type">Type</Label>
-                <Select id="type" name="type" defaultValue="action">
-                  {TASK_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" rows={2} />
-              </div>
-              <div>
-                <Label htmlFor="linkUrl">Link URL (action tasks)</Label>
-                <Input id="linkUrl" name="linkUrl" type="url" placeholder="https://…" />
-              </div>
-              <div>
-                <Label htmlFor="dueAt">Due date</Label>
-                <Input id="dueAt" name="dueAt" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="acceptedTypes">Accepted file types</Label>
-                <Input
-                  id="acceptedTypes"
-                  name="acceptedTypes"
-                  defaultValue="application/pdf,image/png,image/jpeg"
-                />
-              </div>
-              <div>
-                <Label htmlFor="maxSizeMb">Max file size (MB)</Label>
-                <Input
-                  id="maxSizeMb"
-                  name="maxSizeMb"
-                  type="number"
-                  min={1}
-                  max={100}
-                  defaultValue={20}
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-slate-100 pt-4">
-              <Label>Assign to</Label>
-              <div className="mt-2 space-y-2">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="assignMode"
-                    value="all_confirmed"
-                    defaultChecked
-                  />
-                  All confirmed speakers ({confirmedCount})
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="assignMode" value="selected" />
-                  Selected speakers
-                </label>
-              </div>
-              <div className="mt-3 max-h-48 overflow-y-auto rounded-md border border-slate-200 p-3">
-                {speakers.map((s) => (
-                  <label
-                    key={s.contactId}
-                    className="flex items-center gap-2 py-1 text-sm"
-                  >
-                    <input type="checkbox" name="contactIds" value={s.contactId} />
-                    {s.firstName} {s.lastName}
-                    <span className="text-slate-400">({s.speakerStatus})</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="isRequired" defaultChecked />
-              Required task
-            </label>
-
-            <Button type="submit">Create task</Button>
-          </form>
+          <CreateTaskForm
+            slug={slug}
+            speakers={speakers}
+            confirmedCount={confirmedCount}
+            submissionForms={submissionForms}
+          />
         </CardBody>
       </Card>
     </div>

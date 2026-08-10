@@ -32,6 +32,8 @@ export async function createTaskAction(formData: FormData) {
   const dueAt = String(formData.get("dueAt") || "").trim();
   const assignMode = String(formData.get("assignMode") || "selected");
   const isRequired = formData.get("isRequired") === "on";
+  const formIdRaw = String(formData.get("formId") || "").trim();
+  const formId = type === "form" && formIdRaw ? formIdRaw : null;
 
   if (!name) throw new Error("Task name is required");
 
@@ -47,6 +49,7 @@ export async function createTaskAction(formData: FormData) {
       type,
       target: "contact",
       linkUrl: linkUrl || null,
+      formId,
       acceptedTypes: type === "file_request" ? acceptedTypes : null,
       maxSizeMb: type === "file_request" ? maxSizeMb : 20,
       createdAt,

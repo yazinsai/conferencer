@@ -2,7 +2,12 @@ import { and, asc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
-import { getContactForUser, getDefaultEvent } from "@/lib/db/queries";
+import {
+  getContactForUser,
+  getDefaultEvent,
+  loadFormQuestions,
+  type FormQuestionRow,
+} from "@/lib/db/queries";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -12,6 +17,7 @@ import {
   submitFormTaskAction,
   uploadFileTaskAction,
 } from "./actions";
+import { FormTaskAnswers, FormTaskFields } from "./form-task-fields";
 
 function effectiveDue(assignment: {
   dueAt: string | null;
@@ -87,6 +93,13 @@ export default async function PortalTasksPage() {
     (i) => i.assignment.status !== "complete" && i.assignment.status !== "approved",
   );
 
+  const formQuestionsByFormId = new Map<string, FormQuestionRow[]>();
+  for (const { task } of items) {
+    if (task.type === "form" && task.formId && !formQuestionsByFormId.has(task.formId)) {
+      formQuestionsByFormId.set(task.formId, loadFormQuestions(task.formId));
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -105,10 +118,10 @@ export default async function PortalTasksPage() {
       ) : (
         <>
           {pending.length > 0 ? (
-            <TaskGroup title="Outstanding" items={pending} />
+            <TaskGroup title="Outstanding" items={pending} formQuestionsByFormId={formQuestionsByFormId} />
           ) : null}
           {complete.length > 0 ? (
-            <TaskGroup title="Completed" items={complete} />
+            <TaskGroup title="Completed" items={complete} formQuestionsByFormId={formQuestionsByFormId} />
           ) : null}
         </>
       )}
@@ -119,12 +132,14 @@ export default async function PortalTasksPage() {
 function TaskGroup({
   title,
   items,
+  formQuestionsByFormId,
 }: {
   title: string;
   items: Array<{
     assignment: typeof schema.taskAssignments.$inferSelect;
     task: typeof schema.tasks.$inferSelect;
   }>;
+  formQuestionsByFormId: Map<string, FormQuestionRow[]>;
 }) {
   return (
     <Card>
@@ -135,10 +150,24 @@ function TaskGroup({
           const overdue = isOverdue(assignment);
           const locked =
             assignment.status === "complete" && assignment.lockOnComplete;
-          const formAnswer =
-            task.type === "form" && assignment.formAnswers
-              ? (JSON.parse(assignment.formAnswers) as { answer?: string })
-              : null;
+          const formQuestions =
+            task.type === "form" && task.formId
+              ? formQuestionsByFormId.get(task.formId) ?? []
+              : [];
+          let formAnswers: Record<string, string> | null = null;
+          if (task.type === "form" && assignment.formAnswers) {
+            try {
+              const parsed = JSON.parse(assignment.formAnswers) as Record<
+                string,
+                unknown
+              >;
+              formAnswers = Object.fromEntries(
+                Object.entries(parsed).map(([k, v]) => [k, String(v ?? "")]),
+              );
+            } catch {
+              formAnswers = null;
+            }
+          }
 
           return (
             <div
@@ -231,29 +260,40 @@ function TaskGroup({
                   assignment.status !== "approved" ? (
                     <form action={submitFormTaskAction} className="space-y-3">
                       <input type="hidden" name="assignmentId" value={assignment.id} />
-                      <div>
-                        <Label htmlFor={`answer-${assignment.id}`}>Your response</Label>
-                        <Textarea
-                          id={`answer-${assignment.id}`}
-                          name="answer"
-                          rows={4}
-                          required
-                          placeholder="Enter your answer…"
+                      {task.formId && formQuestions.length > 0 ? (
+                        <FormTaskFields
+                          assignmentId={assignment.id}
+                          questions={formQuestions}
                         />
-                      </div>
+                      ) : (
+                        <div>
+                          <Label htmlFor={`answer-${assignment.id}`}>Your response</Label>
+                          <Textarea
+                            id={`answer-${assignment.id}`}
+                            name="answer"
+                            rows={4}
+                            required
+                            placeholder="Enter your answer…"
+                          />
+                        </div>
+                      )}
                       <Button type="submit">Submit</Button>
                     </form>
                   ) : null}
                 </div>
               ) : null}
 
-              {formAnswer?.answer ? (
-                <div className="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
-                  <div className="text-xs font-medium uppercase text-slate-500">
-                    Your response
+              {formAnswers && Object.keys(formAnswers).length > 0 ? (
+                task.formId && formQuestions.length > 0 ? (
+                  <FormTaskAnswers questions={formQuestions} answers={formAnswers} />
+                ) : formAnswers.answer ? (
+                  <div className="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
+                    <div className="text-xs font-medium uppercase text-slate-500">
+                      Your response
+                    </div>
+                    <p className="mt-1 whitespace-pre-wrap">{formAnswers.answer}</p>
                   </div>
-                  <p className="mt-1 whitespace-pre-wrap">{formAnswer.answer}</p>
-                </div>
+                ) : null
               ) : null}
             </div>
           );
