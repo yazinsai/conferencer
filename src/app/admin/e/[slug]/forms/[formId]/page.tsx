@@ -83,8 +83,8 @@ export default async function FormBuilderPage({
   const rounds = listPlans(event.id).flatMap((plan) =>
     listRounds(plan.id).map((round) => ({ id: round.id, name: round.name, planName: plan.name })),
   );
-  const reviewers = all<{ id: string; first_name: string; last_name: string }>(
-    `SELECT DISTINCT u.id, u.first_name, u.last_name FROM users u
+  const reviewers = all<{ id: string; first_name: string; last_name: string; email: string }>(
+    `SELECT DISTINCT u.id, u.first_name, u.last_name, u.email FROM users u
        JOIN event_memberships m ON m.user_id = u.id
       WHERE m.event_id = ? AND m.role IN ('reviewer','organizer')
       ORDER BY u.last_name`,
@@ -544,7 +544,7 @@ export default async function FormBuilderPage({
                               >
                                 {reviewers.map((reviewer) => (
                                   <option key={reviewer.id} value={reviewer.id}>
-                                    {reviewer.first_name} {reviewer.last_name}
+                                    {reviewer.first_name} {reviewer.last_name} · {reviewer.email}
                                   </option>
                                 ))}
                               </select>
