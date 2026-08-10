@@ -470,8 +470,12 @@ async function routeByTrack(
   if (!submission?.track_id) return;
   const rule = routing.find((r) => r.track_id === submission.track_id);
   if (!rule?.round_id) return;
-  const { assign } = await import("@/lib/repo/evaluations");
-  for (const reviewerId of rule.reviewer_user_ids ?? []) {
+  const { assign, listRoundReviewers } = await import("@/lib/repo/evaluations");
+  // Named reviewers win; otherwise the whole pool for that round picks it up.
+  const reviewers = rule.reviewer_user_ids?.length
+    ? rule.reviewer_user_ids
+    : listRoundReviewers(rule.round_id).map((reviewer) => reviewer.user_id);
+  for (const reviewerId of reviewers) {
     assign(rule.round_id, submissionId, reviewerId);
   }
   void eventId;

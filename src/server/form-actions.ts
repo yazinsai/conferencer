@@ -173,8 +173,22 @@ export async function saveFormStepAction(formData: FormData) {
     patch.confirmation_email_subject = text("confirmation_email_subject");
     patch.confirmation_email_body = text("confirmation_email_body");
   }
-  if (formData.has("track_routing")) {
-    patch.track_routing = String(formData.get("track_routing"));
+  if (formData.has("routing_tracks")) {
+    // Track routing (R-FORM-7): the selected track decides which round and
+    // reviewers a submission is assigned to the moment it arrives.
+    const rules = formData
+      .getAll("routing_tracks")
+      .map(String)
+      .map((trackId) => ({
+        track_id: trackId,
+        round_id: String(formData.get(`routing_round_${trackId}`) ?? "") || undefined,
+        reviewer_user_ids: formData
+          .getAll(`routing_reviewers_${trackId}`)
+          .map(String)
+          .filter(Boolean),
+      }))
+      .filter((rule) => rule.round_id);
+    patch.track_routing = JSON.stringify(rules);
   }
 
   const clean = Object.fromEntries(
