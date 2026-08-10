@@ -627,6 +627,21 @@ CREATE TABLE IF NOT EXISTS api_tokens (
 );
 CREATE INDEX IF NOT EXISTS idx_api_tokens_event ON api_tokens(event_id);
 
+-- ---------------------------------------------------------------- webhooks --
+
+CREATE TABLE IF NOT EXISTS webhooks (
+  id           TEXT PRIMARY KEY,
+  event_id     TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  url          TEXT NOT NULL,
+  secret       TEXT NOT NULL,
+  events       TEXT NOT NULL DEFAULT '[]',   -- json array of event names
+  is_active    INTEGER NOT NULL DEFAULT 1,
+  last_status  TEXT,
+  last_sent_at TEXT,
+  created_at   TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_webhooks_event ON webhooks(event_id);
+
 -- --------------------------------------------------------------------- crm --
 
 CREATE TABLE IF NOT EXISTS pipeline_entries (

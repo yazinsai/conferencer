@@ -83,6 +83,11 @@ export default async function SettingsPage({ params }: PageProps<"/admin/e/[slug
           label: "Airtable sync",
           hint: "Optional mirror of submissions and speakers",
         },
+        {
+          href: `${base}/webhooks`,
+          label: "Webhooks",
+          hint: "Push submission, task and schedule events to your systems",
+        },
         { href: `/admin/e/${slug}/portals`, label: "Portals", hint: "Speaker portal configuration" },
         { href: `/admin/e/${slug}/team`, label: "Event team", hint: "Organizers and reviewers" },
       ],

@@ -100,6 +100,14 @@ export async function completeTaskAction(formData: FormData) {
   }
   const status = String(formData.get("status") ?? "complete");
   setAssignmentStatus(assignmentId, status);
+  if (status === "complete") {
+    const { emitWebhook } = await import("@/lib/webhooks");
+    await emitWebhook(event.id, "task.completed", {
+      assignment_id: assignmentId,
+      task: assignment.task_name,
+      contact: contact.email,
+    });
+  }
   logAudit({
     eventId: event.id,
     entityType: "task_assignment",

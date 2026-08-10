@@ -109,6 +109,15 @@ export async function scheduleAction(formData: FormData) {
     after: { starts_at: startsAt, location_id: roomId },
   });
 
+  const { emitWebhook } = await import("@/lib/webhooks");
+  await emitWebhook(event.id, "session.scheduled", {
+    id: submissionId,
+    title: submission.title,
+    starts_at: startsAt,
+    ends_at: endsAt,
+    room_id: roomId,
+  });
+
   revalidatePath(`/admin/e/${slug}`, "layout");
   redirect(`/admin/e/${slug}/agenda?view=${view}&day=${date}&moved=1`);
 }

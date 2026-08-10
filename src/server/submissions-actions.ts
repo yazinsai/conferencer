@@ -20,6 +20,7 @@ import {
 } from "@/lib/repo/submissions";
 import { ensureEventContact, splitName, upsertContact } from "@/lib/repo/contacts";
 import { onSubmissionAccepted, onSubmissionDeclined } from "@/lib/services/decisions";
+import { emitWebhook } from "@/lib/webhooks";
 
 function ids(formData: FormData): string[] {
   return formData.getAll("ids").map(String).filter(Boolean);
@@ -57,6 +58,12 @@ export async function setStatusAction(formData: FormData) {
     const updated = getSubmission(submissionId)!;
     if (status === "accepted") onSubmissionAccepted(event, updated, { id: user.id, name: fullName(user) });
     if (status === "declined") onSubmissionDeclined(event, updated, { id: user.id, name: fullName(user) });
+    await emitWebhook(event.id, "submission.status_changed", {
+      id: submissionId,
+      title: updated.title,
+      from: before,
+      to: status,
+    });
   }
   revalidatePath(`/admin/e/${slug}`, "layout");
   revalidatePath("/portal", "layout");
