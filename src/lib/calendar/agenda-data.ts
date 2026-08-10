@@ -15,6 +15,7 @@ export type AgendaSubmission = {
   locationId: string | null;
   trackName: string | null;
   formatName: string | null;
+  formatDurationMinutes: number | null;
   roomName: string | null;
   participantContactIds: string[];
   participantNames: string[];
@@ -32,6 +33,7 @@ export function loadAgendaSubmissions(eventId: string): AgendaSubmission[] {
       locationId: schema.submissions.locationId,
       trackName: schema.tracks.name,
       formatName: schema.formats.name,
+      formatDurationMinutes: schema.formats.durationMinutes,
       roomName: schema.rooms.name,
     })
     .from(schema.submissions)

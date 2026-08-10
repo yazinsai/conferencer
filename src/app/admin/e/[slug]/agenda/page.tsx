@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { AgendaScheduleHost } from "./agenda-schedule-host";
+import { AutoScheduleDraft } from "./auto-schedule-draft";
 import { publishAgendaAction } from "./actions";
 
 const VIEWS = ["list", "day", "rooms", "conflicts"] as const;
@@ -192,6 +193,12 @@ export default async function AgendaPage({
           subtitle={`${unscheduled.length} accepted session${unscheduled.length === 1 ? "" : "s"} without a time slot`}
         />
         <CardBody>
+          <AutoScheduleDraft
+            slug={slug}
+            view={view}
+            day={day}
+            unscheduledCount={unscheduled.length}
+          />
           {unscheduled.length === 0 ? (
             <p className="text-sm text-slate-500">All accepted sessions are scheduled.</p>
           ) : (

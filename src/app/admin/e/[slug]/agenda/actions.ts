@@ -1,12 +1,14 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEventRole } from "@/lib/auth/guards";
 import {
   checkRoomConflictForCandidate,
   loadAgendaSubmissions,
+  loadScheduledSubmissions,
+  loadUnscheduledSubmissions,
   speakerConflictsForCandidate,
 } from "@/lib/calendar/agenda-data";
 import { combineDateAndTime } from "@/lib/calendar/agenda-dates";
@@ -19,6 +21,10 @@ import { getDb, schema } from "@/lib/db";
 import type { TimedSession } from "@/lib/domain/conflicts";
 import { sendEmail } from "@/lib/email/send";
 import { id } from "@/lib/id";
+import {
+  computeAutoScheduleDraft,
+  type DraftPlacement,
+} from "@/lib/calendar/auto-schedule";
 
 function revalidateAgenda(slug: string) {
   revalidatePath(`/admin/e/${slug}/agenda`);
@@ -340,4 +346,173 @@ export async function publishAgendaAction(formData: FormData) {
       scheduled: String(scheduledCount),
     }),
   );
+}
+
+export type AutoScheduleDraftResult = {
+  placements: DraftPlacement[];
+  unplaced: Array<{ submissionId: string; title: string; reason: string }>;
+  speakerWarnings: number;
+};
+
+export async function autoScheduleAssistAction(
+  formData: FormData,
+): Promise<AutoScheduleDraftResult> {
+  const slug = String(formData.get("slug") || "");
+  const { event } = await requireEventRole(slug, ["organizer"]);
+  const db = getDb();
+
+  const rooms = db
+    .select()
+    .from(schema.rooms)
+    .where(eq(schema.rooms.eventId, event.id))
+    .orderBy(asc(schema.rooms.sortOrder))
+    .all();
+
+  const unscheduled = loadUnscheduledSubmissions(event.id);
+  const scheduled = loadScheduledSubmissions(event.id);
+
+  return computeAutoScheduleDraft({
+    eventStartsAt: event.startsAt,
+    eventEndsAt: event.endsAt,
+    rooms: rooms.map((r) => ({ id: r.id, name: r.name })),
+    scheduled: scheduled.map((s) => ({
+      id: s.id,
+      title: s.title,
+      startsAt: s.startsAt,
+      endsAt: s.endsAt,
+      locationId: s.locationId,
+      participantContactIds: s.participantContactIds,
+    })),
+    unscheduled: unscheduled.map((s) => ({
+      id: s.id,
+      title: s.title,
+      participantContactIds: s.participantContactIds,
+      durationMinutes: s.formatDurationMinutes ?? 30,
+    })),
+  });
+}
+
+export async function commitAutoScheduleDraftAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const view = String(formData.get("view") || "list");
+  const day = String(formData.get("day") || "");
+  const raw = String(formData.get("placements") || "[]");
+
+  const { event } = await requireEventRole(slug, ["organizer"]);
+  const db = getDb();
+
+  let placements: DraftPlacement[];
+  try {
+    placements = JSON.parse(raw) as DraftPlacement[];
+    if (!Array.isArray(placements)) throw new Error("invalid");
+  } catch {
+    redirect(
+      agendaUrl(slug, {
+        view,
+        ...(day ? { day } : {}),
+        error: "invalid_draft",
+      }),
+    );
+  }
+
+  let speakerWarnCount = 0;
+  const committed: string[] = [];
+
+  for (const p of placements) {
+    const submission = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.id, p.submissionId),
+          eq(schema.submissions.eventId, event.id),
+          eq(schema.submissions.status, "accepted"),
+        ),
+      )
+      .get();
+    if (!submission) continue;
+
+    const candidate: TimedSession = {
+      id: p.submissionId,
+      title: submission.title,
+      startsAt: p.startsAt,
+      endsAt: p.endsAt,
+      locationId: p.locationId,
+      participantContactIds:
+        loadAgendaSubmissions(event.id).find((s) => s.id === p.submissionId)
+          ?.participantContactIds ?? [],
+    };
+
+    if (checkRoomConflictForCandidate(event.id, candidate)) {
+      redirect(
+        agendaUrl(slug, {
+          view,
+          ...(day ? { day } : {}),
+          error: "room_conflict",
+        }),
+      );
+    }
+
+    const speakerWarnings = speakerConflictsForCandidate(event.id, candidate);
+    if (speakerWarnings.length) speakerWarnCount++;
+
+    db.update(schema.submissions)
+      .set({
+        startsAt: p.startsAt,
+        endsAt: p.endsAt,
+        locationId: p.locationId,
+        updatedAt: nowIso(),
+      })
+      .where(eq(schema.submissions.id, p.submissionId))
+      .run();
+
+    const room = db
+      .select()
+      .from(schema.rooms)
+      .where(eq(schema.rooms.id, p.locationId))
+      .get();
+
+    await sendSessionInvites({
+      event,
+      submissionId: p.submissionId,
+      title: submission.title,
+      startsAt: p.startsAt,
+      endsAt: p.endsAt,
+      roomName: room?.name ?? p.roomName ?? null,
+    });
+
+    db.insert(schema.auditEntries)
+      .values({
+        id: id("aud"),
+        eventId: event.id,
+        entityType: "submission",
+        entityId: p.submissionId,
+        action: "schedule",
+        before: JSON.stringify({
+          startsAt: submission.startsAt,
+          endsAt: submission.endsAt,
+          locationId: submission.locationId,
+        }),
+        after: JSON.stringify({
+          startsAt: p.startsAt,
+          endsAt: p.endsAt,
+          locationId: p.locationId,
+          source: "auto_schedule_assist",
+        }),
+        createdAt: nowIso(),
+      })
+      .run();
+
+    committed.push(p.submissionId);
+  }
+
+  revalidateAgenda(slug);
+
+  const params: Record<string, string> = {
+    view,
+    scheduled: String(committed.length),
+  };
+  if (day) params.day = day;
+  if (speakerWarnCount) params.warn = "speaker_conflict";
+  redirect(agendaUrl(slug, params));
 }
