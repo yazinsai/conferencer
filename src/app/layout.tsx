@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,10 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // No web-font fetch on purpose: `next build` has to succeed inside a Docker
+  // build with no network. The system stack is defined in globals.css.
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+    <html lang="en" className="h-full font-sans antialiased">
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         {children}
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

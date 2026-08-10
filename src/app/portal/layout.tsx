@@ -19,7 +19,7 @@ export default async function PortalLayout({ children }: LayoutProps<"/portal">)
   const accent = portal?.accent_color ?? event.accent_color;
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ ["--accent" as string]: accent }}>
+    <div className="flex min-h-screen flex-col" style={{ ["--event-accent" as string]: accent }}>
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-5xl px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
