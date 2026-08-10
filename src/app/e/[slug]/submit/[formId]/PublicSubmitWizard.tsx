@@ -13,6 +13,7 @@ import {
   Textarea,
 } from "@/components/ui/input";
 import {
+  saveDraftAction,
   submitCfpAction,
   wizardSignInAction,
   wizardSignUpAction,
@@ -63,6 +64,7 @@ type Props = {
     showWelcome: boolean;
     closesAt: string | null;
     submissionLimit: number | null;
+    allowDrafts: boolean;
     successMessage: string | null;
     autoRedirectToPortal: boolean;
     redirectSeconds: number;
@@ -75,6 +77,13 @@ type Props = {
   };
   initialUser: WizardUser | null;
   userSubmissionCount: number;
+  initialDraft?: {
+    id: string;
+    answers: Record<string, unknown>;
+    speakers: Array<Record<string, unknown>>;
+    isDraft: boolean;
+  } | null;
+  readOnly?: boolean;
 };
 
 // Submission before Account so track/format/conditionals work logged-out (R-EVAL-2).
@@ -146,6 +155,8 @@ export function PublicSubmitWizard({
   roleConfig,
   initialUser,
   userSubmissionCount,
+  initialDraft = null,
+  readOnly = false,
 }: Props) {
   const submissionSection = sections.find((s) => s.kind === "submission");
   const participantSection = sections.find((s) => s.kind === "participant");
@@ -166,10 +177,22 @@ export function PublicSubmitWizard({
     [questions, participantSection?.id],
   );
 
-  const [step, setStep] = useState<Step>("welcome");
+  const [step, setStep] = useState<Step>(initialDraft ? "submission" : "welcome");
   const [user, setUser] = useState<WizardUser | null>(initialUser);
-  const [submissionAnswers, setSubmissionAnswers] = useState<Record<string, unknown>>({});
-  const [speakers, setSpeakers] = useState<Array<Record<string, unknown>>>([{}]);
+  const [submissionId, setSubmissionId] = useState<string | null>(initialDraft?.id ?? null);
+  const [isDraft, setIsDraft] = useState(Boolean(initialDraft?.isDraft));
+  const [draftBanner, setDraftBanner] = useState<string | null>(
+    initialDraft?.isDraft ? "Resumed draft — your previous answers are loaded." : null,
+  );
+  const [submissionAnswers, setSubmissionAnswers] = useState<Record<string, unknown>>(
+    () => initialDraft?.answers ?? {},
+  );
+  const [speakers, setSpeakers] = useState<Array<Record<string, unknown>>>(
+    () =>
+      initialDraft?.speakers?.length
+        ? initialDraft.speakers
+        : [{}],
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [accountMode, setAccountMode] = useState<"signup" | "signin">("signup");
   const [accountForm, setAccountForm] = useState({
@@ -178,6 +201,7 @@ export function PublicSubmitWizard({
     firstName: "",
     lastName: "",
   });
+  const [draftLoading, setDraftLoading] = useState(false);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountLoading, setAccountLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -334,13 +358,47 @@ export function PublicSubmitWizard({
     }
   }
 
+  async function handleSaveDraft() {
+    if (readOnly) return;
+    if (!user) {
+      setDraftBanner("Sign in on the Account step to save a draft.");
+      setStep("account");
+      return;
+    }
+    setDraftLoading(true);
+    setDraftBanner(null);
+    try {
+      const result = await saveDraftAction({
+        eventSlug,
+        formId: form.id,
+        submissionId,
+        submissionAnswers,
+        speakers,
+      });
+      if (!result.ok) {
+        setDraftBanner(result.error);
+        return;
+      }
+      setSubmissionId(result.submissionId);
+      setIsDraft(true);
+      setDraftBanner("Draft saved. You can leave and resume later from the portal.");
+    } finally {
+      setDraftLoading(false);
+    }
+  }
+
   async function handleFinalSubmit() {
+    if (readOnly) {
+      setSubmitError("This form is closed. Submissions are read-only.");
+      return;
+    }
     setSubmitError(null);
     setSubmitLoading(true);
     try {
       const result = await submitCfpAction({
         eventSlug,
         formId: form.id,
+        submissionId,
         submissionAnswers,
         speakers,
       });
@@ -348,6 +406,7 @@ export function PublicSubmitWizard({
         setSubmitError(result.error);
         return;
       }
+      setIsDraft(false);
       setSuccess({
         message: result.successMessage,
         autoRedirect: result.autoRedirectToPortal,
@@ -476,6 +535,16 @@ export function PublicSubmitWizard({
           <p className="text-sm text-slate-500">
             Submission limit: {form.submissionLimit} per person
             {user ? ` (${userSubmissionCount} used)` : ""}
+          </p>
+        ) : null}
+        {isDraft || draftBanner ? (
+          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {draftBanner ?? "Draft"}
+          </p>
+        ) : null}
+        {readOnly ? (
+          <p className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            This form is closed. Your submission is read-only.
           </p>
         ) : null}
       </div>
@@ -763,7 +832,7 @@ export function PublicSubmitWizard({
           </>
         ) : null}
 
-        <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
+        <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-5 py-4">
           <Button
             type="button"
             variant="secondary"
@@ -772,11 +841,22 @@ export function PublicSubmitWizard({
           >
             Back
           </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {form.allowDrafts && !readOnly && (step === "submission" || step === "participant" || step === "review") ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSaveDraft}
+                disabled={draftLoading}
+              >
+                {draftLoading ? "Saving…" : "Save as draft"}
+              </Button>
+            ) : null}
           {step === "review" ? (
             <Button
               type="button"
               onClick={handleFinalSubmit}
-              disabled={submitLoading}
+              disabled={submitLoading || readOnly}
               style={{ backgroundColor: accentColor }}
               className="hover:opacity-90"
             >
@@ -793,6 +873,7 @@ export function PublicSubmitWizard({
               Continue
             </Button>
           )}
+          </div>
         </div>
       </Card>
     </div>

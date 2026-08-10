@@ -52,10 +52,13 @@ async function countUserSubmissions(
 
 export default async function PublicSubmitPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string; formId: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   const { slug, formId } = await params;
+  const sp = await searchParams;
   const event = await getEventBySlug(slug);
   if (!event) notFound();
 
@@ -75,7 +78,31 @@ export default async function PublicSubmitPage({
   const closed = isFormClosed(form);
   const sessionUser = await getSessionUser();
 
-  if (closed) {
+  // Editing an existing submission while closed → read-only wizard if owner
+  let editSubmission: typeof schema.submissions.$inferSelect | null = null;
+  if (sp.edit && sessionUser) {
+    const contact = db
+      .select()
+      .from(schema.contacts)
+      .where(eq(schema.contacts.userId, sessionUser.id))
+      .get();
+    if (contact) {
+      editSubmission =
+        db
+          .select()
+          .from(schema.submissions)
+          .where(
+            and(
+              eq(schema.submissions.id, sp.edit),
+              eq(schema.submissions.formId, formId),
+              eq(schema.submissions.submitterContactId, contact.id),
+            ),
+          )
+          .get() ?? null;
+    }
+  }
+
+  if (closed && !editSubmission) {
     return (
       <Card>
         <CardHeader
@@ -172,6 +199,70 @@ export default async function PublicSubmitPage({
     ? await countUserSubmissions(event.id, form.id, sessionUser.id)
     : 0;
 
+  let initialDraft: {
+    id: string;
+    answers: Record<string, unknown>;
+    speakers: Array<Record<string, unknown>>;
+    isDraft: boolean;
+  } | null = null;
+
+  if (editSubmission) {
+    let parsed: Record<string, unknown> = {};
+    try {
+      parsed = JSON.parse(editSubmission.answers || "{}") as Record<string, unknown>;
+    } catch {
+      parsed = {};
+    }
+    const speakers = Array.isArray(parsed.__speakers)
+      ? (parsed.__speakers as Array<Record<string, unknown>>)
+      : [{}];
+    const { __speakers: _s, ...answers } = parsed;
+    initialDraft = {
+      id: editSubmission.id,
+      answers,
+      speakers,
+      isDraft: editSubmission.isDraft || editSubmission.status === "draft",
+    };
+  } else if (sessionUser && form.allowDrafts) {
+    // Resume latest draft for this user+form if present
+    const contact = db
+      .select()
+      .from(schema.contacts)
+      .where(eq(schema.contacts.userId, sessionUser.id))
+      .get();
+    if (contact) {
+      const draft = db
+        .select()
+        .from(schema.submissions)
+        .where(
+          and(
+            eq(schema.submissions.formId, form.id),
+            eq(schema.submissions.submitterContactId, contact.id),
+            eq(schema.submissions.isDraft, true),
+          ),
+        )
+        .get();
+      if (draft) {
+        let parsed: Record<string, unknown> = {};
+        try {
+          parsed = JSON.parse(draft.answers || "{}") as Record<string, unknown>;
+        } catch {
+          parsed = {};
+        }
+        const speakers = Array.isArray(parsed.__speakers)
+          ? (parsed.__speakers as Array<Record<string, unknown>>)
+          : [{}];
+        const { __speakers: _s, ...answers } = parsed;
+        initialDraft = {
+          id: draft.id,
+          answers,
+          speakers,
+          isDraft: true,
+        };
+      }
+    }
+  }
+
   return (
     <PublicSubmitWizard
       eventSlug={slug}
@@ -185,6 +276,7 @@ export default async function PublicSubmitPage({
         showWelcome: form.showWelcome,
         closesAt: form.closesAt,
         submissionLimit: form.submissionLimit,
+        allowDrafts: form.allowDrafts,
         successMessage: form.successMessage,
         autoRedirectToPortal: form.autoRedirectToPortal,
         redirectSeconds: form.redirectSeconds,
@@ -212,6 +304,8 @@ export default async function PublicSubmitPage({
           : null
       }
       userSubmissionCount={userSubmissionCount}
+      initialDraft={initialDraft}
+      readOnly={closed && Boolean(editSubmission)}
     />
   );
 }

@@ -323,9 +323,159 @@ function findOrCreateContact(
   return contact;
 }
 
+export type DraftResult =
+  | { ok: true; submissionId: string }
+  | { ok: false; error: string };
+
+export async function saveDraftAction(input: {
+  eventSlug: string;
+  formId: string;
+  submissionId?: string | null;
+  submissionAnswers: Record<string, unknown>;
+  speakers: Array<Record<string, unknown>>;
+}): Promise<DraftResult> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sign in to save a draft." };
+
+  const event = await getEventBySlug(input.eventSlug);
+  if (!event) return { ok: false, error: "Event not found." };
+  const db = getDb();
+  const form = db
+    .select()
+    .from(schema.submissionForms)
+    .where(
+      and(
+        eq(schema.submissionForms.id, input.formId),
+        eq(schema.submissionForms.eventId, event.id),
+      ),
+    )
+    .get();
+  if (!form) return { ok: false, error: "Form not found." };
+  if (!form.allowDrafts) return { ok: false, error: "Drafts are disabled for this form." };
+  if (isFormClosed(form)) {
+    return { ok: false, error: "This form is closed. Drafts can no longer be saved." };
+  }
+
+  const questions = loadFormQuestions(form.id);
+  const titleQ = questions.find((q) => q.fieldKey === "title");
+  const titleRaw = titleQ ? input.submissionAnswers[titleQ.id] : null;
+  const title = titleRaw != null ? String(titleRaw).trim() : "";
+  if (!title) {
+    return { ok: false, error: "Enter a title to save as draft." };
+  }
+
+  const contact = findOrCreateContact(event.orgId, event.id, {
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    userId: user.id,
+  });
+
+  const stored = filterStoredAnswers(questions, input.submissionAnswers);
+  const trackName = answerByKey(input.submissionAnswers, questions, "track");
+  const formatName = answerByKey(input.submissionAnswers, questions, "format");
+  const description = answerByKey(input.submissionAnswers, questions, "description");
+  const level = answerByKey(input.submissionAnswers, questions, "level") || null;
+  const track = trackName
+    ? db
+        .select()
+        .from(schema.tracks)
+        .where(and(eq(schema.tracks.eventId, event.id), eq(schema.tracks.name, trackName)))
+        .get()
+    : null;
+  const format = formatName
+    ? db
+        .select()
+        .from(schema.formats)
+        .where(and(eq(schema.formats.eventId, event.id), eq(schema.formats.name, formatName)))
+        .get()
+    : null;
+
+  const now = nowIso();
+  let submissionId = input.submissionId ?? null;
+
+  if (submissionId) {
+    const existing = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.id, submissionId),
+          eq(schema.submissions.eventId, event.id),
+          eq(schema.submissions.submitterContactId, contact.id),
+        ),
+      )
+      .get();
+    if (!existing) return { ok: false, error: "Draft not found." };
+    if (!existing.isDraft && existing.status !== "draft") {
+      // Allow editing pending while form open (R-PUB-8) via draft save path only for drafts
+      if (isFormClosed(form)) {
+        return { ok: false, error: "Form is closed; this submission is read-only." };
+      }
+    }
+    db.update(schema.submissions)
+      .set({
+        title,
+        description: description || null,
+        trackId: track?.id ?? null,
+        formatId: format?.id ?? null,
+        level,
+        answers: JSON.stringify({
+          ...stored,
+          __speakers: input.speakers,
+        }),
+        isDraft: existing.status === "draft" || existing.isDraft,
+        status: existing.status === "pending" ? "pending" : "draft",
+        updatedAt: now,
+      })
+      .where(eq(schema.submissions.id, submissionId))
+      .run();
+  } else {
+    submissionId = id("sub");
+    db.insert(schema.submissions)
+      .values({
+        id: submissionId,
+        eventId: event.id,
+        formId: form.id,
+        kind: form.collects === "sessions" ? "session" : "abstract",
+        status: "draft",
+        title,
+        description: description || null,
+        trackId: track?.id ?? null,
+        formatId: format?.id ?? null,
+        level,
+        submitterContactId: contact.id,
+        answers: JSON.stringify({
+          ...stored,
+          __speakers: input.speakers,
+        }),
+        isDraft: true,
+        approvalStatus: "draft",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run();
+    db.insert(schema.submissionParticipants)
+      .values({
+        id: id("sp"),
+        submissionId,
+        contactId: contact.id,
+        role: "speaker",
+        acceptanceStatus: "pending",
+        sortOrder: 0,
+      })
+      .run();
+  }
+
+  revalidatePath("/portal");
+  revalidatePath(`/admin/e/${input.eventSlug}/submissions`);
+  return { ok: true, submissionId };
+}
+
 export async function submitCfpAction(input: {
   eventSlug: string;
   formId: string;
+  submissionId?: string | null;
   submissionAnswers: Record<string, unknown>;
   speakers: Array<Record<string, unknown>>;
 }): Promise<SubmitCfpResult> {
@@ -353,7 +503,7 @@ export async function submitCfpAction(input: {
     return { ok: false, error: "This form is closed and no longer accepts submissions." };
   }
 
-  if (form.submissionLimit != null) {
+  if (form.submissionLimit != null && !input.submissionId) {
     const existing = await countUserSubmissions(event.id, form.id, user.id);
     if (existing >= form.submissionLimit) {
       return {
@@ -516,34 +666,69 @@ export async function submitCfpAction(input: {
     company: answerByKey(primarySpeakerAnswers, participantQuestions, "company"),
   });
 
-  const submissionId = id("sub");
   const createdAt = nowIso();
   const kind = form.collects === "sessions" ? "session" : "abstract";
+  let submissionId = input.submissionId ?? null;
 
-  db.insert(schema.submissions)
-    .values({
-      id: submissionId,
-      eventId: event.id,
-      formId: form.id,
-      kind,
-      status: "pending",
-      title: title || "Untitled submission",
-      description: description || null,
-      trackId: track?.id ?? null,
-      formatId: format?.id ?? null,
-      level,
-      language: "English",
-      submitterContactId: submitterContact.id,
-      answers: JSON.stringify(storedSubmissionAnswers),
-      isDraft: false,
-      approvalStatus: "in_review",
-      createdAt,
-      updatedAt: createdAt,
-    })
-    .run();
+  if (submissionId) {
+    const existing = db
+      .select()
+      .from(schema.submissions)
+      .where(
+        and(
+          eq(schema.submissions.id, submissionId),
+          eq(schema.submissions.eventId, event.id),
+        ),
+      )
+      .get();
+    if (!existing || existing.submitterContactId !== submitterContact.id) {
+      return { ok: false, error: "Submission not found." };
+    }
+    db.update(schema.submissions)
+      .set({
+        status: "pending",
+        title: title || "Untitled submission",
+        description: description || null,
+        trackId: track?.id ?? null,
+        formatId: format?.id ?? null,
+        level,
+        answers: JSON.stringify(storedSubmissionAnswers),
+        isDraft: false,
+        approvalStatus:
+          existing.approvalStatus === "draft" ? "in_review" : existing.approvalStatus,
+        updatedAt: createdAt,
+      })
+      .where(eq(schema.submissions.id, submissionId))
+      .run();
+    db.delete(schema.submissionParticipants)
+      .where(eq(schema.submissionParticipants.submissionId, submissionId))
+      .run();
+  } else {
+    submissionId = id("sub");
+    db.insert(schema.submissions)
+      .values({
+        id: submissionId,
+        eventId: event.id,
+        formId: form.id,
+        kind,
+        status: "pending",
+        title: title || "Untitled submission",
+        description: description || null,
+        trackId: track?.id ?? null,
+        formatId: format?.id ?? null,
+        level,
+        language: "English",
+        submitterContactId: submitterContact.id,
+        answers: JSON.stringify(storedSubmissionAnswers),
+        isDraft: false,
+        approvalStatus: "in_review",
+        createdAt,
+        updatedAt: createdAt,
+      })
+      .run();
+  }
 
   for (let i = 0; i < input.speakers.length; i++) {
-    const speakerAnswers = filterStoredAnswers(participantQuestions, input.speakers[i]);
     const email = answerByKey(input.speakers[i], participantQuestions, "email");
     const firstName = answerByKey(input.speakers[i], participantQuestions, "first_name");
     const lastName = answerByKey(input.speakers[i], participantQuestions, "last_name");
@@ -568,8 +753,6 @@ export async function submitCfpAction(input: {
         sortOrder: i,
       })
       .run();
-
-    void speakerAnswers;
   }
 
   const speakerName = `${submitterFirst} ${submitterLast}`.trim();
