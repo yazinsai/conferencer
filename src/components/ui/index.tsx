@@ -1,36 +1,71 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-export function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
+import { Button as ShadButton, buttonVariants } from "./button";
+import { Card as ShadCard, CardAction, CardContent, CardDescription, CardTitle } from "./card";
+import { Badge } from "./badge";
+import { Input as ShadInput } from "./input";
+import { Textarea as ShadTextarea } from "./textarea";
+import { Label as ShadLabel } from "./label";
+import { Alert, AlertDescription } from "./alert";
+import { Avatar as ShadAvatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Progress as ShadProgress } from "./progress";
+import {
+  Table as ShadTable,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
+
+/**
+ * The application's design system, built on shadcn/ui primitives.
+ *
+ * Everything the app renders goes through this module, so the whole product can
+ * be restyled from one place. Two deliberate departures from stock shadcn:
+ *
+ *  1. `Select` and checkboxes stay **native elements**. Every form here posts to a
+ *     server action with progressive enhancement, and a native control submits its
+ *     value without JavaScript. It is also far more reliable for keyboard users and
+ *     for the automated agents that evaluate this product.
+ *  2. `SubNav` is a set of links, not stateful tabs, because every list view is
+ *     URL-driven and must survive a reload and a shared link.
+ */
+
+export { cn as cx };
 
 /* --------------------------------------------------------------- buttons -- */
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "success";
 type Size = "sm" | "md" | "lg";
 
-const VARIANTS: Record<Variant, string> = {
-  primary:
-    "bg-brand-600 text-white border-brand-600 hover:bg-brand-700 hover:border-brand-700",
-  secondary:
-    "bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-900",
-  ghost: "bg-transparent text-slate-600 border-transparent hover:bg-slate-100",
-  danger: "bg-white text-red-600 border-red-300 hover:bg-red-50",
-  success: "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700",
+const VARIANT_MAP: Record<Variant, Parameters<typeof buttonVariants>[0] extends infer P
+  ? P extends { variant?: infer V }
+    ? V
+    : never
+  : never> = {
+  primary: "default",
+  secondary: "outline",
+  ghost: "ghost",
+  danger: "destructive",
+  success: "default",
 };
 
-const SIZES: Record<Size, string> = {
-  sm: "text-xs px-2.5 py-1.5 gap-1",
-  md: "text-sm px-3.5 py-2 gap-1.5",
-  lg: "text-sm px-5 py-2.5 gap-2",
+const SIZE_MAP: Record<Size, "xs" | "sm" | "default" | "lg"> = {
+  sm: "sm",
+  md: "default",
+  lg: "lg",
 };
+
+// Success has no stock shadcn equivalent; it is the "accept this proposal" green.
+const SUCCESS =
+  "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600/30";
 
 export function buttonClass(variant: Variant = "secondary", size: Size = "md") {
-  return cx(
-    "inline-flex items-center justify-center rounded-md border font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap",
-    VARIANTS[variant],
-    SIZES[size],
+  return cn(
+    buttonVariants({ variant: VARIANT_MAP[variant], size: SIZE_MAP[size] }),
+    variant === "success" && SUCCESS,
   );
 }
 
@@ -40,7 +75,14 @@ export function Button({
   className,
   ...props
 }: ComponentProps<"button"> & { variant?: Variant; size?: Size }) {
-  return <button {...props} className={cx(buttonClass(variant, size), className)} />;
+  return (
+    <ShadButton
+      variant={VARIANT_MAP[variant]}
+      size={SIZE_MAP[size]}
+      className={cn(variant === "success" && SUCCESS, className)}
+      {...props}
+    />
+  );
 }
 
 export function LinkButton({
@@ -49,7 +91,7 @@ export function LinkButton({
   className,
   ...props
 }: ComponentProps<typeof Link> & { variant?: Variant; size?: Size }) {
-  return <Link {...props} className={cx(buttonClass(variant, size), className)} />;
+  return <Link {...props} className={cn(buttonClass(variant, size), className)} />;
 }
 
 /* ----------------------------------------------------------------- forms -- */
@@ -66,27 +108,49 @@ export function Label({
   hint?: ReactNode;
 }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm font-medium text-slate-700 mb-1">
-      {children}
-      {required ? <span className="text-red-600 ml-0.5">*</span> : null}
-      {hint ? <span className="block text-xs font-normal text-slate-500">{hint}</span> : null}
-    </label>
+    <ShadLabel htmlFor={htmlFor} className="mb-1 block">
+      <span className="flex flex-col gap-0.5">
+        <span>
+          {children}
+          {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+        </span>
+        {hint ? (
+          <span className="text-xs font-normal text-muted-foreground">{hint}</span>
+        ) : null}
+      </span>
+    </ShadLabel>
   );
 }
 
+/**
+ * Shared input classes, kept as a plain string because the client islands
+ * (form wizard, review scorecard, agenda board) build their own controls.
+ */
 export const inputClass =
-  "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 disabled:bg-slate-100 disabled:text-slate-500";
+  "flex h-9 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input {...props} className={cx(inputClass, className)} />;
+  return <ShadInput {...props} className={cn(className)} />;
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
-  return <textarea {...props} className={cx(inputClass, "min-h-24", className)} />;
+  return <ShadTextarea {...props} className={cn("min-h-24", className)} />;
 }
 
+/** Native select — see the note at the top of this file. */
 export function Select({ className, ...props }: ComponentProps<"select">) {
-  return <select {...props} className={cx(inputClass, "pr-8", className)} />;
+  return (
+    <select
+      data-slot="select"
+      {...props}
+      className={cn(
+        inputClass,
+        "appearance-none bg-[length:1rem] bg-[right_0.5rem_center] bg-no-repeat pr-8",
+        "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')]",
+        className,
+      )}
+    />
+  );
 }
 
 export function Field({
@@ -111,7 +175,7 @@ export function Field({
       </Label>
       {children}
       {error ? (
-        <p role="alert" className="mt-1 text-xs font-medium text-red-600">
+        <p role="alert" className="mt-1 text-xs font-medium text-destructive">
           {error}
         </p>
       ) : null}
@@ -122,34 +186,34 @@ export function Field({
 export function FormError({ children }: { children?: ReactNode }) {
   if (!children) return null;
   return (
-    <div
-      role="alert"
-      className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
-      {children}
-    </div>
+    <Alert variant="destructive" role="alert">
+      <AlertDescription>{children}</AlertDescription>
+    </Alert>
   );
 }
+
+const NOTICE_TONES = {
+  info: "border-sky-200 bg-sky-50 text-sky-900 [&>svg]:text-sky-600",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  warning: "border-amber-200 bg-amber-50 text-amber-900",
+  danger: "border-destructive/30 bg-destructive/5 text-destructive",
+} as const;
 
 export function Notice({
   tone = "info",
   children,
   className,
 }: {
-  tone?: "info" | "success" | "warning" | "danger";
+  tone?: keyof typeof NOTICE_TONES;
   children: ReactNode;
   className?: string;
 }) {
-  const tones = {
-    info: "border-sky-200 bg-sky-50 text-sky-900",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
-    danger: "border-red-200 bg-red-50 text-red-800",
-  } as const;
   return (
-    <div className={cx("rounded-md border px-3 py-2 text-sm", tones[tone], className)}>
-      {children}
-    </div>
+    <Alert className={cn(NOTICE_TONES[tone], className)}>
+      <AlertDescription className="text-current [&_p]:text-current">
+        {children}
+      </AlertDescription>
+    </Alert>
   );
 }
 
@@ -164,8 +228,17 @@ export function Card({
   className?: string;
   as?: "div" | "section" | "article" | "li";
 }) {
+  if (Tag === "div") {
+    return <ShadCard className={cn("gap-0 py-0", className)}>{children}</ShadCard>;
+  }
   return (
-    <Tag className={cx("rounded-lg border border-slate-200 bg-white shadow-sm", className)}>
+    <Tag
+      data-slot="card"
+      className={cn(
+        "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+        className,
+      )}
+    >
       {children}
     </Tag>
   );
@@ -181,17 +254,19 @@ export function CardHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 px-4 py-3">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="min-w-0">
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
         {description ? (
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+          <CardDescription className="mt-0.5 text-xs">{description}</CardDescription>
         ) : null}
       </div>
-      {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      {actions ? <CardAction className="flex items-center gap-2">{actions}</CardAction> : null}
     </div>
   );
 }
+
+export { CardContent };
 
 export function PageHeader({
   title,
@@ -207,10 +282,12 @@ export function PageHeader({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
-        {breadcrumb ? <div className="mb-1 text-xs text-slate-500">{breadcrumb}</div> : null}
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900">{title}</h1>
+        {breadcrumb ? (
+          <div className="mb-1 text-xs text-muted-foreground">{breadcrumb}</div>
+        ) : null}
+        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         {description ? (
-          <p className="mt-1 max-w-2xl text-sm text-slate-600">{description}</p>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -228,10 +305,10 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-      <p className="text-sm font-semibold text-slate-800">{title}</p>
+    <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
+      <p className="text-sm font-semibold">{title}</p>
       {description ? (
-        <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">{description}</p>
+        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
       ) : null}
       {action ? <div className="mt-4 flex justify-center gap-2">{action}</div> : null}
     </div>
@@ -239,6 +316,15 @@ export function EmptyState({
 }
 
 /* ----------------------------------------------------------------- chips -- */
+
+const CHIP_TONES = {
+  slate: "border-transparent bg-muted text-muted-foreground",
+  green: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  amber: "border-amber-200 bg-amber-50 text-amber-800",
+  red: "border-destructive/20 bg-destructive/10 text-destructive",
+  blue: "border-sky-200 bg-sky-50 text-sky-700",
+  violet: "border-violet-200 bg-violet-50 text-violet-700",
+} as const;
 
 export function Chip({
   children,
@@ -249,47 +335,30 @@ export function Chip({
 }: {
   children: ReactNode;
   color?: string | null;
-  tone?: "slate" | "green" | "amber" | "red" | "blue" | "violet";
+  tone?: keyof typeof CHIP_TONES;
   className?: string;
   title?: string;
 }) {
-  const tones = {
-    slate: "bg-slate-100 text-slate-700 ring-slate-200",
-    green: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    amber: "bg-amber-50 text-amber-800 ring-amber-200",
-    red: "bg-red-50 text-red-700 ring-red-200",
-    blue: "bg-sky-50 text-sky-700 ring-sky-200",
-    violet: "bg-violet-50 text-violet-700 ring-violet-200",
-  } as const;
   if (color) {
     return (
-      <span
+      <Badge
         title={title}
-        className={cx(
-          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1",
-          className,
-        )}
+        variant="outline"
+        className={cn("gap-1", className)}
         style={{
           backgroundColor: `${color}18`,
           color: shade(color),
-          boxShadow: `inset 0 0 0 1px ${color}44`,
+          borderColor: `${color}44`,
         }}
       >
         {children}
-      </span>
+      </Badge>
     );
   }
   return (
-    <span
-      title={title}
-      className={cx(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1",
-        tones[tone],
-        className,
-      )}
-    >
+    <Badge title={title} variant="outline" className={cn(CHIP_TONES[tone], className)}>
       {children}
-    </span>
+    </Badge>
   );
 }
 
@@ -306,7 +375,7 @@ export function Dot({ color }: { color?: string | null }) {
     <span
       aria-hidden
       className="inline-block h-2 w-2 shrink-0 rounded-full"
-      style={{ backgroundColor: color ?? "#94a3b8" }}
+      style={{ backgroundColor: color ?? "var(--muted-foreground)" }}
     />
   );
 }
@@ -315,8 +384,8 @@ export function Dot({ color }: { color?: string | null }) {
 
 export function Table({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cx("overflow-x-auto rounded-lg border border-slate-200 bg-white", className)}>
-      <table className="w-full min-w-full border-collapse text-sm">{children}</table>
+    <div className={cn("overflow-x-auto rounded-xl border border-border bg-card", className)}>
+      <ShadTable className="w-full min-w-full border-collapse text-sm">{children}</ShadTable>
     </div>
   );
 }
@@ -331,15 +400,15 @@ export function Th({
   scope?: "col" | "row";
 }) {
   return (
-    <th
+    <TableHead
       scope={scope}
-      className={cx(
-        "whitespace-nowrap border-b border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500",
+      className={cn(
+        "h-auto whitespace-nowrap border-b border-border bg-muted/50 px-3 py-2 text-left align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground",
         className,
       )}
     >
       {children}
-    </th>
+    </TableHead>
   );
 }
 
@@ -353,14 +422,16 @@ export function Td({
   colSpan?: number;
 }) {
   return (
-    <td
+    <TableCell
       colSpan={colSpan}
-      className={cx("border-b border-slate-100 px-3 py-2 align-top text-slate-700", className)}
+      className={cn("border-b border-border/60 px-3 py-2 align-top", className)}
     >
       {children}
-    </td>
+    </TableCell>
   );
 }
+
+export { TableHeader, TableRow };
 
 /* ------------------------------------------------------------------ misc -- */
 
@@ -375,36 +446,26 @@ export function Avatar({
   size?: number;
   className?: string;
 }) {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
-  if (src) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- user uploads streamed from /f/:id
-      <img
-        src={src}
-        alt={name}
-        width={size}
-        height={size}
-        style={{ width: size, height: size }}
-        className={cx("shrink-0 rounded-full object-cover ring-1 ring-slate-200", className)}
-      />
-    );
-  }
+  const initials =
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") || "?";
   return (
-    <span
-      aria-hidden
-      style={{ width: size, height: size, fontSize: Math.max(10, size * 0.36) }}
-      className={cx(
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700 ring-1 ring-brand-200",
-        className,
-      )}
+    <ShadAvatar
+      style={{ width: size, height: size }}
+      className={cn("shrink-0 ring-1 ring-border", className)}
     >
-      {initials || "?"}
-    </span>
+      {src ? <AvatarImage src={src} alt={name} /> : null}
+      <AvatarFallback
+        style={{ fontSize: Math.max(10, size * 0.36) }}
+        className="bg-primary/10 font-semibold text-primary"
+      >
+        {initials}
+      </AvatarFallback>
+    </ShadAvatar>
   );
 }
 
@@ -422,24 +483,25 @@ export function Stat({
   tone?: "brand" | "green" | "amber" | "red";
 }) {
   const tones = {
-    brand: "text-brand-700",
+    brand: "text-primary",
     green: "text-emerald-700",
     amber: "text-amber-700",
-    red: "text-red-700",
+    red: "text-destructive",
   } as const;
   const body = (
     <>
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={cx("mt-1 text-2xl font-semibold", tone ? tones[tone] : "text-slate-900")}>
+      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <div className={cn("mt-1 text-2xl font-semibold", tone ? tones[tone] : undefined)}>
         {value}
       </div>
-      {hint ? <div className="mt-0.5 text-xs text-slate-500">{hint}</div> : null}
+      {hint ? <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div> : null}
     </>
   );
-  const cls =
-    "block rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition-shadow";
+  const cls = "block rounded-xl border border-border bg-card px-4 py-3 shadow-sm transition-shadow";
   return href ? (
-    <Link href={href} className={cx(cls, "hover:border-brand-300 hover:shadow")}>
+    <Link href={href} className={cn(cls, "hover:border-primary/40 hover:shadow")}>
       {body}
     </Link>
   ) : (
@@ -449,17 +511,7 @@ export function Stat({
 
 export function Progress({ value, max = 100 }: { value: number; max?: number }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
-  return (
-    <div
-      className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
-      role="progressbar"
-      aria-valuenow={pct}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <div className="h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
-    </div>
-  );
+  return <ShadProgress value={pct} className="h-2" />;
 }
 
 export function SubNav({
@@ -470,7 +522,7 @@ export function SubNav({
   current: string;
 }) {
   return (
-    <nav className="mb-4 flex flex-wrap gap-1 border-b border-slate-200" aria-label="Views">
+    <nav className="mb-4 flex flex-wrap gap-1 border-b border-border" aria-label="Views">
       {items.map((item) => {
         const active = item.href === current;
         return (
@@ -478,19 +530,19 @@ export function SubNav({
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={cx(
-              "-mb-px border-b-2 px-3 py-2 text-sm font-medium",
+            className={cn(
+              "-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "border-brand-600 text-brand-700"
-                : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800",
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
             )}
           >
             {item.label}
             {item.count !== undefined ? (
               <span
-                className={cx(
+                className={cn(
                   "ml-1.5 rounded-full px-1.5 py-0.5 text-xs",
-                  active ? "bg-brand-100 text-brand-700" : "bg-slate-100 text-slate-600",
+                  active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
                 )}
               >
                 {item.count}

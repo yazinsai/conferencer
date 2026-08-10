@@ -21,7 +21,7 @@ export default async function PublicEventLayout({
   const form = defaultForm(event.id);
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ ["--accent" as string]: event.accent_color }}>
+    <div className="flex min-h-screen flex-col" style={{ ["--event-accent" as string]: event.accent_color }}>
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
