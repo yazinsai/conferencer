@@ -884,6 +884,53 @@ function main() {
     nowIso(),
   );
 
+  /* ----------------------------------------------------------------- crm -- */
+  const pipelineSeed: Array<{ key: string; stage: string; score: number; rationale: string }> = [
+    { key: "jonas", stage: "researching", score: 3, rationale: "Great SDK talk at another event." },
+    { key: "chen", stage: "contacted", score: 4, rationale: "Retrieval infrastructure depth we lack." },
+    { key: "keiko", stage: "in_discussion", score: 4, rationale: "Codemod migration story, strong data." },
+    { key: "dana", stage: "confirmed", score: 5, rationale: "Confirmed for the platform track." },
+    { key: "ana", stage: "declined", score: 3, rationale: "Unavailable on the event dates." },
+  ];
+  for (const entry of pipelineSeed) {
+    const contact = contacts[entry.key];
+    if (!contact) continue;
+    const entryId = id();
+    run(
+      `INSERT INTO pipeline_entries (id, org_id, contact_id, stage, score, rationale, sort_order, created_at, updated_at)
+       VALUES (?,?,?,?,?,?,0,?,?)`,
+      entryId,
+      orgId,
+      contact.id,
+      entry.stage,
+      entry.score,
+      entry.rationale,
+      nowIso(),
+      nowIso(),
+    );
+    run(
+      `INSERT INTO pipeline_events (id, entry_id, kind, from_stage, to_stage, body, actor_name, created_at)
+       VALUES (?,?,?,?,?,?,?,?)`,
+      id(),
+      entryId,
+      "stage_change",
+      null,
+      entry.stage,
+      null,
+      "Jordan Alvarez",
+      nowIso(),
+    );
+  }
+  run(
+    "INSERT INTO segments (id, org_id, name, kind, config, created_at) VALUES (?,?,?,?,?,?)",
+    id(),
+    orgId,
+    "AI Experts",
+    "dynamic",
+    JSON.stringify({ q: "AI" }),
+    nowIso(),
+  );
+
   /* ----------------------------------------------------------- audit log -- */
   logAudit({
     eventId: event.id,

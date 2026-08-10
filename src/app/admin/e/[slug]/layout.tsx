@@ -49,6 +49,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
       items: [
         { href: `${base}/speakers`, label: "Speakers" },
         { href: `${base}/team`, label: "Event Team" },
+        { href: "/crm", label: "Speaker CRM" },
       ],
     },
     {
