@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Change this in production — it signs session cookies.
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      DATA_DIR: /data
+      # Optional: real email delivery. Without it every message still lands in
+      # the in-app outbox at /admin/e/:slug/emails.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Conferencer <onboarding@resend.dev>}
+      CRON_SECRET: ${CRON_SECRET:-}
+    volumes:
+      - conferencer-data:/data
+    restart: unless-stopped
+
+volumes:
+  conferencer-data:

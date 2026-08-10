@@ -88,7 +88,7 @@ const SELECT_ROW = `
          (SELECT c.first_name || ' ' || c.last_name FROM contacts c WHERE c.id = s.submitter_contact_id) AS submitter_name,
          (SELECT GROUP_CONCAT(c2.first_name || ' ' || c2.last_name, ', ')
             FROM submission_participants sp JOIN contacts c2 ON c2.id = sp.contact_id
-           WHERE sp.submission_id = s.id) AS speakers,
+           WHERE sp.submission_id = s.id AND sp.role != 'submitter') AS speakers,
          (SELECT ROUND(AVG(rv.score), 2) FROM reviews rv WHERE rv.submission_id = s.id AND rv.submitted_at IS NOT NULL) AS avg_score,
          (SELECT COUNT(*) FROM reviews rv WHERE rv.submission_id = s.id AND rv.submitted_at IS NOT NULL) AS review_count,
          (SELECT COUNT(*) FROM uploads u WHERE u.submission_id = s.id) AS file_count
