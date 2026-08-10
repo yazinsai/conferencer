@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { buttonClass, cx, inputClass } from "@/components/ui";
+import { buttonClass, cx, fileInputClass, inputClass } from "@/components/ui";
 import { autoMap, IMPORT_FIELDS, parseCsv } from "@/lib/csv";
 
 /**
@@ -46,7 +46,7 @@ export function CsvImporter({
             const file = e.target.files?.[0];
             if (file) void onFile(file);
           }}
-          className="block text-sm text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-50"
+          className={fileInputClass}
         />
 
         {headers.length ? (

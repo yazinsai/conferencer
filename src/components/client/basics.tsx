@@ -2,10 +2,30 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { buttonClass, cx, inputClass } from "@/components/ui";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-/** Submit button that asks first. Every destructive action confirms (Appendix B #10). */
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "success";
+type Size = "sm" | "md" | "lg";
+
+/**
+ * Submit button that asks first. Every destructive action confirms
+ * (Appendix B #10) — via a real dialog rather than window.confirm, so it is
+ * styled, focus-trapped and keyboard-navigable.
+ */
 export function ConfirmSubmit({
   message,
   children,
@@ -18,23 +38,42 @@ export function ConfirmSubmit({
   message: string;
   children: ReactNode;
   className?: string;
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
-  size?: "sm" | "md" | "lg";
+  variant?: Variant;
+  size?: Size;
   name?: string;
   value?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const hidden = useRef<HTMLButtonElement | null>(null);
+
   return (
-    <button
-      type="submit"
-      name={name}
-      value={value}
-      className={cx(buttonClass(variant, size), className)}
-      onClick={(e) => {
-        if (!window.confirm(message)) e.preventDefault();
-      }}
-    >
-      {children}
-    </button>
+    <>
+      {/* The real submit button, clicked programmatically once confirmed, so the
+          server action still receives the form (and its name/value pair). */}
+      <button ref={hidden} type="submit" name={name} value={value} className="hidden" />
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>
+          <button type="button" className={cx(buttonClass(variant, size), className)}>
+            {children}
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>{message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonClass(variant === "danger" ? "danger" : "primary", "md")}
+              onClick={() => hidden.current?.click()}
+            >
+              Yes, continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -49,7 +88,6 @@ export function CopyButton({
   className?: string;
   size?: "sm" | "md";
 }) {
-  const [copied, setCopied] = useState(false);
   return (
     <button
       type="button"
@@ -60,14 +98,13 @@ export function CopyButton({
           : `${window.location.origin}${value}`;
         try {
           await navigator.clipboard.writeText(absolute);
+          toast.success("Copied to your clipboard", { description: absolute });
         } catch {
           window.prompt("Copy this link", absolute);
         }
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1800);
       }}
     >
-      {copied ? "Copied!" : label}
+      {label}
     </button>
   );
 }
@@ -92,7 +129,7 @@ export function ShowMore({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="font-medium text-brand-700 underline underline-offset-2 hover:text-brand-800"
+          className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
         >
           {open ? "Show less" : "Show more"}
         </button>
@@ -164,7 +201,7 @@ export function SearchBox({
       />
       <button
         type="submit"
-        className="absolute right-1 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+        className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
       >
         Search
       </button>
@@ -192,12 +229,12 @@ export function FilterSelect({
   const value = params.get(param) ?? "";
   return (
     <span className={cx("inline-flex items-center gap-1.5", className)}>
-      <label htmlFor={`filter-${param}`} className="text-xs font-medium text-slate-500">
+      <label htmlFor={`filter-${param}`} className="text-xs font-medium text-muted-foreground">
         {label}
       </label>
       <select
         id={`filter-${param}`}
-        className={cx(inputClass, "w-auto py-1.5 text-xs")}
+        className={cx(inputClass, "h-8 w-auto py-0 text-xs")}
         value={value}
         onChange={(e) => {
           const sp = new URLSearchParams(params.toString());
@@ -218,7 +255,7 @@ export function FilterSelect({
   );
 }
 
-/** Small disclosure used for filter panels and overflow menus. */
+/** Popover used for filter panels, the columns picker and saved views. */
 export function Disclosure({
   label,
   children,
@@ -231,23 +268,16 @@ export function Disclosure({
   align?: "left" | "right";
 }) {
   return (
-    <details className={cx("relative", className)}>
-      <summary
-        className={cx(
-          buttonClass("secondary", "sm"),
-          "cursor-pointer list-none [&::-webkit-details-marker]:hidden",
-        )}
-      >
+    <Popover>
+      <PopoverTrigger className={cx(buttonClass("secondary", "sm"), className)}>
         {label}
-      </summary>
-      <div
-        className={cx(
-          "absolute z-30 mt-1 min-w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg",
-          align === "right" ? "right-0" : "left-0",
-        )}
+      </PopoverTrigger>
+      <PopoverContent
+        align={align === "right" ? "end" : "start"}
+        className="w-auto min-w-56 max-w-[min(92vw,26rem)] p-3"
       >
         {children}
-      </div>
-    </details>
+      </PopoverContent>
+    </Popover>
   );
 }
