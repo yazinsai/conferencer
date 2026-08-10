@@ -449,6 +449,14 @@ export async function submitProposalAction(payload: WizardPayload): Promise<Wiza
     await notify(event, form, submissionId, contact, isNew);
   }
 
+  const { emitWebhook } = await import("@/lib/webhooks");
+  await emitWebhook(event.id, "submission.created", {
+    id: submissionId,
+    title,
+    is_new: isNew,
+    submitter: contact.email,
+  });
+
   revalidatePath("/portal", "layout");
   revalidatePath(`/admin/e/${event.slug}`, "layout");
   revalidatePath(`/e/${event.slug}`, "layout");
