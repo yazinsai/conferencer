@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
+import { PublicNav } from "@/components/public/public-nav";
 import { getEventBySlug } from "@/lib/auth/guards";
 
 export default async function PublicEventLayout({
@@ -18,7 +19,7 @@ export default async function PublicEventLayout({
       style={{ "--event-accent": accent } as CSSProperties}
     >
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
           {event.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -41,8 +42,11 @@ export default async function PublicEventLayout({
             ) : null}
           </div>
         </div>
+        <div className="mx-auto max-w-5xl">
+          <PublicNav slug={slug} />
+        </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
     </div>
   );
 }
