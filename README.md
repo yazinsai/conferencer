@@ -58,6 +58,27 @@ Event slug: **`devflow-conf-2027`**
 | Reviewer | `/review` |
 | Public CFP | `/e/:slug/submit/:formId` |
 | Public widgets | `/e/:slug/sessions` · `speakers` · `agenda` · `itinerary` · `gallery` |
+| Speaker CRM | `/admin/crm` |
+| API tokens | `/admin/e/:slug/settings/api` |
+| OpenAPI | `/api/v1/openapi.json` |
+
+## REST API
+
+Issue a bearer token under **Settings → API**. Authenticate with:
+
+```bash
+curl -H "Authorization: Bearer cnf_…" http://localhost:3000/api/v1/events
+curl -H "Authorization: Bearer cnf_…" http://localhost:3000/api/v1/submissions?limit=25
+```
+
+Public (no token):
+
+```bash
+curl http://localhost:3000/api/v1/public/devflow-conf-2027/sessions
+curl http://localhost:3000/api/v1/public/devflow-conf-2027/speakers
+```
+
+Full catalog: `/api/v1/openapi.json` or Settings → API → Docs.
 
 ## Scripts
 
@@ -67,6 +88,7 @@ Event slug: **`devflow-conf-2027`**
 | `npm run seed` | Seed if empty |
 | `npm run seed:reset` | Wipe DB and reseed |
 | `npm run seed:big` | +60 submissions / +40 speakers for perf demos |
+| `npm run jobs:reminders` | Draft-deadline + task reminder emails |
 
 ## Stack
 
@@ -75,6 +97,7 @@ Event slug: **`devflow-conf-2027`**
 - Password auth (bcrypt) + signed httpOnly cookies
 - Resend optional; every send lands in the in-app outbox
 - Local file uploads (20 MB, MIME allowlist)
+- Optional Airtable (`AIRTABLE_API_KEY` + `AIRTABLE_BASE_ID`) — off by default
 
 ## License
 
