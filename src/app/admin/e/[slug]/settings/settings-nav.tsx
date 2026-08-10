@@ -9,6 +9,7 @@ const links = [
   { href: "/levels", label: "Levels" },
   { href: "/fields", label: "Fields" },
   { href: "/records", label: "Records" },
+  { href: "/api", label: "API" },
 ] as const;
 
 export type SettingsNavActive = (typeof links)[number]["href"];
