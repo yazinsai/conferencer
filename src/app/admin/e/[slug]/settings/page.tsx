@@ -78,6 +78,11 @@ export default async function SettingsPage({ params }: PageProps<"/admin/e/[slug
       title: "Configuration",
       items: [
         { href: `${base}/api`, label: "API tokens", hint: "Bearer tokens for /api/v1" },
+        {
+          href: `${base}/airtable`,
+          label: "Airtable sync",
+          hint: "Optional mirror of submissions and speakers",
+        },
         { href: `/admin/e/${slug}/portals`, label: "Portals", hint: "Speaker portal configuration" },
         { href: `/admin/e/${slug}/team`, label: "Event team", hint: "Organizers and reviewers" },
       ],
