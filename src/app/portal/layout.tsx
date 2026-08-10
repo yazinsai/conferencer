@@ -4,6 +4,9 @@ import { getSessionUser } from "@/lib/auth/session";
 import { forbidden, getUserRolesForEvent } from "@/lib/auth/guards";
 import { getDefaultEvent } from "@/lib/db/queries";
 import { signOutAction } from "@/lib/auth/actions";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 export default async function PortalLayout({
   children,
@@ -27,43 +30,41 @@ export default async function PortalLayout({
   ];
 
   return (
-    <div className="min-h-full">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-full bg-background">
+      <header className="border-b bg-card">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div>
-            <div className="text-xs uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Speaker Portal
             </div>
             <div className="font-semibold">{event.name}</div>
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-2 text-sm">
             {roles.includes("organizer") ? (
-              <Link
-                href={`/admin/e/${event.slug}`}
-                className="font-medium text-blue-700"
-              >
+              <ButtonLink href={`/admin/e/${event.slug}`} variant="link" size="sm">
                 Back to Admin Mode
-              </Link>
+              </ButtonLink>
             ) : null}
-            <span className="text-slate-600">
+            <span className="text-muted-foreground">
               {user.firstName} {user.lastName}
             </span>
             <form action={signOutAction}>
-              <button
-                type="submit"
-                className="text-slate-600 hover:text-slate-900"
-              >
+              <Button type="submit" variant="ghost" size="sm">
                 Sign out
-              </button>
+              </Button>
             </form>
           </div>
         </div>
+        <Separator />
         <nav className="mx-auto flex max-w-5xl gap-1 px-4">
           {tabs.map((t) => (
             <Link
               key={t.href}
               href={t.href}
-              className="border-b-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 hover:border-blue-600 hover:text-blue-700"
+              className={cn(
+                "border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground transition-colors",
+                "hover:border-primary hover:text-foreground",
+              )}
             >
               {t.label}
             </Link>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signInAction } from "@/lib/auth/actions";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -11,14 +12,14 @@ export default async function SignInPage({
 }) {
   const sp = await searchParams;
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-16">
+    <div className="flex min-h-full items-center justify-center bg-muted/40 px-4 py-16">
       <Card className="w-full max-w-md">
         <CardHeader title="Sign in" subtitle="Email + password for every role." />
         <CardBody>
           {sp.error ? (
-            <p className="mb-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {sp.error}
-            </p>
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{sp.error}</AlertDescription>
+            </Alert>
           ) : null}
           <form action={signInAction} className="space-y-4">
             <input type="hidden" name="next" value={sp.next ?? ""} />
@@ -40,9 +41,12 @@ export default async function SignInPage({
               Sign in
             </Button>
           </form>
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-muted-foreground">
             No account?{" "}
-            <Link href={`/sign-up${sp.next ? `?next=${encodeURIComponent(sp.next)}` : ""}`} className="font-medium text-blue-600">
+            <Link
+              href={`/sign-up${sp.next ? `?next=${encodeURIComponent(sp.next)}` : ""}`}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Sign up
             </Link>
           </p>
