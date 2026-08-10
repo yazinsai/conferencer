@@ -20,6 +20,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { AgendaScheduleHost } from "./agenda-schedule-host";
 import { AutoScheduleDraft } from "./auto-schedule-draft";
 import { UnscheduledDnd } from "./unscheduled-dnd";
+import { RoomsGridZoom } from "./rooms-grid-zoom";
 import { publishAgendaAction } from "./actions";
 
 const VIEWS = ["list", "day", "rooms", "conflicts"] as const;
@@ -390,59 +391,18 @@ export default async function AgendaPage({
             {rooms.length === 0 ? (
               <p className="text-sm text-slate-500">No rooms configured.</p>
             ) : (
-              <table className="min-w-full border-collapse text-xs">
-                <thead>
-                  <tr>
-                    <th className="border border-slate-200 bg-slate-50 p-2 text-left">
-                      Time
-                    </th>
-                    {rooms.map((room) => (
-                      <th
-                        key={room.id}
-                        className="border border-slate-200 bg-slate-50 p-2 text-left min-w-[140px]"
-                      >
-                        {room.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(timeSlots.length ? timeSlots : ["—"]).map((slot) => (
-                    <tr key={slot}>
-                      <td className="border border-slate-200 p-2 font-medium text-slate-600 whitespace-nowrap">
-                        {slot}
-                      </td>
-                      {rooms.map((room) => {
-                        const match = scheduled.find(
-                          (s) =>
-                            s.locationId === room.id &&
-                            s.startsAt?.includes(`T${slot}`),
-                        );
-                        return (
-                          <td
-                            key={room.id}
-                            className="border border-slate-200 p-2 align-top"
-                          >
-                            {match ? (
-                              <Link
-                                href={scheduleHref(slug, match.id, view)}
-                                className="block rounded bg-blue-50 px-2 py-1 text-blue-900 hover:bg-blue-100"
-                              >
-                                <div className="font-medium">{match.title}</div>
-                                <div className="text-[10px] text-blue-700">
-                                  {match.startsAt?.slice(0, 10)}
-                                </div>
-                              </Link>
-                            ) : (
-                              <span className="text-slate-300">·</span>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <RoomsGridZoom
+                slug={slug}
+                rooms={rooms.map((r) => ({ id: r.id, name: r.name }))}
+                timeSlots={timeSlots}
+                scheduled={scheduled.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  locationId: s.locationId,
+                  startsAt: s.startsAt,
+                }))}
+                scheduleHref={(submissionId) => scheduleHref(slug, submissionId, view)}
+              />
             )}
           </CardBody>
         </Card>

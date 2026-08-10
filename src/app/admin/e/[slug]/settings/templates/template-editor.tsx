@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { applyMergeFields } from "@/lib/email/merge";
-import { SAMPLE_MERGE_FIELDS } from "@/lib/email/templates";
+import { SAMPLE_MERGE_FIELDS } from "@/lib/email/sample-fields";
 import { saveEmailTemplateAction } from "./actions";
 
 type Template = {

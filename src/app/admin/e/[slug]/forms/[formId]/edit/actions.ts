@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
-import { nowIso } from "@/lib/dates";
 import { id } from "@/lib/id";
 
 function revalidateForm(slug: string, formId: string) {
@@ -194,7 +193,7 @@ export async function toggleQuestionRequiredAction(formData: FormData) {
   const formId = String(formData.get("formId") || "");
   const questionId = String(formData.get("questionId") || "");
   const step = String(formData.get("step") || "3");
-  const { event } = await requireEventRole(slug, ["organizer"]);
+  await requireEventRole(slug, ["organizer"]);
   const db = getDb();
 
   const q = db
@@ -275,6 +274,68 @@ export async function moveQuestionAction(formData: FormData) {
   db.update(schema.formQuestions)
     .set({ sortOrder: current.sortOrder })
     .where(eq(schema.formQuestions.id, other.id))
+    .run();
+
+  revalidateForm(slug, formId);
+  redirect(`/admin/e/${slug}/forms/${formId}/edit?step=${step}`);
+}
+
+export async function setQuestionConditionAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const formId = String(formData.get("formId") || "");
+  const questionId = String(formData.get("questionId") || "");
+  const dependsOnQuestionId = String(formData.get("dependsOnQuestionId") || "");
+  const operator = String(formData.get("operator") || "equals") as
+    | "equals"
+    | "not_equals"
+    | "in";
+  const value = String(formData.get("value") || "").trim();
+  const step = String(formData.get("step") || "3");
+  await requireEventRole(slug, ["organizer"]);
+  const db = getDb();
+
+  const q = db
+    .select()
+    .from(schema.formQuestions)
+    .where(and(eq(schema.formQuestions.id, questionId), eq(schema.formQuestions.formId, formId)))
+    .get();
+  if (!q) throw new Error("Question not found");
+
+  if (!dependsOnQuestionId || !value) {
+    redirect(`/admin/e/${slug}/forms/${formId}/edit?step=${step}`);
+  }
+
+  const condition =
+    operator === "in"
+      ? {
+          question_id: dependsOnQuestionId,
+          operator,
+          value: value.split(",").map((s) => s.trim()),
+        }
+      : { question_id: dependsOnQuestionId, operator, value };
+
+  db.update(schema.formQuestions)
+    .set({ condition: JSON.stringify(condition) })
+    .where(eq(schema.formQuestions.id, questionId))
+    .run();
+
+  revalidateForm(slug, formId);
+  redirect(`/admin/e/${slug}/forms/${formId}/edit?step=${step}`);
+}
+
+export async function clearQuestionConditionAction(formData: FormData) {
+  const slug = String(formData.get("slug") || "");
+  const formId = String(formData.get("formId") || "");
+  const questionId = String(formData.get("questionId") || "");
+  const step = String(formData.get("step") || "3");
+  await requireEventRole(slug, ["organizer"]);
+  const db = getDb();
+
+  db.update(schema.formQuestions)
+    .set({ condition: null })
+    .where(
+      and(eq(schema.formQuestions.id, questionId), eq(schema.formQuestions.formId, formId)),
+    )
     .run();
 
   revalidateForm(slug, formId);

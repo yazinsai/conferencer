@@ -9,12 +9,15 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import {
   addQuestionAction,
+  clearQuestionConditionAction,
   moveQuestionAction,
   removeQuestionAction,
   saveFormWizardAction,
+  setQuestionConditionAction,
   toggleQuestionRequiredAction,
 } from "./actions";
 import { CopyUrlButton } from "./copy-url-button";
+import { parseCondition } from "@/lib/domain/conditions";
 
 const STEPS = [
   { n: 1, label: "Submission Setup" },
@@ -79,6 +82,7 @@ export default async function FormEditPage({
       fieldKey: schema.fields.key,
       maxLength: schema.fields.maxLength,
       scope: schema.fields.scope,
+      condition: schema.formQuestions.condition,
     })
     .from(schema.formQuestions)
     .innerJoin(schema.fields, eq(schema.formQuestions.fieldId, schema.fields.id))
@@ -579,7 +583,19 @@ type QuestionRow = {
   isRequired: boolean;
   isLocked: boolean;
   sortOrder: number;
+  condition: string | null;
 };
+
+function formatConditionSummary(
+  condition: ReturnType<typeof parseCondition>,
+  earlierQuestions: QuestionRow[],
+) {
+  if (!condition) return null;
+  const dep = earlierQuestions.find((q) => q.id === condition.question_id);
+  const depLabel = dep?.fieldLabel ?? "earlier question";
+  const value = Array.isArray(condition.value) ? condition.value.join(", ") : condition.value;
+  return `${depLabel} ${condition.operator.replace("_", " ")} "${value}"`;
+}
 
 function QuestionList({
   slug,
@@ -602,8 +618,21 @@ function QuestionList({
           <p className="px-5 py-4 text-sm text-slate-500">No questions yet.</p>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {questions.map((q, index) => (
-              <li key={q.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+            {questions.map((q, index) => {
+              const earlierQuestions = questions.slice(0, index);
+              const parsedCondition = parseCondition(q.condition);
+              const conditionSummary = formatConditionSummary(parsedCondition, earlierQuestions);
+              const defaultDependsOn = parsedCondition?.question_id ?? earlierQuestions[0]?.id ?? "";
+              const defaultOperator = parsedCondition?.operator ?? "equals";
+              const defaultValue = parsedCondition
+                ? Array.isArray(parsedCondition.value)
+                  ? parsedCondition.value.join(", ")
+                  : String(parsedCondition.value)
+                : "";
+
+              return (
+              <li key={q.id} className="px-5 py-3">
+                <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-slate-900">{q.fieldLabel}</span>
@@ -616,6 +645,11 @@ function QuestionList({
                     ) : (
                       <Badge className="bg-slate-100 text-slate-500">Optional</Badge>
                     )}
+                    {conditionSummary ? (
+                      <Badge className="bg-violet-100 text-violet-800">
+                        Show when {conditionSummary}
+                      </Badge>
+                    ) : null}
                   </div>
                   {q.maxLength ? (
                     <p className="mt-0.5 text-xs text-slate-500">Max length: {q.maxLength}</p>
@@ -665,8 +699,69 @@ function QuestionList({
                     </form>
                   ) : null}
                 </div>
+                </div>
+
+                {index > 0 ? (
+                  <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Show when
+                    </p>
+                    <form action={setQuestionConditionAction} className="flex flex-wrap items-end gap-2">
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="formId" value={formId} />
+                      <input type="hidden" name="questionId" value={q.id} />
+                      <input type="hidden" name="step" value={String(step)} />
+                      <label className="text-xs text-slate-600">
+                        Question
+                        <Select
+                          name="dependsOnQuestionId"
+                          defaultValue={defaultDependsOn}
+                          className="mt-1 w-44"
+                        >
+                          {earlierQuestions.map((eq) => (
+                            <option key={eq.id} value={eq.id}>
+                              {eq.fieldLabel}
+                            </option>
+                          ))}
+                        </Select>
+                      </label>
+                      <label className="text-xs text-slate-600">
+                        Operator
+                        <Select name="operator" defaultValue={defaultOperator} className="mt-1 w-32">
+                          <option value="equals">equals</option>
+                          <option value="not_equals">not equals</option>
+                          <option value="in">in (comma-separated)</option>
+                        </Select>
+                      </label>
+                      <label className="min-w-[10rem] flex-1 text-xs text-slate-600">
+                        Value
+                        <Input
+                          name="value"
+                          defaultValue={defaultValue}
+                          placeholder="Answer value"
+                          className="mt-1"
+                        />
+                      </label>
+                      <Button type="submit" variant="secondary">
+                        Set condition
+                      </Button>
+                    </form>
+                    {parsedCondition ? (
+                      <form action={clearQuestionConditionAction} className="mt-2">
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="formId" value={formId} />
+                        <input type="hidden" name="questionId" value={q.id} />
+                        <input type="hidden" name="step" value={String(step)} />
+                        <Button type="submit" variant="ghost">
+                          Clear condition
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                ) : null}
               </li>
-            ))}
+            );
+            })}
           </ul>
         )}
       </CardBody>
