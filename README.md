@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Conferencer
 
-## Getting Started
+Open-source conference **program** management — an alternative to Sessionboard’s Program module.
 
-First, run the development server:
+CFP forms → submissions → committee review → decisions → speaker portal & tasks → agenda → public widgets.
+
+## Quick start (< 5 minutes)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run setup    # drizzle push + seed DevFlow Conf 2027
+npm run dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run setup
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Optional env (see `.env.example`):
 
-## Learn More
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_PATH` | SQLite file (default `./data/conferencer.db`) |
+| `SESSION_SECRET` | Cookie signing secret |
+| `UPLOAD_DIR` | Local upload directory |
+| `RESEND_API_KEY` | Real email delivery (optional — outbox always works) |
+| `NEXT_PUBLIC_APP_URL` | Absolute links in emails |
 
-To learn more about Next.js, take a look at the following resources:
+## Demo accounts (seeded)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Role | Email | Password |
+| --- | --- | --- |
+| Organizer | `sbek-organizer@example.com` | `SbekTest!2027-org` |
+| Speaker | `sbek-speaker@example.com` | `SbekTest!2027-spk` |
+| Speaker 2 | `sbek-speaker2@example.com` | `SbekTest!2027-spk2` |
+| Reviewer | `sbek-reviewer@example.com` | `SbekTest!2027-rev` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Event slug: **`devflow-conf-2027`**
 
-## Deploy on Vercel
+## Key routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Surface | Path |
+| --- | --- |
+| Landing | `/` |
+| Sign in / up | `/sign-in`, `/sign-up` |
+| Admin dashboard | `/admin` → `/admin/e/devflow-conf-2027` |
+| Submissions | `/admin/e/:slug/submissions` |
+| Forms | `/admin/e/:slug/forms` |
+| Evaluations | `/admin/e/:slug/evaluation` |
+| Agenda | `/admin/e/:slug/agenda` |
+| Speakers / Tasks / Deliverables | `/admin/e/:slug/speakers`, `/tasks`, `/deliverables` |
+| Email outbox | `/admin/e/:slug/emails` |
+| Speaker portal | `/portal` |
+| Reviewer | `/review` |
+| Public CFP | `/e/:slug/submit/:formId` |
+| Public widgets | `/e/:slug/sessions` · `speakers` · `agenda` · `itinerary` · `gallery` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+| Script | What it does |
+| --- | --- |
+| `npm run setup` | Migrate schema + seed |
+| `npm run seed` | Seed if empty |
+| `npm run seed:reset` | Wipe DB and reseed |
+| `npm run seed:big` | +60 submissions / +40 speakers for perf demos |
+
+## Stack
+
+- Next.js 16 (App Router, SSR) + React 19 + Tailwind 4
+- Drizzle ORM + SQLite (`better-sqlite3`)
+- Password auth (bcrypt) + signed httpOnly cookies
+- Resend optional; every send lands in the in-app outbox
+- Local file uploads (20 MB, MIME allowlist)
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

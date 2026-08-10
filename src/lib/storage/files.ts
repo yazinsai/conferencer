@@ -16,7 +16,9 @@ const MAX_BYTES = 20 * 1024 * 1024;
 
 export function uploadDir() {
   const dir = process.env.UPLOAD_DIR ?? "./uploads";
-  const abs = path.isAbsolute(dir) ? dir : path.join(process.cwd(), dir);
+  const abs = path.isAbsolute(dir)
+    ? dir
+    : path.join(/*turbopackIgnore: true*/ process.cwd(), "uploads");
   fs.mkdirSync(abs, { recursive: true });
   return abs;
 }

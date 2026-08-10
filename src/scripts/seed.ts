@@ -559,7 +559,15 @@ export async function seed(opts?: { reset?: boolean }) {
     .run();
 
   // Submissions with mixed statuses
-  const statuses = ["accepted", "pending", "declined", "accept_queue", "draft", "withdrawn"] as const;
+  const statuses = [
+    "accepted",
+    "pending",
+    "declined",
+    "accept_queue",
+    "decline_queue",
+    "draft",
+    "withdrawn",
+  ] as const;
   const submissionIds: string[] = [];
 
   sample.submissions.forEach((s, i) => {

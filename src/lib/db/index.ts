@@ -17,7 +17,7 @@ function resolveDbPath() {
   const configured = process.env.DATABASE_PATH ?? "./data/conferencer.db";
   return path.isAbsolute(configured)
     ? configured
-    : path.join(process.cwd(), configured);
+    : path.join(/*turbopackIgnore: true*/ process.cwd(), "data", path.basename(configured));
 }
 
 export function getSqlite() {
