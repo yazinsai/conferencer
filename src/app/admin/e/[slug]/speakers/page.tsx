@@ -3,11 +3,13 @@ import Link from "next/link";
 import { and, count, eq, like, or, sql } from "drizzle-orm";
 import { requireEventRole } from "@/lib/auth/guards";
 import { getDb, schema } from "@/lib/db";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
-import { addSpeakerAction } from "./actions";
+import { addSpeakerAction, sendBulkSpeakerEmailAction } from "./actions";
+import { SpeakersBulkEmailFields } from "./speakers-bulk-email";
+import { SpeakersImportForm } from "./speakers-import-form";
+import { SpeakerStatusSelect } from "./speaker-status-select";
 
 const STATUSES = [
   { key: "all", label: "All" },
@@ -17,20 +19,6 @@ const STATUSES = [
   { key: "declined", label: "Declined" },
   { key: "cancelled", label: "Cancelled" },
 ] as const;
-
-function speakerStatusClass(status: string) {
-  switch (status) {
-    case "confirmed":
-      return "bg-emerald-100 text-emerald-800";
-    case "invited":
-      return "bg-blue-100 text-blue-800";
-    case "declined":
-    case "cancelled":
-      return "bg-rose-100 text-rose-800";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
 
 export default async function SpeakersPage({
   params,
@@ -121,6 +109,21 @@ export default async function SpeakersPage({
     counts[ec.speakerStatus] = (counts[ec.speakerStatus] ?? 0) + 1;
   }
 
+  const emailTemplates = db
+    .select({
+      key: schema.emailTemplates.key,
+      subject: schema.emailTemplates.subject,
+      bodyHtml: schema.emailTemplates.bodyHtml,
+    })
+    .from(schema.emailTemplates)
+    .where(eq(schema.emailTemplates.eventId, event.id))
+    .all();
+
+  const sampleSpeaker = enriched[0]?.contact ?? {
+    firstName: "Alex",
+    lastName: "Speaker",
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -159,16 +162,34 @@ export default async function SpeakersPage({
         </Button>
       </form>
 
+      <SpeakersImportForm slug={slug} />
+
       <Card>
         <CardHeader title={`${enriched.length} speakers`} />
         <CardBody className="overflow-x-auto p-0">
+          <form id="bulk-speaker-email" action={sendBulkSpeakerEmailAction}>
+            <input type="hidden" name="slug" value={slug} />
+            <SpeakersBulkEmailFields
+              templates={emailTemplates}
+              eventName={event.name}
+              sampleSpeaker={sampleSpeaker}
+            />
+            <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-2">
+              <Button type="submit">Send email</Button>
+              <span className="text-xs text-slate-500">
+                Select speakers below, then send
+              </span>
+            </div>
+          </form>
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
+                <th className="px-3 py-2"> </th>
                 <th className="px-3 py-2">Speaker</th>
                 <th className="px-3 py-2">Title / Company</th>
                 <th className="px-3 py-2">Email</th>
                 <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Logistics</th>
                 <th className="px-3 py-2">Sessions</th>
                 <th className="px-3 py-2">Tasks</th>
               </tr>
@@ -180,49 +201,72 @@ export default async function SpeakersPage({
                   className="border-t border-slate-100 hover:bg-slate-50"
                 >
                   <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/e/${slug}/speakers/${s.contact.id}`}
-                      className="flex items-center gap-3"
-                    >
-                      {s.contact.headshotUrl ? (
-                        <Image
-                          src={s.contact.headshotUrl}
-                          alt=""
-                          width={36}
-                          height={36}
-                          className="h-9 w-9 rounded-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600">
-                          {s.contact.firstName[0]}
-                          {s.contact.lastName[0]}
+                    <input
+                      type="checkbox"
+                      name="contactIds"
+                      value={s.contact.id}
+                      form="bulk-speaker-email"
+                      className="rounded"
+                    />
+                  </td>
+                    <td className="px-3 py-2">
+                      <Link
+                        href={`/admin/e/${slug}/speakers/${s.contact.id}`}
+                        className="flex items-center gap-3"
+                      >
+                        {s.contact.headshotUrl ? (
+                          <Image
+                            src={s.contact.headshotUrl}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 rounded-full object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600">
+                            {s.contact.firstName[0]}
+                            {s.contact.lastName[0]}
+                          </div>
+                        )}
+                        <span className="font-medium text-blue-700 hover:underline">
+                          {s.contact.firstName} {s.contact.lastName}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div>{s.contact.jobTitle || "—"}</div>
+                      <div className="text-xs text-slate-500">
+                        {s.contact.company || ""}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">{s.contact.email}</td>
+                    <td className="px-3 py-2">
+                      <SpeakerStatusSelect
+                        slug={slug}
+                        contactId={s.contact.id}
+                        current={s.eventContact.speakerStatus}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-xs text-slate-600">
+                      {s.contact.dietary || s.contact.tshirtSize ? (
+                        <div className="space-y-0.5">
+                          {s.contact.dietary ? <div>Diet: {s.contact.dietary}</div> : null}
+                          {s.contact.tshirtSize ? (
+                            <div>Shirt: {s.contact.tshirtSize}</div>
+                          ) : null}
                         </div>
+                      ) : (
+                        "—"
                       )}
-                      <span className="font-medium text-blue-700 hover:underline">
-                        {s.contact.firstName} {s.contact.lastName}
-                      </span>
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div>{s.contact.jobTitle || "—"}</div>
-                    <div className="text-xs text-slate-500">
-                      {s.contact.company || ""}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">{s.contact.email}</td>
-                  <td className="px-3 py-2">
-                    <Badge className={speakerStatusClass(s.eventContact.speakerStatus)}>
-                      {s.eventContact.speakerStatus}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2">{s.sessionCount}</td>
-                  <td className="px-3 py-2">
-                    {s.tasksTotal > 0
-                      ? `${s.tasksComplete}/${s.tasksTotal}`
-                      : "—"}
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-3 py-2">{s.sessionCount}</td>
+                    <td className="px-3 py-2">
+                      {s.tasksTotal > 0
+                        ? `${s.tasksComplete}/${s.tasksTotal}`
+                        : "—"}
+                    </td>
+                  </tr>
               ))}
             </tbody>
           </table>

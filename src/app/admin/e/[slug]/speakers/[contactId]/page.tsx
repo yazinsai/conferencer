@@ -242,6 +242,14 @@ export default async function SpeakerDetailPage({
                   <Label htmlFor="pronouns">Pronouns</Label>
                   <Input id="pronouns" name="pronouns" defaultValue={c.pronouns ?? ""} />
                 </div>
+                <div>
+                  <Label htmlFor="dietary">Dietary requirements</Label>
+                  <Input id="dietary" name="dietary" defaultValue={c.dietary ?? ""} />
+                </div>
+                <div>
+                  <Label htmlFor="tshirtSize">T-shirt size</Label>
+                  <Input id="tshirtSize" name="tshirtSize" defaultValue={c.tshirtSize ?? ""} />
+                </div>
               </div>
               <Button type="submit">Save profile</Button>
             </form>

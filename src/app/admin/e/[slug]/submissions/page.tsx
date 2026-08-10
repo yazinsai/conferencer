@@ -82,6 +82,12 @@ export default async function SubmissionsPage({
           <p className="text-slate-600">Review, decide, and hand off to the agenda.</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link
+            href={`/admin/e/${slug}/submissions/export?status=${sp.status ?? "all"}${sp.kind ? `&kind=${sp.kind}` : ""}${sp.q ? `&q=${encodeURIComponent(sp.q)}` : ""}`}
+            className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            Export CSV
+          </Link>
           <form action={sendDecisionsAction} className="flex gap-2">
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="mode" value="accepted" />
