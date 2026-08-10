@@ -362,3 +362,43 @@ function numberOrNull(value: FormDataEntryValue | null): number | null {
   const n = Number(s);
   return Number.isNaN(n) ? null : n;
 }
+
+/* ---------------------------------------------------------- saved views -- */
+
+export async function saveViewAction(formData: FormData) {
+  const slug = String(formData.get("slug"));
+  const { user, event } = await requireOrganizer(slug);
+  const { createView, viewQuery } = await import("@/lib/repo/views");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const config: Record<string, string> = {};
+  for (const key of [
+    "status",
+    "q",
+    "track",
+    "format",
+    "form",
+    "level",
+    "approval",
+    "scheduled",
+    "sort",
+    "columns",
+  ]) {
+    const value = String(formData.get(key) ?? "").trim();
+    if (value) config[key] = value;
+  }
+  createView({ eventId: event.id, userId: user.id, name, config });
+
+  revalidatePath(`/admin/e/${slug}/submissions`);
+  redirect(`/admin/e/${slug}/submissions?${viewQuery(config)}`);
+}
+
+export async function deleteViewAction(formData: FormData) {
+  const slug = String(formData.get("slug"));
+  const { event } = await requireOrganizer(slug);
+  const { deleteView, getView } = await import("@/lib/repo/views");
+  const view = getView(String(formData.get("view_id")));
+  if (view && view.event_id === event.id) deleteView(view.id);
+  revalidatePath(`/admin/e/${slug}/submissions`);
+}

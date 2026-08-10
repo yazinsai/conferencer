@@ -9,9 +9,15 @@ import {
 } from "@/lib/repo/submissions";
 import { SubmissionTable } from "@/components/admin/submission-table";
 import { ALL_COLUMNS, DEFAULT_COLUMNS } from "@/lib/columns";
-import { setApprovalAction, setStatusAction } from "@/server/submissions-actions";
+import {
+  deleteViewAction,
+  saveViewAction,
+  setApprovalAction,
+  setStatusAction,
+} from "@/server/submissions-actions";
 import { Disclosure, FilterSelect, SearchBox } from "@/components/client/basics";
-import { LinkButton, PageHeader, SubNav } from "@/components/ui";
+import { Chip, LinkButton, PageHeader, SubNav } from "@/components/ui";
+import { listViews, viewQuery } from "@/lib/repo/views";
 
 const TABS: Array<{ key: string; label: string }> = [
   { key: "all", label: "All" },
@@ -66,6 +72,7 @@ export async function SubmissionsView({
   const forms = listForms(eventId);
   const formNames = Object.fromEntries(forms.map((f) => [f.id, f.name]));
 
+  const views = listViews(eventId);
   const columnParam = str("columns");
   const columns = columnParam ? columnParam.split(",").filter(Boolean) : DEFAULT_COLUMNS;
 
@@ -206,6 +213,83 @@ export async function SubmissionsView({
             </button>
           </form>
         </Disclosure>
+
+        <Disclosure label={`Saved views (${views.length})`} align="right">
+          <div className="w-72 space-y-3">
+            {views.length ? (
+              <ul className="space-y-1">
+                {views.map((view) => {
+                  const config = JSON.parse(view.config || "{}") as Record<string, string>;
+                  return (
+                    <li key={view.id} className="flex items-center justify-between gap-2">
+                      <a
+                        href={`${base}?${viewQuery(config)}`}
+                        className="text-sm font-medium text-brand-700 hover:underline"
+                      >
+                        {view.name}
+                      </a>
+                      <form action={deleteViewAction}>
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="view_id" value={view.id} />
+                        <button
+                          type="submit"
+                          className="text-[11px] text-slate-400 hover:text-red-600"
+                        >
+                          delete
+                        </button>
+                      </form>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-500">
+                No saved views yet. Filter and sort the list, then save it here.
+              </p>
+            )}
+            <form action={saveViewAction} className="space-y-2 border-t border-slate-200 pt-2">
+              <input type="hidden" name="slug" value={slug} />
+              {["status", "q", "track", "format", "form", "level", "approval", "scheduled", "sort"].map(
+                (key) => (
+                  <input key={key} type="hidden" name={key} value={str(key)} />
+                ),
+              )}
+              <input type="hidden" name="columns" value={columns.join(",")} />
+              <label className="block text-xs font-medium text-slate-600">
+                Save this view
+                <input
+                  name="name"
+                  required
+                  placeholder="Platform track shortlist"
+                  className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+                />
+              </label>
+              <p className="text-[11px] text-slate-400">
+                Saves the current filters, sort and columns.
+              </p>
+              <button
+                type="submit"
+                className="w-full rounded-md bg-brand-600 px-2 py-1.5 text-xs font-medium text-white"
+              >
+                Save view
+              </button>
+            </form>
+          </div>
+        </Disclosure>
+
+        {views.length ? (
+          <span className="flex flex-wrap items-center gap-1">
+            {views.slice(0, 4).map((view) => (
+              <a
+                key={view.id}
+                href={`${base}?${viewQuery(JSON.parse(view.config || "{}"))}`}
+                className="inline-flex"
+              >
+                <Chip tone="blue">{view.name}</Chip>
+              </a>
+            ))}
+          </span>
+        ) : null}
       </div>
 
       <p className="mb-3 text-sm text-slate-500" role="status">
