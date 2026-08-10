@@ -3,71 +3,17 @@ import { id } from "../ids";
 import { nowIso } from "../datetime";
 import { contactName, type Contact } from "./contacts";
 
-export const SUBMISSION_STATUSES = [
-  "draft",
-  "pending",
-  "accept_queue",
-  "decline_queue",
-  "accepted",
-  "declined",
-  "withdrawn",
-] as const;
+export {
+  SUBMISSION_STATUSES,
+  STATUS_LABELS,
+  APPROVAL_STATUSES,
+  APPROVAL_LABELS,
+  speakerFacingStatus,
+  statusTone,
+} from "../status";
+export type { SubmissionStatus } from "../status";
 
-export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];
-
-export const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  draft: "Draft",
-  pending: "Pending",
-  accept_queue: "Accept Queue",
-  decline_queue: "Decline Queue",
-  accepted: "Accepted",
-  declined: "Declined",
-  withdrawn: "Withdrawn",
-};
-
-/** R-DATA-1: queue statuses are internal — speakers only ever see "Pending". */
-export function speakerFacingStatus(status: string): string {
-  switch (status) {
-    case "accepted":
-      return "Accepted";
-    case "declined":
-      return "Declined";
-    case "withdrawn":
-      return "Withdrawn";
-    case "draft":
-      return "Draft";
-    default:
-      return "Pending";
-  }
-}
-
-export function statusTone(
-  status: string,
-): "slate" | "green" | "amber" | "red" | "blue" | "violet" {
-  switch (status) {
-    case "accepted":
-      return "green";
-    case "declined":
-      return "red";
-    case "accept_queue":
-      return "blue";
-    case "decline_queue":
-      return "amber";
-    case "withdrawn":
-      return "slate";
-    case "draft":
-      return "slate";
-    default:
-      return "violet";
-  }
-}
-
-export const APPROVAL_STATUSES = ["draft", "in_review", "approved"] as const;
-export const APPROVAL_LABELS: Record<string, string> = {
-  draft: "Draft",
-  in_review: "In review",
-  approved: "Approved",
-};
+import { SUBMISSION_STATUSES, type SubmissionStatus } from "../status";
 
 export type Submission = {
   id: string;

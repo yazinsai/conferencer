@@ -72,6 +72,7 @@ class Session {
       ...init,
       headers: {
         cookie: this.header(),
+        origin: BASE,
         ...(init.headers ?? {}),
       },
     });

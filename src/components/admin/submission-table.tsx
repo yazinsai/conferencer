@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { buttonClass, Chip, cx, Td, Th } from "@/components/ui";
 import type { SubmissionRow } from "@/lib/repo/submissions";
-import { APPROVAL_LABELS, STATUS_LABELS, statusTone } from "@/lib/repo/submissions";
+import { APPROVAL_LABELS, STATUS_LABELS, statusTone } from "@/lib/status";
 
 export type Column = { key: string; label: string };
 

@@ -56,13 +56,7 @@ export type AssignmentRow = TaskAssignment & {
 
 export const TASK_STATUSES = ["not_started", "in_progress", "complete", "approved", "rejected"];
 
-export const TASK_STATUS_LABELS: Record<string, string> = {
-  not_started: "Not started",
-  in_progress: "In progress",
-  complete: "Complete",
-  approved: "Approved",
-  rejected: "Rejected",
-};
+export { TASK_STATUS_LABELS } from "../status";
 
 export function isComplete(status: string): boolean {
   return status === "complete" || status === "approved";

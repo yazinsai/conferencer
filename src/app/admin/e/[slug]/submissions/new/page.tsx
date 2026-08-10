@@ -1,6 +1,6 @@
 import { requireOrganizer } from "@/lib/guards";
 import { listLookup } from "@/lib/repo/events";
-import { createSubmissionAction } from "../actions";
+import { createSubmissionAction } from "@/server/submissions-actions";
 import {
   Button,
   Card,

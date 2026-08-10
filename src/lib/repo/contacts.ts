@@ -51,13 +51,7 @@ export type RosterRow = Contact & {
   event_contact_id: string;
 };
 
-export const SPEAKER_STATUSES = [
-  "prospect",
-  "invited",
-  "confirmed",
-  "declined",
-  "cancelled",
-] as const;
+export { SPEAKER_STATUSES } from "../status";
 
 export function contactName(c: {
   first_name?: string | null;
