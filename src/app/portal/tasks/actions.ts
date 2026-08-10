@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
@@ -103,7 +103,16 @@ export async function uploadFileTaskAction(formData: FormData) {
   });
 
   const db = getDb();
+  const prior = db
+    .select({ version: schema.uploads.version })
+    .from(schema.uploads)
+    .where(eq(schema.uploads.taskAssignmentId, assignmentId))
+    .orderBy(desc(schema.uploads.version))
+    .get();
+  const version = (prior?.version ?? 0) + 1;
+
   const uploadId = id("upl");
+  const createdAt = nowIso();
   db.insert(schema.uploads)
     .values({
       id: uploadId,
@@ -114,15 +123,17 @@ export async function uploadFileTaskAction(formData: FormData) {
       contentType: saved.contentType,
       size: saved.size,
       storageKey: saved.storageKey,
+      version,
       uploadedByUserId: user.id,
-      createdAt: nowIso(),
+      createdAt,
     })
     .run();
 
+  const completedAt = assignment.completedAt ?? createdAt;
   db.update(schema.taskAssignments)
     .set({
       status: "complete",
-      completedAt: nowIso(),
+      completedAt,
     })
     .where(eq(schema.taskAssignments.id, assignmentId))
     .run();

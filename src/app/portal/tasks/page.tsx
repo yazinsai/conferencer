@@ -171,9 +171,14 @@ function TaskGroup({
                 </Badge>
               </div>
 
-              {!locked && assignment.status !== "complete" && assignment.status !== "approved" ? (
+              {!locked &&
+              (assignment.status !== "complete" && assignment.status !== "approved"
+                ? true
+                : task.type === "file_request") ? (
                 <div className="mt-4 border-t border-slate-100 pt-4">
-                  {task.type === "action" ? (
+                  {task.type === "action" &&
+                  assignment.status !== "complete" &&
+                  assignment.status !== "approved" ? (
                     <form action={completeActionTaskAction}>
                       <input type="hidden" name="assignmentId" value={assignment.id} />
                       {task.linkUrl ? (
@@ -213,11 +218,17 @@ function TaskGroup({
                           required
                         />
                       </div>
-                      <Button type="submit">Upload and complete</Button>
+                      <Button type="submit">
+                        {assignment.status === "complete" || assignment.status === "approved"
+                          ? "Upload new version"
+                          : "Upload and complete"}
+                      </Button>
                     </form>
                   ) : null}
 
-                  {task.type === "form" ? (
+                  {task.type === "form" &&
+                  assignment.status !== "complete" &&
+                  assignment.status !== "approved" ? (
                     <form action={submitFormTaskAction} className="space-y-3">
                       <input type="hidden" name="assignmentId" value={assignment.id} />
                       <div>
