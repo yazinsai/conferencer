@@ -66,68 +66,7 @@ function splitName(name: string) {
   return { firstName: parts[0] || "User", lastName: parts.slice(1).join(" ") || "" };
 }
 
-const EMAIL_TEMPLATES: Array<{ key: string; subject: string; bodyHtml: string }> = [
-  {
-    key: "submission_confirmation",
-    subject: "We received your submission to {event_name}",
-    bodyHtml:
-      "<p>Hi {speaker_name},</p><p>Thanks for submitting <strong>{talk_title}</strong> to {event_name}. We'll be in touch.</p>",
-  },
-  {
-    key: "submission_admin_alert",
-    subject: "New submission: {talk_title}",
-    bodyHtml:
-      "<p>A new submission arrived for {event_name}: <strong>{talk_title}</strong> by {speaker_name}.</p>",
-  },
-  {
-    key: "decision_accepted",
-    subject: "Your talk has been accepted to {event_name}",
-    bodyHtml:
-      "<p>Hi {speaker_name}, congratulations! Your session '{talk_title}' has been accepted. Please confirm your participation and complete your speaker profile.</p><p>Portal: {portal_link}</p>",
-  },
-  {
-    key: "decision_declined",
-    subject: "Update on your {event_name} submission",
-    bodyHtml:
-      "<p>Hi {speaker_name}, thank you for submitting '{talk_title}'. Unfortunately we are unable to accept it this year.</p>",
-  },
-  {
-    key: "portal_invite",
-    subject: "Your {event_name} speaker portal is ready",
-    bodyHtml:
-      "<p>Hi {first_name}, open your portal to complete onboarding tasks: {portal_link}</p>",
-  },
-  {
-    key: "task_assigned",
-    subject: "New task for {event_name}: due {due_date}",
-    bodyHtml: "<p>Hi {speaker_name}, you have a new task. Due: {due_date}. Portal: {portal_link}</p>",
-  },
-  {
-    key: "task_reminder",
-    subject: "Reminder: outstanding tasks for {event_name}",
-    bodyHtml: "<p>Hi {speaker_name}, you still have outstanding onboarding tasks. Portal: {portal_link}</p>",
-  },
-  {
-    key: "draft_deadline_reminder",
-    subject: "CFP closes soon for {event_name}",
-    bodyHtml: "<p>Hi {speaker_name}, the call for speakers closes soon. Finish your draft in the portal.</p>",
-  },
-  {
-    key: "evaluation_invite",
-    subject: "You have reviews waiting for {event_name}",
-    bodyHtml: "<p>Hi {first_name}, please complete your assigned reviews for {event_name}.</p>",
-  },
-  {
-    key: "evaluation_reminder",
-    subject: "Reminder: outstanding reviews for {event_name}",
-    bodyHtml: "<p>Hi {first_name}, you still have outstanding reviews.</p>",
-  },
-  {
-    key: "speaker_announcement",
-    subject: "Announcement from {event_name}",
-    bodyHtml: "<p>Hi {speaker_name},</p><p>{event_name} update.</p>",
-  },
-];
+const EMAIL_TEMPLATES = DEFAULT_EMAIL_TEMPLATES;
 
 const DEFAULT_TASKS = [
   "Confirm participation",
