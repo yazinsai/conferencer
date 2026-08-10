@@ -8,6 +8,7 @@ import { listPlans, reviewerProgress } from "@/lib/repo/evaluations";
 import { listAssignments } from "@/lib/repo/tasks";
 import { statusCounts } from "@/lib/repo/submissions";
 import { recentActivity } from "@/lib/repo/audit";
+import { DashboardPanels } from "@/components/admin/dashboard-panels";
 import { Card, CardHeader, Chip, LinkButton, Progress, Stat, Td, Th, Table } from "@/components/ui";
 import {
   daysUntil,
@@ -25,8 +26,13 @@ export async function generateMetadata({ params }: PageProps<"/admin/e/[slug]">)
   return { title: `Dashboard · ${event.name}` };
 }
 
-export default async function DashboardPage({ params }: PageProps<"/admin/e/[slug]">) {
+export default async function DashboardPage({
+  params,
+  searchParams,
+}: PageProps<"/admin/e/[slug]">) {
   const { slug } = await params;
+  const sp = await searchParams;
+  const panel = typeof sp.panel === "string" ? sp.panel : "forms";
   const { user, event } = await requireOrganizer(slug);
   const base = `/admin/e/${event.slug}`;
 
@@ -91,14 +97,6 @@ export default async function DashboardPage({ params }: PageProps<"/admin/e/[slu
       tone: "violet" as const,
     },
   ].filter(Boolean) as Array<{ text: string; href: string; tone: "amber" | "blue" | "red" | "violet" }>;
-
-  const pacing = all<{ day: string; n: number }>(
-    `SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS n
-       FROM submissions WHERE event_id = ?
-      GROUP BY day ORDER BY day DESC LIMIT 14`,
-    event.id,
-  ).reverse();
-  const maxPacing = Math.max(1, ...pacing.map((p) => p.n));
 
   const readiness = all<{
     contact_id: string;
@@ -208,64 +206,13 @@ export default async function DashboardPage({ params }: PageProps<"/admin/e/[slu
         </section>
       ) : null}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader
-            title="Submission pacing"
-            description="Submissions received per day"
-            actions={<LinkButton href={`${base}/submissions`} size="sm">View all</LinkButton>}
-          />
-          <div className="flex h-40 items-end gap-1 px-4 py-4">
-            {pacing.length ? (
-              pacing.map((point) => (
-                <div key={point.day} className="flex flex-1 flex-col items-center gap-1">
-                  <div
-                    className="w-full rounded-t bg-brand-500"
-                    style={{ height: `${(point.n / maxPacing) * 100}%`, minHeight: 4 }}
-                    title={`${point.n} on ${point.day}`}
-                  />
-                  <span className="text-[10px] text-slate-400">{point.day.slice(8)}</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-slate-500">No submissions yet.</p>
-            )}
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader
-            title="Reviewer progress"
-            description="Assigned versus completed reviews"
-            actions={<LinkButton href={`${base}/evaluation`} size="sm">Evaluation</LinkButton>}
-          />
-          <div className="space-y-3 px-4 py-4">
-            {plans.flatMap((plan) => reviewerProgress(plan.id)).length ? (
-              plans
-                .flatMap((plan) => reviewerProgress(plan.id))
-                .slice(0, 6)
-                .map((row) => (
-                  <div key={`${row.round_id}-${row.user_id}`}>
-                    <div className="flex justify-between text-xs text-slate-600">
-                      <span>
-                        {row.first_name} {row.last_name}{" "}
-                        <span className="text-slate-400">· {row.round_name}</span>
-                      </span>
-                      <span>
-                        {row.complete}/{row.assigned}
-                      </span>
-                    </div>
-                    <div className="mt-1">
-                      <Progress value={row.complete} max={Math.max(row.assigned, 1)} />
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <p className="text-sm text-slate-500">No reviewers assigned yet.</p>
-            )}
-          </div>
-        </Card>
-      </div>
+      <DashboardPanels
+        slug={slug}
+        eventId={event.id}
+        tab={panel}
+        eventStart={event.starts_at}
+        eventEnd={event.ends_at}
+      />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
