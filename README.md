@@ -21,7 +21,7 @@ That is the whole setup. No database server, no cloud account, no API keys.
 | --- | --- |
 | **Call for speakers** | Seven-step form builder, 13 field types, required/locked flags, **conditional show-when logic**, close dates, per-person limits, drafts, custom success page, confirmation email |
 | **Public submission** | Five-step wizard (Welcome → Account → Submission → Participants → Review) that a stranger can complete without an invitation, with email+password signup and no email confirmation step |
-| **Submissions** | Status tabs with counts, inline and bulk status changes, column picker, filters, search across titles *and* speaker names, CSV export, change history with restore |
+| **Submissions** | Status tabs with counts, inline and bulk status changes, column picker, **saved views**, filters, search across titles *and* speaker names, CSV export, change history with restore |
 | **Review** | Multi-round evaluation plans, per-round reviewer pools and scorecards (1–3 / 1–5 / 1–10 / numeric / weighted dropdown / free text / file / separator), blind rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, live progress, weighted aggregate results, bulk reminders, two CSV export shapes |
 | **Decisions** | Accept/decline individually or in bulk, templated decision emails with merge fields, a free-text note, preview, per-submission Notified flag |
 | **Speakers** | Roster with search and filters, manual add, CSV import with column mapping, workflow status, logistics fields, portal invitations, bulk email with per-recipient preview, communications history |
@@ -31,7 +31,8 @@ That is the whole setup. No database server, no cloud account, no API keys.
 | **Public site** | Sessions, speakers, agenda grid, itinerary, speaker gallery, personal schedule with `.ics` export — all readable logged-out |
 | **Embeds** | One `<script>` tag per widget plus plain HTML, JSON, XML and iCal feeds, filterable by track and format |
 | **Comms** | Editable templates with merge fields and preview, an in-app outbox recording every send, scheduled reminders through `npm run cron` |
-| **API** | Bearer-token REST API at `/api/v1`, cursor pagination, `updated_since`, bulk endpoints, public token-free feeds, OpenAPI 3 at `/api/v1/openapi.json`, reference at `/api-docs` |
+| **API** | Bearer-token REST API at `/api/v1`, cursor pagination, `updated_since`, bulk endpoints, public token-free feeds, OpenAPI 3 at `/api/v1/openapi.json`, reference at `/api-docs`, **HMAC-signed outbound webhooks** |
+| **Dashboard** | Countdown, headline counters, live status strip, computed "also check" nudges, tabbed analytics (forms · participants · evaluations · agenda) and a speaker-readiness table |
 
 ---
 
