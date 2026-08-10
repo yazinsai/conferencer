@@ -6,7 +6,9 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ token: string }> },
 ) {
-  const { token } = await context.params;
+  const { token: rawToken } = await context.params;
+  // Support `/portal/calendar/:token.ics` (R-COM-5) — strip trailing extension.
+  const token = rawToken.replace(/\.ics$/i, "");
   const db = getDb();
 
   const contact = db

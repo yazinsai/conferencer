@@ -33,6 +33,7 @@ async function main() {
   mark(await check("/api/v1/public/devflow-conf-2027/sessions", 200));
   mark(await check("/api/v1/openapi.json", 200));
   mark(await check("/api/v1/events", 401));
+  mark(await check("/admin/emails", [307, 302, 303]));
 
   mark(await check("/admin", [307, 302, 303]));
   mark(await check("/portal", [307, 302, 303]));

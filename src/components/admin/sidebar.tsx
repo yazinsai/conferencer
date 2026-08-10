@@ -39,6 +39,7 @@ const sections = [
       { href: "/settings", label: "Settings" },
       { href: "/agent", label: "Assistant" },
       { href: "/emails", label: "Emails" },
+      { href: "/admin/emails", label: "All Emails", external: true },
       { href: "/embeds", label: "Embeds" },
     ],
   },
