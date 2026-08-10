@@ -30,6 +30,10 @@ const sections = [
     ],
   },
   {
+    title: "Organization",
+    items: [{ href: "/admin/crm", label: "Speaker CRM", external: true }],
+  },
+  {
     title: "Configure",
     items: [
       { href: "/settings", label: "Settings" },
@@ -63,7 +67,11 @@ export function AdminSidebar({
               {section.items.map((item) => (
                 <li key={item.href + item.label}>
                   <Link
-                    href={`${base}${item.href}`}
+                    href={
+                      "external" in item && item.external
+                        ? item.href
+                        : `${base}${item.href}`
+                    }
                     className="block rounded-md px-2 py-1.5 text-sm text-slate-200 hover:bg-slate-800 hover:text-white"
                   >
                     {item.label}
