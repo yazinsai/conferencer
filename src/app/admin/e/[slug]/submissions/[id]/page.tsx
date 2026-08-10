@@ -29,6 +29,7 @@ import {
   setStatusAction,
   deleteSubmissionAction,
 } from "@/server/submissions-actions";
+import { aiScoreAction, overrideAiScoreAction } from "@/server/evaluation-actions";
 import {
   Avatar,
   Button,
@@ -718,6 +719,54 @@ export default async function SubmissionDetailPage({
                   Scheduled but not published yet — publish from the agenda board.
                 </p>
               ) : null}
+            </Card>
+
+            <Card className="p-4">
+              <h2 className="text-sm font-semibold text-slate-900">AI first-pass triage</h2>
+              {submission.ai_score !== null && submission.ai_score !== undefined ? (
+                <>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Chip tone="violet">AI score {submission.ai_score.toFixed(1)}</Chip>
+                    {submission.ai_override_score !== null &&
+                    submission.ai_override_score !== undefined ? (
+                      <Chip tone="green">
+                        Human override {submission.ai_override_score.toFixed(1)}
+                      </Chip>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-xs text-slate-600">{submission.ai_rationale}</p>
+                </>
+              ) : (
+                <p className="mt-1 text-xs text-slate-500">
+                  Not scored yet. Run triage from the Evaluation area.
+                </p>
+              )}
+              <form action={aiScoreAction} className="mt-3">
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="submission_id" value={submission.id} />
+                <Button type="submit" size="sm">
+                  {submission.ai_score !== null ? "Re-run AI triage" : "Run AI triage"}
+                </Button>
+              </form>
+              <form action={overrideAiScoreAction} className="mt-2 flex items-end gap-2">
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="submission_id" value={submission.id} />
+                <Field label="Human override" name="override">
+                  <Input
+                    id="override"
+                    name="override"
+                    type="number"
+                    step="0.5"
+                    min={1}
+                    max={5}
+                    defaultValue={submission.ai_override_score ?? ""}
+                    className="w-24"
+                  />
+                </Field>
+                <Button type="submit" size="sm" variant="secondary">
+                  Save
+                </Button>
+              </form>
             </Card>
 
             <Card className="p-4 text-sm">
