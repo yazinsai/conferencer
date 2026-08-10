@@ -15,12 +15,15 @@
     "seed:big": "tsx src/scripts/seed-big.ts",
     "setup": "npm run db:push && npm run seed",
     "jobs:reminders": "tsx src/scripts/jobs-reminders.ts",
+    "mcp": "tsx src/mcp/server.ts",
+    "deploy:docker": "docker build -t conferencer .",
     "test": "vitest run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
     "date-fns": "^4.4.0",
