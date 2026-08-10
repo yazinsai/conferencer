@@ -452,3 +452,52 @@ function numberOrNull(value: FormDataEntryValue | null): number | null {
   const n = Number(raw);
   return Number.isNaN(n) ? null : n;
 }
+
+/* ------------------------------------------------------------- AI triage -- */
+
+export async function aiScoreAction(formData: FormData) {
+  const { slug, event } = await ctx(formData);
+  const { scoreSubmission } = await import("@/lib/ai");
+  const { getSubmissionRow, updateSubmission } = await import("@/lib/repo/submissions");
+  const { readJson } = await import("@/lib/db");
+
+  const explicit = formData.getAll("submission_ids").map(String).filter(Boolean);
+  const single = formData.get("submission_id");
+  if (single) explicit.push(String(single));
+  const targets = explicit.length
+    ? explicit
+    : listSubmissions(event.id, { status: "pending", limit: 50 }).map((s) => s.id);
+
+  let scored = 0;
+  for (const submissionId of targets) {
+    const row = getSubmissionRow(submissionId);
+    if (!row || row.event_id !== event.id) continue;
+    const answers = readJson<Record<string, unknown>>(row.answers, {});
+    const verdict = await scoreSubmission({
+      title: row.title,
+      abstract: row.description ?? "",
+      track: row.track_name,
+      format: row.format_name,
+      takeaway: answers.key_takeaway ? String(answers.key_takeaway) : null,
+    });
+    updateSubmission(submissionId, {
+      ai_score: verdict.score,
+      ai_rationale: `${verdict.rationale} [${verdict.model}]`,
+    });
+    scored += 1;
+  }
+
+  revalidatePath(`/admin/e/${slug}`, "layout");
+  redirect(`/admin/e/${slug}/evaluation?ai=${scored}`);
+}
+
+export async function overrideAiScoreAction(formData: FormData) {
+  const { slug, event } = await ctx(formData);
+  const { getSubmission, updateSubmission } = await import("@/lib/repo/submissions");
+  const submissionId = String(formData.get("submission_id"));
+  const submission = getSubmission(submissionId);
+  if (!submission || submission.event_id !== event.id) return;
+  const raw = String(formData.get("override") ?? "").trim();
+  updateSubmission(submissionId, { ai_override_score: raw === "" ? null : Number(raw) });
+  revalidatePath(`/admin/e/${slug}`, "layout");
+}

@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { requireOrganizer } from "@/lib/guards";
 import { listPlans, listRounds, planProgress } from "@/lib/repo/evaluations";
-import { createPlanAction } from "@/server/evaluation-actions";
+import { listSubmissions } from "@/lib/repo/submissions";
+import { aiScoreAction, createPlanAction } from "@/server/evaluation-actions";
 import {
   Button,
   Card,
@@ -11,6 +12,7 @@ import {
   Field,
   Input,
   PageHeader,
+  Notice,
   Progress,
   Select,
   Textarea,
@@ -19,10 +21,17 @@ import { formatDate } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
-export default async function EvaluationIndex({ params }: PageProps<"/admin/e/[slug]/evaluation">) {
+export default async function EvaluationIndex({
+  params,
+  searchParams,
+}: PageProps<"/admin/e/[slug]/evaluation">) {
   const { slug } = await params;
+  const sp = await searchParams;
   const { event } = await requireOrganizer(slug);
   const plans = listPlans(event.id);
+  const aiScored = listSubmissions(event.id, { limit: 500 }).filter(
+    (row) => row.ai_score !== null && row.ai_score !== undefined,
+  );
 
   return (
     <div>
@@ -30,6 +39,13 @@ export default async function EvaluationIndex({ params }: PageProps<"/admin/e/[s
         title="Evaluation"
         description="Plans, rounds, scorecards and reviewer assignments. Reviewers only ever see the submissions you assign them."
       />
+
+      {sp.ai ? (
+        <Notice tone="success" className="mb-4">
+          AI triage scored {String(sp.ai)} submission(s). Scores are labelled as AI and can be
+          overridden by a human on each submission.
+        </Notice>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
@@ -101,6 +117,49 @@ export default async function EvaluationIndex({ params }: PageProps<"/admin/e/[s
           ) : null}
         </div>
 
+        <div className="space-y-4">
+        <Card className="h-fit">
+          <CardHeader
+            title="AI first-pass triage"
+            description="Scores pending abstracts 1–5 with written reasoning, so the committee can start from a shortlist. Human scores always win."
+          />
+          <form action={aiScoreAction} className="space-y-2 p-4">
+            <input type="hidden" name="slug" value={slug} />
+            <p className="text-xs text-slate-500">
+              {aiScored.length
+                ? `${aiScored.length} submission(s) already carry an AI score.`
+                : "No AI scores yet."}{" "}
+              Uses OpenAI when OPENAI_API_KEY is set, otherwise a transparent local rubric that
+              reads the abstract.
+            </p>
+            <Button type="submit" variant="secondary" className="w-full">
+              Run AI triage on pending submissions
+            </Button>
+          </form>
+          {aiScored.length ? (
+            <ul className="max-h-64 divide-y divide-slate-100 overflow-y-auto">
+              {aiScored.slice(0, 8).map((row) => (
+                <li key={row.id} className="px-4 py-2 text-sm">
+                  <Link
+                    href={`/admin/e/${slug}/submissions/${row.id}`}
+                    className="font-medium text-slate-800 hover:text-brand-700"
+                  >
+                    {row.title}
+                  </Link>
+                  <span className="ml-2">
+                    <Chip tone="violet">AI {row.ai_score?.toFixed(1)}</Chip>
+                    {row.ai_override_score !== null && row.ai_override_score !== undefined ? (
+                      <Chip tone="green" className="ml-1">
+                        Human {row.ai_override_score.toFixed(1)}
+                      </Chip>
+                    ) : null}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Card>
+
         <Card className="h-fit">
           <CardHeader title="New evaluation plan" />
           <form action={createPlanAction} className="space-y-3 p-4">
@@ -133,6 +192,7 @@ export default async function EvaluationIndex({ params }: PageProps<"/admin/e/[s
             </Button>
           </form>
         </Card>
+        </div>
       </div>
     </div>
   );
