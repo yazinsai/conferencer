@@ -168,11 +168,15 @@ export function Field({
   error?: string | null;
   children: ReactNode;
 }) {
+  // flex-col + a growing label keeps inputs on a shared baseline when fields sit
+  // side by side in a grid and only some of them carry a hint.
   return (
-    <div>
-      <Label htmlFor={name} required={required} hint={hint}>
-        {label}
-      </Label>
+    <div className="flex h-full flex-col">
+      <div className="flex-1">
+        <Label htmlFor={name} required={required} hint={hint}>
+          {label}
+        </Label>
+      </div>
       {children}
       {error ? (
         <p role="alert" className="mt-1 text-xs font-medium text-destructive">
@@ -182,6 +186,10 @@ export function Field({
     </div>
   );
 }
+
+/** Browsers style file inputs themselves; this makes them match the button set. */
+export const fileInputClass =
+  "block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
 
 export function FormError({ children }: { children?: ReactNode }) {
   if (!children) return null;

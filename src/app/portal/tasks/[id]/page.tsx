@@ -23,6 +23,8 @@ import {
   Notice,
   Select,
   Textarea,
+  cx,
+  fileInputClass,
 } from "@/components/ui";
 import { formatDate, formatStamp } from "@/lib/datetime";
 
@@ -143,7 +145,7 @@ export default async function PortalTaskDetail({
                   type="file"
                   accept={assignment.accepted_types || undefined}
                   required
-                  className="mt-1 block text-sm text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-50"
+                  className={cx("mt-1", fileInputClass)}
                 />
                 <p className="mt-1 text-xs text-slate-500">
                   Uploading again creates a new version — earlier versions stay available.
