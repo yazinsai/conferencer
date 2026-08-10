@@ -77,13 +77,14 @@ type Props = {
   userSubmissionCount: number;
 };
 
-const STEPS = ["welcome", "account", "submission", "participant", "review"] as const;
+// Submission before Account so track/format/conditionals work logged-out (R-EVAL-2).
+const STEPS = ["welcome", "submission", "account", "participant", "review"] as const;
 type Step = typeof STEPS[number];
 
 const STEP_LABELS: Record<Step, string> = {
   welcome: "Welcome",
-  account: "Account",
   submission: "Submission",
+  account: "Account",
   participant: "Participant",
   review: "Review",
 };
@@ -254,6 +255,16 @@ export function PublicSubmitWizard({
 
   function goNext() {
     if (step === "welcome") {
+      setStep("submission");
+      return;
+    }
+
+    if (step === "submission") {
+      const errs = fieldErrors(submissionQuestions, submissionAnswers);
+      if (Object.keys(errs).length) {
+        setErrors(errs);
+        return;
+      }
       setStep("account");
       return;
     }
@@ -267,16 +278,6 @@ export function PublicSubmitWizard({
         setAccountError(
           `You have reached the submission limit (${form.submissionLimit}) for this form.`,
         );
-        return;
-      }
-      setStep("submission");
-      return;
-    }
-
-    if (step === "submission") {
-      const errs = fieldErrors(submissionQuestions, submissionAnswers);
-      if (Object.keys(errs).length) {
-        setErrors(errs);
         return;
       }
       setStep("participant");
