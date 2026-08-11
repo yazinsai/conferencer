@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { XIcon } from "lucide-react";
-
 import { cx } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * N12 — announcement banner over a retracting bar. The public event family's nav
@@ -74,7 +73,7 @@ export function EventNavShell({
               aria-label="Dismiss this announcement"
               className="shrink-0 rounded-full p-1 text-paper/70 outline-2 outline-offset-2 outline-transparent transition-colors duration-[120ms] ease-out hover:bg-paper/10 hover:text-paper focus-visible:outline-paper"
             >
-              <XIcon aria-hidden className="size-3.5" />
+              <Icon name="close" size={16} />
             </button>
           </div>
         ) : null}

@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChevronDownIcon } from "lucide-react";
-
 import { buttonClass, cx } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,7 +117,7 @@ export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventN
         </span>
         <span className={cx(buttonClass("secondary", "sm"), "pointer-events-none")}>
           Menu
-          <ChevronDownIcon aria-hidden className="size-3.5 transition-transform duration-[180ms] ease-out group-open:rotate-180" />
+          <Icon name="chevronDown" size={14} className="transition-transform duration-[180ms] ease-out group-open:rotate-180" />
         </span>
       </summary>
       <div className="px-3 pb-4">
@@ -182,7 +181,7 @@ export function AccountMenu({
             .join("")}
         </span>
         <span className="hidden sm:inline">{name}</span>
-        <ChevronDownIcon aria-hidden className="size-3.5 opacity-60" />
+        <Icon name="chevronDown" size={14} className="opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal text-muted-foreground">

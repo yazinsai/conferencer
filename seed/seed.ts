@@ -61,7 +61,7 @@ import { addComment, storeBuffer } from "../src/lib/repo/uploads";
 import { ensureTemplates } from "../src/lib/repo/emails";
 import { sendEmail } from "../src/lib/email";
 import { logAudit } from "../src/lib/repo/audit";
-import { avatarSvg, makePdf, makePng } from "./avatars";
+import { headshotFor, makePdf, makePng } from "./avatars";
 import {
   EVENT,
   FIXTURE_ABSTRACTS,
@@ -394,11 +394,12 @@ function main() {
     // Headshot for everyone who appears publicly, except one speaker so the
     // gallery's no-photo fallback is demonstrable (EMB-12).
     if (person.role === "speaker" && person.key !== "jonas") {
+      const headshot = headshotFor(person.key, person.first, person.last);
       const upload = storeBuffer({
         eventId: event.id,
-        filename: `${person.first.toLowerCase()}-${person.last.toLowerCase()}.svg`,
-        contentType: "image/svg+xml",
-        buffer: Buffer.from(avatarSvg(person.first, person.last), "utf8"),
+        filename: `${person.first.toLowerCase()}-${person.last.toLowerCase()}.${headshot.extension}`,
+        contentType: headshot.contentType,
+        buffer: headshot.buffer,
         kind: "headshot",
         contactId: contact.id,
         isPublic: true,

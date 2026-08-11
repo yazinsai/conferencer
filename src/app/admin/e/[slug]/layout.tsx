@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { SearchIcon } from "lucide-react";
-
 import { buttonClass, cx } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { requireOrganizer, roleSet } from "@/lib/guards";
 import { fullName } from "@/lib/auth";
 import { AccountMenu, Sidebar, SidebarSheet, type NavGroup } from "@/components/admin/shell";
@@ -94,7 +93,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
               {/* The shell carries the focus ring, so it draws around the whole
                   control rather than inside the pill. */}
               <div className="flex h-9 items-center gap-2 rounded-pill border border-rule bg-paper-2 pl-3 pr-1.5 outline-2 outline-offset-2 outline-transparent focus-within:border-ink-2 focus-within:bg-paper focus-within:outline-ring">
-                <SearchIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                <Icon name="search" size={16} className="text-muted-foreground" />
                 <input
                   id="global-search"
                   name="q"
