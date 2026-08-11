@@ -169,6 +169,14 @@ build with no network, and that invariant predates the design system.
 regression. It is what caught the focus ring measuring 2.97:1 against the black pill it
 surrounds, the amber chip at 3.94:1 on its own tint, and input borders at 1.48:1.
 
+**Layout is checked too.** `npm run audit` drives headless Chrome across six pages at
+320 / 375 / 414 / 768 / 1280 / 1440 px and asserts what only a rendered page can prove: no
+horizontal scroll, no clickable label wrapping onto a second line, every interactive element
+named, every image with alt text, nothing above the fold lazy-loaded, the hero fitting a
+1280×800 laptop, and — by dispatching real Tab keys, because `:focus-visible` is a keyboard
+heuristic that a scripted `.focus()` will not trigger — a visible ring on every keyboard
+stop. 104 checks.
+
 **Authorization lives in one place** — `src/lib/guards.ts` — and is called by every page
 *and* every server action. Server actions are reachable by direct POST, so hiding a link is
 never enough. Cross-role and cross-user access returns a real 403.
@@ -246,6 +254,7 @@ scripts/                   smoke.mjs (the end-to-end test), cron.ts
 | `npm run seed:big` | Add 60 submissions and 40 speakers to test at scale |
 | `npm run smoke` | End-to-end HTTP test of the whole product |
 | `npm run contrast` | WCAG audit of every colour pair in the design system |
+| `npm run audit` | Layout and a11y audit of the rendered pages, in a real browser |
 | `npm run shots` | Regenerate the real product captures the landing page shows |
 | `npm run typecheck` | `next typegen` then `tsc --noEmit` |
 | `npm run lint` | ESLint |

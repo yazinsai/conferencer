@@ -468,7 +468,9 @@ export function Chip({
 }
 
 function shade(hex: string): string {
-  // Darken a hex colour a touch so text on the tinted chip stays readable.
+  // Derived from the event's or track's own colour, which is user data rather
+  // than a design token — darkened a touch so the label stays readable on the
+  // tint. This is the one place a colour is computed instead of named.
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!m) return hex;
   const rgb = [1, 2, 3].map((i) => Math.round(parseInt(m[i], 16) * 0.55));
@@ -615,9 +617,9 @@ export function Stat({
     </>
   );
   const cls =
-    "block rounded-card border border-rule bg-card px-4 py-3.5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow] duration-[120ms] ease-out";
+    "block rounded-card border border-rule bg-card px-4 py-3.5 shadow-[var(--shadow-card)] transition-[border-color] duration-[120ms] ease-out";
   return href ? (
-    <Link href={href} className={cn(cls, "hover:border-rule-2 hover:shadow-[var(--shadow-raised)]")}>
+    <Link href={href} className={cn(cls, "hover:border-ink-2")}>
       {body}
     </Link>
   ) : (

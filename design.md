@@ -104,6 +104,13 @@ at medium weight — the same quiet fill the hover state uses, one step stronger
 sidebar rows with the brand hue would blow the 5 % budget on chrome, and the item that matters
 (the CTA) would stop being the loudest thing on screen.
 
+**On the accent budget and the dark band.** Slop gate 23 caps accent coverage at ~5 % of a viewport.
+Read literally, an ink-filled section band would fail it, because `--color-accent` and `--color-ink`
+are the same value here. They are not the same *role*: `accent` is the CTA fill, and a full-bleed ink
+band is a **surface flip** — the oldest editorial device there is — which flips its text colour in the
+same rule so nothing inherits ink onto ink. The budget the gate is actually protecting is the
+chromatic one, and `--color-signal` sits far under 5 % on every screen in the product.
+
 **Per-event accent survives.** `--event-accent` still carries `event.accent_color` on the public site.
 That is product behaviour — a conference brands its own page — not decoration.
 

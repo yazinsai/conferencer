@@ -118,7 +118,7 @@ export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventN
         </span>
         <span className={cx(buttonClass("secondary", "sm"), "pointer-events-none")}>
           Menu
-          <ChevronDownIcon aria-hidden className="size-3.5 transition-transform group-open:rotate-180" />
+          <ChevronDownIcon aria-hidden className="size-3.5 transition-transform duration-[180ms] ease-out group-open:rotate-180" />
         </span>
       </summary>
       <div className="px-3 pb-4">

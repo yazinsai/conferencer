@@ -116,7 +116,7 @@ export function SessionCard({
   action?: React.ReactNode;
 }) {
   return (
-    <article className="group rounded-card border border-rule bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow] duration-[180ms] ease-out hover:border-rule-2 hover:shadow-[var(--shadow-raised)]">
+    <article className="group rounded-card border border-rule bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color] duration-[180ms] ease-out hover:border-ink-2">
       <div className="flex items-start justify-between gap-3">
         <h3 className="display min-w-0 text-base leading-snug text-ink">
           <Link href={href} className="underline-offset-4 hover:underline">

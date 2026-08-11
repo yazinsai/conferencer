@@ -55,7 +55,7 @@ export function MarketingNav({
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto grid h-[var(--nav-height)] w-full max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto grid h-[var(--nav-height)] w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <Link href="/" className="wordmark nowrap-affordance justify-self-start text-[0.9375rem] text-ink">
           Conferencer
         </Link>
