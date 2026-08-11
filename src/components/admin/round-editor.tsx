@@ -272,59 +272,72 @@ export function RoundEditor({
       <Card>
         <CardHeader
           title="Scorecard"
-          description="One row per criterion. Reviewers fill this in for each assigned submission."
+          description="One row per criterion. Reviewers fill this in for each assigned submission. Scored options apply to dropdown and numeric types — other types ignore them but keep any saved values."
           actions={
             <Button type="button" size="sm" onClick={addCriterion}>
               Add criterion
             </Button>
           }
         />
-        <div className="overflow-x-auto">
-          <Table className="rounded-none border-0">
-            <thead>
-              <tr>
-                <Th className="w-8" />
-                <Th>Criterion</Th>
-                <Th className="w-44">Response type</Th>
-                <Th className="w-36">Options</Th>
-                <Th className="w-24">Weight</Th>
-                <Th className="w-24">Required</Th>
-                <Th className="w-12" />
-              </tr>
-            </thead>
-            <tbody>
-              {criteria.map((criterion) => (
-                <tr
-                  key={criterion.id}
-                  draggable
-                  onDragStart={() => setDragId(criterion.id)}
-                  onDragEnd={() => setDragId(null)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => {
-                    if (dragId) reorder(dragId, criterion.id);
-                    setDragId(null);
-                  }}
-                  className={cx(dragId === criterion.id && "opacity-50")}
-                >
-                  <Td className="w-8 px-2">
-                    <span
-                      className="cursor-grab select-none text-slate-300"
-                      title="Drag to reorder"
-                      aria-hidden
-                    >
-                      ⠿
-                    </span>
-                  </Td>
-                  <Td>
+        <div className="border-t border-rule">
+          {/* Same named columns for header + every criterion — no colspan tricks. */}
+          <div
+            className="hidden gap-2 border-b border-rule bg-paper-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid md:grid-cols-[1.5rem_minmax(0,1.4fr)_minmax(8rem,0.95fr)_minmax(7rem,1fr)_4.5rem_5rem_2.5rem] md:items-end"
+            role="row"
+          >
+            <span className="sr-only">Reorder</span>
+            <span>Criterion</span>
+            <span>Type</span>
+            <span>
+              Scored options
+              <span className="mt-0.5 block font-normal normal-case tracking-normal text-muted-foreground">
+                Dropdown points / numeric range
+              </span>
+            </span>
+            <span>Weight</span>
+            <span>Required</span>
+            <span className="sr-only">Actions</span>
+          </div>
+
+          <ul className="divide-y divide-rule">
+            {criteria.map((criterion) => (
+              <li
+                key={criterion.id}
+                draggable
+                onDragStart={() => setDragId(criterion.id)}
+                onDragEnd={() => setDragId(null)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragId) reorder(dragId, criterion.id);
+                  setDragId(null);
+                }}
+                className={cx(
+                  "px-4 py-3",
+                  dragId === criterion.id && "opacity-50",
+                )}
+              >
+                <div className="grid gap-3 md:grid-cols-[1.5rem_minmax(0,1.4fr)_minmax(8rem,0.95fr)_minmax(7rem,1fr)_4.5rem_5rem_2.5rem] md:items-start md:gap-2">
+                  <span
+                    className="cursor-grab select-none text-muted-foreground md:pt-2"
+                    title="Drag to reorder"
+                    aria-hidden
+                  >
+                    ⠿
+                  </span>
+
+                  <label className="block min-w-0 text-xs font-medium text-ink-2">
+                    <span className="mb-1 block md:sr-only">Criterion</span>
                     <Input
                       value={criterion.label}
                       onChange={(e) => patchCriterion(criterion.id, { label: e.target.value })}
                       placeholder="Originality"
                       aria-label="Criterion label"
-                      className="min-w-40"
+                      className="w-full"
                     />
-                  </Td>
-                  <Td>
+                  </label>
+
+                  <label className="block text-xs font-medium text-ink-2">
+                    <span className="mb-1 block md:sr-only">Type</span>
                     <Select
                       value={criterion.type}
                       onChange={(e) =>
@@ -339,18 +352,27 @@ export function RoundEditor({
                         </option>
                       ))}
                     </Select>
-                  </Td>
-                  <Td>
+                  </label>
+
+                  <div className="min-w-0 text-xs font-medium text-ink-2">
+                    <span className="mb-1 block md:sr-only">Scored options</span>
                     {needsOptions(criterion.type) ? (
                       <OptionsPopover
                         criterion={criterion}
                         onChange={(patch) => patchCriterion(criterion.id, patch)}
                       />
                     ) : (
-                      <span className="text-xs text-slate-400">{optionsSummary(criterion)}</span>
+                      <p className="pt-2 text-xs font-normal text-muted-foreground">
+                        Not used for {SCORECARD_TYPE_LABELS[criterion.type] ?? criterion.type}
+                        {criterion.optionsText.trim() || criterion.min != null
+                          ? " · saved values kept"
+                          : ""}
+                      </p>
                     )}
-                  </Td>
-                  <Td>
+                  </div>
+
+                  <label className="block text-xs font-medium text-ink-2">
+                    <span className="mb-1 block md:sr-only">Weight</span>
                     <Input
                       type="number"
                       step="0.5"
@@ -360,51 +382,49 @@ export function RoundEditor({
                         patchCriterion(criterion.id, { weight: Number(e.target.value) })
                       }
                       aria-label="Weight"
-                      className="w-20"
+                      className="w-full md:w-20"
                     />
-                  </Td>
-                  <Td>
-                    <label className="flex items-center gap-2 text-sm text-slate-600">
-                      <input
-                        type="checkbox"
-                        checked={criterion.is_required}
-                        onChange={(e) =>
-                          patchCriterion(criterion.id, { is_required: e.target.checked })
-                        }
-                      />
-                      <span className="sr-only">Required</span>
-                    </label>
-                  </Td>
-                  <Td>
+                  </label>
+
+                  <label className="flex items-center gap-2 pt-1 text-sm text-neutral md:pt-2">
+                    <input
+                      type="checkbox"
+                      checked={criterion.is_required}
+                      onChange={(e) =>
+                        patchCriterion(criterion.id, { is_required: e.target.checked })
+                      }
+                    />
+                    <span className="md:sr-only">Required</span>
+                  </label>
+
+                  <div className="md:pt-1">
                     <details className="relative">
-                      <summary className="cursor-pointer list-none rounded px-2 py-1 text-slate-500 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                      <summary className="cursor-pointer list-none rounded-md px-2 py-1 text-muted-foreground hover:bg-paper-2 [&::-webkit-details-marker]:hidden">
                         ⋯
                       </summary>
-                      <div className="absolute right-0 z-20 mt-1 w-40 rounded-md border border-slate-200 bg-white p-1 shadow-md">
+                      <div className="absolute right-0 z-20 mt-1 w-40 rounded-md border border-rule bg-paper p-1 shadow-[var(--shadow-card)]">
                         <button
                           type="button"
-                          className="w-full rounded px-2 py-1.5 text-left text-sm text-red-600 hover:bg-red-50"
+                          className="w-full rounded-md px-2 py-1.5 text-left text-sm text-destructive hover:bg-danger-soft"
                           onClick={() => removeCriterion(criterion.id)}
                         >
                           Delete
                         </button>
                       </div>
                     </details>
-                  </Td>
-                </tr>
-              ))}
-              {!criteria.length ? (
-                <tr>
-                  <Td colSpan={7} className="py-6 text-center text-slate-500">
-                    No criteria yet — add one to start the scorecard.
-                  </Td>
-                </tr>
-              ) : null}
-            </tbody>
-          </Table>
+                  </div>
+                </div>
+              </li>
+            ))}
+            {!criteria.length ? (
+              <li className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No criteria yet — add one to start the scorecard.
+              </li>
+            ) : null}
+          </ul>
         </div>
         {criteria.some((c) => c.weight === 0) ? (
-          <p className="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">
+          <p className="border-t border-rule px-4 py-2 text-xs text-muted-foreground">
             Weight 0 — collected but excluded from the aggregate score.
           </p>
         ) : null}
@@ -460,7 +480,7 @@ export function RoundEditor({
           title="Review privacy"
           description="What reviewers learn about who submitted. Watch the preview when you flip these."
         />
-        <div className="space-y-3 p-4">
+        <div className="space-y-1 p-4">
           <label className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
@@ -468,31 +488,34 @@ export function RoundEditor({
               checked={round.anonymize}
               onChange={(e) => patchRound({ anonymize: e.target.checked })}
             />
-            <span>
-              <span className="font-medium text-slate-800">Anonymous review</span>
-              <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-ink">Anonymous review</span>
+                {round.anonymize ? <Chip tone="violet">on</Chip> : null}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
                 Hide author and co-author identity from reviewers in this round.
               </span>
             </span>
-            {round.anonymize ? <Chip tone="violet">on</Chip> : null}
           </label>
-          <label className="flex items-start gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="mt-0.5"
-              checked={round.show_participants}
-              disabled={round.anonymize}
-              onChange={(e) => patchRound({ show_participants: e.target.checked })}
-            />
-            <span>
-              <span className="font-medium text-slate-800">Show participant list</span>
-              <span className="mt-0.5 block text-xs text-slate-500">
-                {round.anonymize
-                  ? "Ignored while anonymous review is on."
-                  : "Speakers appear beside the submission for assigned reviewers."}
+          {/* Child of anonymize — preference is saved either way; preview ignores it while anon is on. */}
+          <div className="ml-6 border-l border-rule pl-3">
+            <label className="flex items-start gap-2 py-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={round.show_participants}
+                onChange={(e) => patchRound({ show_participants: e.target.checked })}
+              />
+              <span>
+                <span className="font-medium text-ink">Show participant list</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  Used only when anonymization is off. Speakers appear beside the submission for
+                  assigned reviewers.
+                </span>
               </span>
-            </span>
-          </label>
+            </label>
+          </div>
         </div>
       </Card>
 
@@ -678,26 +701,24 @@ function OptionsPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         type="button"
-        className="text-left text-xs font-medium text-brand-700 underline-offset-2 hover:underline"
+        className="text-left text-xs font-medium text-signal underline-offset-2 hover:underline"
       >
         {optionsSummary(criterion) === "No options" || optionsSummary(criterion) === "—"
-          ? "Configure options"
+          ? "Configure scored options"
           : optionsSummary(criterion)}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 p-3">
         <PopoverHeader>
-          <PopoverTitle className="text-sm">
-            {criterion.type === "numeric" ? "Numeric range" : "Dropdown options"}
-          </PopoverTitle>
-          <PopoverDescription className="text-xs text-slate-500">
+          <PopoverTitle className="text-sm">Scored options</PopoverTitle>
+          <PopoverDescription className="text-xs text-muted-foreground">
             {criterion.type === "numeric"
-              ? "Min and max reviewers can enter."
-              : "One option per line. Optional points after a pipe: Accept | 5"}
+              ? "Min and max reviewers can enter for this numeric criterion."
+              : "For dropdown-with-points criteria. One option per line; optional points after a pipe — e.g. Accept | 5"}
           </PopoverDescription>
         </PopoverHeader>
         {criterion.type === "numeric" ? (
           <div className="mt-2 grid grid-cols-2 gap-2">
-            <label className="text-xs font-medium text-slate-600">
+            <label className="text-xs font-medium text-ink-2">
               Min
               <Input
                 type="number"
@@ -706,7 +727,7 @@ function OptionsPopover({
                 className="mt-1"
               />
             </label>
-            <label className="text-xs font-medium text-slate-600">
+            <label className="text-xs font-medium text-ink-2">
               Max
               <Input
                 type="number"
@@ -723,6 +744,7 @@ function OptionsPopover({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={"Accept | 5\nReject | 0\nMaybe | 2"}
             className="mt-2 font-mono text-xs"
+            aria-label="Scored options"
           />
         )}
         <Button
