@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { buttonClass, cx } from "@/components/ui";
+import { LogoMark } from "@/components/ui/logo";
 
 /**
  * N1b — the canonical SaaS three-section bar: wordmark hard-left, a centred
@@ -21,13 +22,17 @@ export function MarketingNav({
   links,
   ctaHref,
   ctaLabel,
+  overMedia = false,
 }: {
   links: Array<{ href: string; label: string }>;
   ctaHref: string;
   ctaLabel: string;
+  /** Light type while transparent — use when the hero is photography/video. */
+  overMedia?: boolean;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const frame = useRef(0);
+  const light = overMedia && !scrolled;
 
   useEffect(() => {
     const onScroll = () => {
@@ -60,7 +65,14 @@ export function MarketingNav({
       )}
     >
       <div className="mx-auto grid h-[var(--nav-height)] w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-        <Link href="/" className="wordmark nowrap-affordance justify-self-start text-[0.9375rem] text-ink">
+        <Link
+          href="/"
+          className={cx(
+            "wordmark nowrap-affordance flex items-center gap-2 justify-self-start text-[0.9375rem]",
+            light ? "text-paper" : "text-ink",
+          )}
+        >
+          <LogoMark size={20} />
           Conferencer
         </Link>
 
@@ -69,7 +81,12 @@ export function MarketingNav({
             <Link
               key={link.href}
               href={link.href}
-              className="nowrap-affordance rounded-pill px-3 py-1.5 text-[0.8125rem] text-neutral transition-colors duration-[120ms] ease-out hover:bg-paper-3 hover:text-ink"
+              className={cx(
+                "nowrap-affordance rounded-pill px-3 py-1.5 text-[0.8125rem] transition-colors duration-[120ms] ease-out",
+                light
+                  ? "text-paper/80 hover:bg-paper/10 hover:text-paper"
+                  : "text-neutral hover:bg-paper-3 hover:text-ink",
+              )}
             >
               {link.label}
             </Link>
@@ -79,11 +96,22 @@ export function MarketingNav({
         <div className="flex items-center gap-2 justify-self-end">
           <Link
             href="/sign-in"
-            className={cx(buttonClass("ghost", "sm"), "nowrap-affordance hidden sm:inline-flex")}
+            className={cx(
+              buttonClass("ghost", "sm"),
+              "nowrap-affordance hidden sm:inline-flex",
+              light && "text-paper hover:bg-paper/10 hover:text-paper",
+            )}
           >
             Sign in
           </Link>
-          <Link href={ctaHref} className={cx(buttonClass("primary", "sm"), "nowrap-affordance")}>
+          <Link
+            href={ctaHref}
+            className={cx(
+              buttonClass("primary", "sm"),
+              "nowrap-affordance",
+              light && "border-transparent bg-paper text-ink hover:bg-paper-3",
+            )}
+          >
             {ctaLabel}
           </Link>
         </div>
