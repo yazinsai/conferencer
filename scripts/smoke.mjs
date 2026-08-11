@@ -358,7 +358,7 @@ async function main() {
   }
 
   section("Speaker scoping");
-  await expectContains(speaker, "/portal", ["My Submissions", "Priya"], "speaker portal home");
+  await expectContains(speaker, "/portal", ["My submissions", "Priya"], "speaker portal home");
   await expectMissing(
     speaker,
     "/portal",
