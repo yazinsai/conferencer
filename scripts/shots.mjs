@@ -239,8 +239,12 @@ async function capture(chrome, shot, cookie) {
     });
     await sleep(shot.settle ?? 500);
 
+    // WebP for the shipped product captures: a 2× PNG of a dense admin screen is
+    // ~400 KB, which is not a reasonable thing to put on a landing page.
+    const format = flag("format", null) ?? shot.format ?? (SET === "product" ? "webp" : "png");
     const { data } = await page.send("Page.captureScreenshot", {
-      format: "png",
+      format,
+      ...(format === "webp" ? { quality: 92 } : {}),
       captureBeyondViewport: Boolean(shot.full),
       ...(shot.full
         ? {}
@@ -254,7 +258,7 @@ async function capture(chrome, shot, cookie) {
             },
           }),
     });
-    const file = join(OUT, `${shot.name}.png`);
+    const file = join(OUT, `${shot.name}.${format}`);
     writeFileSync(file, Buffer.from(data, "base64"));
     const kb = Math.round(Buffer.from(data, "base64").length / 1024);
     console.log(`  \x1b[32m✓\x1b[0m ${shot.name.padEnd(28)} ${shot.width}×${shot.height}  ${kb} KB  ${shot.path}`);
@@ -263,14 +267,41 @@ async function capture(chrome, shot, cookie) {
   }
 }
 
-/** The captures the landing page renders. Real UI, never a drawn mockup. */
-const PRODUCT = [
-  { name: "dashboard", path: `/admin/e/${SLUG}`, width: 1440, height: 900, auth: true },
-  { name: "agenda", path: `/admin/e/${SLUG}/agenda`, width: 1440, height: 900, auth: true },
-  { name: "review", path: `/admin/e/${SLUG}/evaluation`, width: 1440, height: 900, auth: true },
-  { name: "submissions", path: `/admin/e/${SLUG}/submissions`, width: 1440, height: 900, auth: true },
-  { name: "public-agenda", path: `/e/${SLUG}/agenda`, width: 1440, height: 900 },
-];
+/**
+ * The captures the landing page renders. Real UI, never a drawn mockup — a
+ * hand-built browser frame around an invented interface is the loudest "this was
+ * generated" tell there is.
+ *
+ * Record ids are seeded randomly, so they're discovered by scraping the index
+ * page for the first link rather than hardcoded.
+ */
+async function discover(path, pattern) {
+  const html = await fetch(`${BASE}${path}`, {
+    headers: { cookie: `cf_session=${await cookiePromise}` },
+  }).then((r) => r.text());
+  const match = pattern.exec(html);
+  return match?.[1] ?? null;
+}
+
+let cookiePromise = null;
+
+async function productShots() {
+  const formId = await discover(`/admin/e/${SLUG}/forms`, /\/forms\/([A-Za-z0-9]{12,})/);
+  const planId = await discover(`/admin/e/${SLUG}/evaluation`, /\/evaluation\/([A-Za-z0-9]{12,})/);
+
+  return [
+    { name: "dashboard", path: `/admin/e/${SLUG}`, width: 1440, height: 900, auth: true },
+    // Step 3 is the question list — the part of the builder worth showing.
+    formId
+      ? { name: "cfp-builder", path: `/admin/e/${SLUG}/forms/${formId}?step=3`, width: 1440, height: 900, auth: true }
+      : null,
+    planId
+      ? { name: "review", path: `/admin/e/${SLUG}/evaluation/${planId}`, width: 1440, height: 900, auth: true }
+      : null,
+    { name: "agenda", path: `/admin/e/${SLUG}/agenda`, width: 1440, height: 900, auth: true },
+    { name: "public-agenda", path: `/e/${SLUG}/agenda`, width: 1440, height: 900 },
+  ].filter(Boolean);
+}
 
 const RESPONSIVE = ["/", `/e/${SLUG}`, `/admin/e/${SLUG}`].flatMap((path) =>
   [320, 375, 414, 768, 1280, 1440].map((width) => ({
@@ -287,11 +318,11 @@ const RESPONSIVE = ["/", `/e/${SLUG}`, `/admin/e/${SLUG}`].flatMap((path) =>
 
 async function main() {
   if (!CHROME) throw new Error("No Chrome binary found — set CHROME_BIN");
-  const shots = SET === "responsive" ? RESPONSIVE : PRODUCT;
   mkdirSync(OUT, { recursive: true });
 
-  const needsAuth = shots.some((s) => s.auth);
-  const cookie = needsAuth ? await organizerCookie() : null;
+  cookiePromise = organizerCookie();
+  const cookie = await cookiePromise;
+  const shots = SET === "responsive" ? RESPONSIVE : await productShots();
 
   console.log(`\x1b[1mConferencer screenshots\x1b[0m → ${OUT} (${SET}, ${shots.length} shots)\n`);
   const chrome = await Chrome.launch();
