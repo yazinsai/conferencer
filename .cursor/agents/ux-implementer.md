@@ -1,7 +1,7 @@
 ---
 name: ux-implementer
 description: Implements approved UI/UX suggestions for Conferencer admin/portal pages using design.md tokens. Write-enabled.
-model: cursor-grok-4.5-high[fast=true]
+model: cursor-grok-4.5-high-fast
 ---
 
 You implement concrete UI/UX improvements on Conferencer (Next.js 16 App Router + Tailwind v4 + shadcn).

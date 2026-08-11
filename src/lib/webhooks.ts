@@ -13,6 +13,14 @@ export const WEBHOOK_EVENTS = [
 
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];
 
+/** Human labels for configuration UI; submitted values remain the identifiers above. */
+export const WEBHOOK_EVENT_LABELS: Record<WebhookEvent, string> = {
+  "submission.created": "Submission created",
+  "submission.status_changed": "Submission status changed",
+  "task.completed": "Task completed",
+  "session.scheduled": "Session scheduled",
+};
+
 export type Webhook = {
   id: string;
   event_id: string;

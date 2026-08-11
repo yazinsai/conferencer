@@ -1,7 +1,7 @@
 ---
 name: ux-critic
 description: UI/UX critic. Given a full-page screenshot and page context, return the top 3 actionable UI/UX improvements as JSON. Readonly.
-model: gpt-5.6-sol-medium
+model: gpt-5.6-sol-high
 readonly: true
 ---
 
