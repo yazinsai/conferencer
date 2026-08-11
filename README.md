@@ -159,10 +159,30 @@ fold, then the page becomes a list), and the app is *Stat-Led* (a real figure le
 panels beneath qualify it). They share the wordmark, the fonts, the CTA voice, the hairline
 weight and the accent budget; they differ in shape.
 
+**Icons are Solar, and there is only one set.** Two icon libraries on one page is a stroke-voice
+mismatch the eye catches immediately, so `lucide-react` is gone. Solar ships 7,627 icons;
+`npm run icons` extracts only the ones the product renders into
+`src/components/ui/icons.generated.ts` (37 icons, 14 KB), so `@iconify-json/solar` stays a
+devDependency that nothing at build or runtime imports. **`npx shadcn@latest add` writes Lucide
+imports — swap them for `<Icon>` before the component ships.**
+
 **Fonts are local, never fetched.** Geist (display) and Geist Mono (the wordmark and
 tabular figures) arrive through the `geist` dependency; Switzer (body) is vendored as three
 woff2 files under `src/fonts/` with its licence. `next build` has to succeed inside a Docker
 build with no network, and that invariant predates the design system.
+
+**The demo has real faces, and the people are fictional.** The eleven speakers with a headshot use
+photographs from [randomuser.me](https://randomuser.me/photos), whose portraits are hand-picked from
+the authorized section of UI Faces — a set curated for exactly this use. They are vendored under
+`seed/assets/portraits/` (57 KB) so seeding stays offline and takes under two seconds, and the
+indices are pinned so a re-run never reshuffles who is who. **The portraits do not depict the named
+individuals**; see `seed/assets/NOTICE.md`. One speaker deliberately has no photo, so the gallery's
+no-photo fallback stays visible.
+
+Two photographs from Pixabay sit behind the public event fold and the landing page's proof band —
+the only two places `design.md` allows one. `public/media/NOTICE.md` records both. Refetch either set
+with `npm run media faces` / `npm run media scenes`; the latter needs `PIXABAY_API_KEY` in
+`.env.local` and `ffmpeg`, and neither is ever needed to run the app.
 
 **Colour is checked, not asserted.** `npm run contrast` recomputes the WCAG ratio for all 27
 `(text, surface)` pairs straight out of `src/app/tokens.css` and exits non-zero on a
@@ -175,7 +195,10 @@ horizontal scroll, no clickable label wrapping onto a second line, every interac
 named, every image with alt text, nothing above the fold lazy-loaded, the hero fitting a
 1280×800 laptop, and — by dispatching real Tab keys, because `:focus-visible` is a keyboard
 heuristic that a scripted `.focus()` will not trigger — a visible ring on every keyboard
-stop, and that the two scroll-driven navs actually change state. 106 checks.
+stop, and that the two scroll-driven navs actually change state. It also measures the text over the
+two photographic surfaces the only way that works: it removes every glyph, photographs the surface
+underneath, decodes the PNG and finds the worst-case pixel behind each line — a gradient over a
+photograph cannot be checked from tokens. 108 checks.
 
 **Authorization lives in one place** — `src/lib/guards.ts` — and is called by every page
 *and* every server action. Server actions are reachable by direct POST, so hiding a link is
@@ -221,8 +244,12 @@ src/lib/
 
 src/server/                "use server" action modules, one per surface
 src/fonts/                 vendored woff2 + licences (nothing is fetched at build time)
+seed/assets/portraits/     the eleven speaker headshots + NOTICE.md
+public/media/              the two photographs + NOTICE.md
+public/screens/            real captures of this app, shown on the landing page
 src/components/
   ui/                      shadcn primitives + index.tsx (the design system)
+  ui/icons.generated.ts    the Solar icons in use — regenerate, don't edit
   admin/ public/ portal/ review/ crm/   surface-specific components
   marketing/               the landing page's nav, bands, figures and FAQ
   client/                  the "use client" islands
@@ -255,6 +282,8 @@ scripts/                   smoke.mjs (the end-to-end test), cron.ts
 | `npm run smoke` | End-to-end HTTP test of the whole product |
 | `npm run contrast` | WCAG audit of every colour pair in the design system |
 | `npm run audit` | Layout and a11y audit of the rendered pages, in a real browser |
+| `npm run icons` | Regenerate the icon module from the Solar set |
+| `npm run media` | Refetch the speaker portraits and the two photographs (maintainer-only) |
 | `npm run shots` | Regenerate the real product captures the landing page shows |
 | `npm run typecheck` | `next typegen` then `tsc --noEmit` |
 | `npm run lint` | ESLint |

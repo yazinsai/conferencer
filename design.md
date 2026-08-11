@@ -155,6 +155,35 @@ hero where the headline only has half the page, `display-s` for a closing statem
 Display caps at 4.5 rem (72 px) — under the 5.5 rem ceiling — because every headline in this product
 runs 40–60 characters and a bigger clamp would push the hero past the fold at 1280×800 (gate 44b).
 
+## Iconography
+
+**Solar** ([Iconify](https://icon-sets.iconify.design/solar/), MIT), one set, no exceptions —
+two icon libraries on one page is a stroke-voice mismatch the eye reads before it reads anything else.
+
+Two style families, mirroring the display/body split in the type:
+
+- **`linear`** — the single voice. A hairline stroke that sits at the same weight as the 1 px rules.
+- **`bold`** — one register only, for filled status markers that have to read at 14 px (toasts).
+
+Solar ships 7,627 icons; `scripts/icons.mjs` extracts only the ones the product renders into
+`src/components/ui/icons.generated.ts` (37 icons, 14 KB of path data). `@iconify-json/solar` is a
+devDependency that nothing at build time or runtime imports. Adding an icon means adding it to the
+manifest at the top of that script and re-running `npm run icons`; the script fails on an unknown
+name rather than emitting a hole.
+
+`<Icon>` has no hooks, so it renders in server and client components alike, and is `aria-hidden` by
+default — an icon beside a label repeats the label, and a screen reader should not hear it twice.
+Pass `label` when the icon is the only thing naming a control.
+
+**Where icons go.** Only where they carry information: sidebar wayfinding, the kind of thing a
+dashboard nudge is about, the two different data types on a session's meta line, disclosure state,
+empty states, toasts. **Not** on the landing page's numbered loop steps or its spec sheet — the
+numerals and the row labels already carry those, and an icon per feature card is the icon-tile grid
+slop gate 3 exists to stop.
+
+`npx shadcn@latest add <name>` writes `lucide-react` imports. They have to be swapped for `<Icon>`
+before the component ships; there is no Lucide in this project and there should not be.
+
 ## Spacing
 
 4-point named scale, mirrored onto Tailwind's `--spacing-*` so both `gap-md` and `var(--space-md)` work.
@@ -250,6 +279,23 @@ These are deliberate departures. Each names the rule it bends and why.
    (gates 7 and 22 are loosened for modern-minimal) and true to the studied DNA.
 7. **The inert `.dark` block stays in `globals.css`.** The product is light-only on purpose; the block
    costs nothing and removing it would be an unrelated change.
+8. **Photography is allowed in exactly three places**, and the system is otherwise photograph-free:
+   - **speaker headshots**, everywhere `<Avatar>` renders — a conference's speakers are its content,
+     and initials on a gradient are the most placeholder-looking thing a programme site can show;
+   - **the public event fold**, as a single full-bleed photograph behind the marquee, which
+     Macrostructure 03 already sanctions;
+   - **the landing page's proof band**, which was already a dark surface flip.
+
+   Everything else — the landing hero, feature blocks, session and speaker cards, the spec sheet —
+   stays typographic. A photograph must be saying something true about the page it is on; a mood is
+   not a reason.
+
+   **The scrim contract.** Any photograph carrying text sits under a two-stop gradient of
+   `--color-ink`, on the *background* and never on the text, and the surface sets its `color` in the
+   same rule it sets the background. Contrast is *measured* on the rendered pixels — `npm run audit`
+   removes every glyph, photographs the surface, and finds the worst-case pixel behind each line —
+   because a gradient over a photograph cannot be checked from tokens. Photographs are desaturated
+   before encoding so they read as part of a monochrome system rather than as stock colour.
 
 ## Honest copy
 
