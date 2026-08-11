@@ -428,6 +428,24 @@ export function countSubmissionsBySubmitter(
   );
 }
 
+/** Most recently updated draft for this submitter on a form (R-PUB-6 resume). */
+export function latestDraftForSubmitter(
+  eventId: string,
+  contactId: string,
+  formId: string,
+): Submission | undefined {
+  return get<Submission>(
+    `SELECT * FROM submissions
+      WHERE event_id = ? AND form_id = ? AND submitter_contact_id = ?
+        AND status = 'draft' AND is_draft = 1
+      ORDER BY updated_at DESC
+      LIMIT 1`,
+    eventId,
+    formId,
+    contactId,
+  );
+}
+
 /* --------------------------------------------------------------- public --- */
 
 export type PublicSession = SubmissionRow & {

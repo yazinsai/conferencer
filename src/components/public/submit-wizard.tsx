@@ -2,7 +2,16 @@
 
 import { useMemo, useState, useTransition } from "react";
 
-import { buttonClass, cx, inputClass } from "@/components/ui";
+import { AttendeePreview } from "@/components/public/attendee-preview";
+import { buttonClass, cx, Icon, inputClass } from "@/components/ui";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { visibleQuestionIds, parseCondition, conditionMet } from "@/lib/conditions";
 import { stripHtml } from "@/lib/fields";
 import {
@@ -44,14 +53,57 @@ export type WizardProps = {
   autoRedirect: boolean;
   redirectSeconds: number;
   combinedLimit: { keys: string[]; max: number; label: string } | null;
+  trackColors?: Record<string, string>;
   signedIn: null | { email: string; name: string };
   initial: {
     submissionId: string | null;
+    isDraft: boolean;
     answers: Record<string, string | string[]>;
     participants: WizardParticipant[];
   };
   limitReached: boolean;
   submissionLimit: number | null;
+};
+
+const ATTENDEE_KEYS = new Set(["title", "description", "key_takeaway"]);
+const ABOUT_KEYS = new Set([
+  "track",
+  "format",
+  "level",
+  "audience_level",
+  "workshop_prerequisites",
+  "tags",
+  "language",
+]);
+const REVIEWER_KEYS = new Set(["notes_for_reviewers"]);
+
+const FIELD_TIPS: Record<
+  string,
+  { title: string; principles: string[]; example?: string }
+> = {
+  title: {
+    title: "What works",
+    principles: [
+      "Be specific about the problem or outcome.",
+      "Avoid generic titles like “Scaling with AI.”",
+    ],
+    example: "How we cut inference costs 60% without changing models",
+  },
+  description: {
+    title: "What works",
+    principles: [
+      "Write this for attendees deciding whether to attend—not reviewers.",
+      "Explain the problem, what you’ll cover, and what they’ll leave knowing.",
+    ],
+  },
+  key_takeaway: {
+    title: "What works",
+    principles: [
+      "One concrete outcome an attendee can act on after the session.",
+      "Prefer a verb + result over a topic label.",
+    ],
+    example: "Ship a cost dashboard that flags the top three inference spenders",
+  },
 };
 
 const STEP_LABELS = ["Welcome", "Account", "Submission", "Participants", "Review"];
@@ -66,7 +118,14 @@ export function SubmitWizard(props: WizardProps) {
     return list;
   }, [props.showWelcome, props.collectParticipants]);
 
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(() => {
+    // Resume drafts on the submission step (skip welcome / signed-in account).
+    if (props.initial.submissionId && props.signedIn) {
+      const submissionStep = steps.indexOf(2);
+      return submissionStep >= 0 ? submissionStep : 0;
+    }
+    return 0;
+  });
   const [answers, setAnswers] = useState<Record<string, string | string[]>>(props.initial.answers);
   const [participants, setParticipants] = useState<WizardParticipant[]>(
     props.initial.participants.length
@@ -78,8 +137,9 @@ export function SubmitWizard(props: WizardProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [banner, setBanner] = useState<{ tone: "error" | "success"; text: string } | null>(null);
   const [done, setDone] = useState<null | { redirectTo: string }>(null);
-  const [draftSaved, setDraftSaved] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(props.initial.isDraft);
   const [accountMode, setAccountMode] = useState<"signup" | "signin">("signup");
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const step = steps[stepIndex];
@@ -87,6 +147,64 @@ export function SubmitWizard(props: WizardProps) {
     props.submissionQuestions.map((q) => ({ id: q.id, condition: q.condition })),
     answers,
   );
+
+  const answerByKey = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const question of props.submissionQuestions) {
+      const raw = answers[question.id];
+      map[question.key] = Array.isArray(raw) ? raw.join(", ") : String(raw ?? "");
+    }
+    return map;
+  }, [answers, props.submissionQuestions]);
+
+  const previewData = useMemo(() => {
+    const track = answerByKey.track?.trim() ?? "";
+    return {
+      title: answerByKey.title ?? "",
+      abstract: answerByKey.description ?? "",
+      takeaway: answerByKey.key_takeaway ?? "",
+      track,
+      trackColor: track ? (props.trackColors?.[track] ?? null) : null,
+      format: answerByKey.format?.trim() ?? "",
+      level: (answerByKey.audience_level || answerByKey.level || "").trim(),
+      speakers: participants.map((p) => ({
+        firstName: p.values.first_name ?? "",
+        lastName: p.values.last_name ?? "",
+        jobTitle: p.values.job_title,
+        company: p.values.company,
+      })),
+    };
+  }, [answerByKey, participants, props.trackColors]);
+
+  const submissionGroups = useMemo(() => {
+    const visibleQuestions = props.submissionQuestions.filter((q) => visible.has(q.id));
+    const groups: Array<{ id: string; title: string; hint?: string; questions: WizardQuestion[] }> =
+      [
+        {
+          id: "attendees",
+          title: "What attendees will see",
+          hint: "This copy shows up on the public programme and session page.",
+          questions: visibleQuestions.filter((q) => ATTENDEE_KEYS.has(q.key)),
+        },
+        {
+          id: "about",
+          title: "About the session",
+          questions: visibleQuestions.filter((q) => ABOUT_KEYS.has(q.key)),
+        },
+        {
+          id: "reviewers",
+          title: "For reviewers only",
+          hint: "Private — the programme committee sees this; attendees do not.",
+          questions: visibleQuestions.filter((q) => REVIEWER_KEYS.has(q.key)),
+        },
+      ];
+    const known = new Set([...ATTENDEE_KEYS, ...ABOUT_KEYS, ...REVIEWER_KEYS]);
+    const other = visibleQuestions.filter((q) => !known.has(q.key));
+    if (other.length) {
+      groups.splice(2, 0, { id: "other", title: "Additional details", questions: other });
+    }
+    return groups.filter((g) => g.questions.length > 0);
+  }, [props.submissionQuestions, visible]);
 
   const combinedUsed = props.combinedLimit
     ? props.combinedLimit.keys.reduce((sum, key) => {
@@ -241,7 +359,14 @@ export function SubmitWizard(props: WizardProps) {
         setBanner({ tone: "error", text: result.error ?? "Could not save the draft." });
         return;
       }
-      if (result.submissionId) setSubmissionId(result.submissionId);
+      if (result.submissionId) {
+        setSubmissionId(result.submissionId);
+        // Persist id in the URL so a refresh resumes this draft (R-PUB-6).
+        const url = new URL(window.location.href);
+        url.searchParams.delete("new");
+        url.searchParams.set("submission", result.submissionId);
+        window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+      }
       setDraftSaved(true);
       setBanner({ tone: "success", text: "Draft saved. You can close this page and come back." });
     });
@@ -305,7 +430,10 @@ export function SubmitWizard(props: WizardProps) {
           <a href={done.redirectTo} className={buttonClass("primary", "lg")}>
             Continue to portal
           </a>
-          <a href={`/e/${props.slug}/submit/${props.formId}`} className={buttonClass("secondary", "lg")}>
+          <a
+            href={`/e/${props.slug}/submit/${props.formId}?new=1`}
+            className={buttonClass("secondary", "lg")}
+          >
             Submit another proposal
           </a>
         </div>
@@ -313,9 +441,14 @@ export function SubmitWizard(props: WizardProps) {
     );
   }
 
+  const submissionStep = step === 2;
+
   return (
     <div>
-      <ol className="mb-6 flex flex-wrap gap-2" aria-label="Progress">
+      <ol
+        className={cx("mb-6 flex flex-wrap gap-2", !submissionStep && "max-w-3xl")}
+        aria-label="Progress"
+      >
         {steps.map((s, index) => (
           <li key={s} className="flex items-center gap-2">
             <span
@@ -349,6 +482,7 @@ export function SubmitWizard(props: WizardProps) {
           role="alert"
           className={cx(
             "mb-4 rounded-md border px-3 py-2 text-sm",
+            !submissionStep && "max-w-3xl",
             banner.tone === "error"
               ? "border-red-200 bg-red-50 text-red-700"
               : "border-positive/25 bg-positive-soft text-positive",
@@ -359,12 +493,22 @@ export function SubmitWizard(props: WizardProps) {
       ) : null}
 
       {draftSaved ? (
-        <div className="mb-4 rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-sm text-warn">
+        <div
+          className={cx(
+            "mb-4 rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-sm text-warn",
+            !submissionStep && "max-w-3xl",
+          )}
+        >
           <strong>Draft saved.</strong> This proposal is saved as a draft and is not submitted yet.
         </div>
       ) : null}
 
-      <div className="rounded-card border border-rule bg-paper p-6">
+      <div
+        className={cx(
+          "rounded-card border border-rule bg-paper p-6",
+          !submissionStep && "max-w-3xl",
+        )}
+      >
         {step === 0 ? (
           <section>
             <h2 className="text-lg font-semibold text-ink">
@@ -506,42 +650,96 @@ export function SubmitWizard(props: WizardProps) {
 
         {step === 2 ? (
           <section>
-            <h2 className="text-lg font-semibold text-ink">
-              {props.sectionSubmission.heading ?? "Your submission"}
-            </h2>
-            {props.sectionSubmission.description ? (
-              <div
-                className="prose-cf mt-2 text-sm text-neutral"
-                dangerouslySetInnerHTML={{ __html: props.sectionSubmission.description }}
-              />
-            ) : null}
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-ink">
+                  {props.sectionSubmission.heading ?? "Your submission"}
+                </h2>
+                {props.sectionSubmission.description ? (
+                  <div
+                    className="prose-cf mt-2 text-sm text-neutral"
+                    dangerouslySetInnerHTML={{ __html: props.sectionSubmission.description }}
+                  />
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className={cx(buttonClass("secondary", "sm"), "lg:hidden")}
+                onClick={() => setMobilePreviewOpen(true)}
+              >
+                Preview
+              </button>
+            </div>
             {props.limitReached ? (
               <div className="mt-3 rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-sm text-warn">
                 You have reached the limit of {props.submissionLimit} submissions for this call.
               </div>
             ) : null}
-            <div className="mt-4 space-y-5">
-              {props.submissionQuestions
-                .filter((q) => visible.has(q.id))
-                .map((question) => (
-                  <QuestionInput
-                    key={question.id}
-                    question={question}
-                    value={answers[question.id]}
-                    error={errors[question.id]}
-                    onChange={(value) => setAnswer(question.id, value)}
-                  />
+
+            <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start">
+              <div className="space-y-8">
+                {submissionGroups.map((group) => (
+                  <fieldset key={group.id} className="min-w-0">
+                    <legend className="w-full">
+                      <h3 className="text-sm font-semibold text-ink">{group.title}</h3>
+                      {group.hint ? (
+                        <p className="mt-1 text-xs text-muted-foreground">{group.hint}</p>
+                      ) : null}
+                    </legend>
+                    <div className="mt-4 space-y-5">
+                      {group.questions.map((question) => (
+                        <QuestionInput
+                          key={question.id}
+                          question={question}
+                          value={answers[question.id]}
+                          error={errors[question.id]}
+                          tip={FIELD_TIPS[question.key]}
+                          onChange={(value) => setAnswer(question.id, value)}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
                 ))}
+              </div>
+
+              <aside className="hidden lg:block">
+                <div className="sticky top-6 rounded-card border border-rule bg-paper-2/60 p-4">
+                  <div className="mb-3 flex items-baseline justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-ink">Attendee preview</h3>
+                    <span className="text-xs text-muted-foreground">Live</span>
+                  </div>
+                  <AttendeePreview data={previewData} />
+                </div>
+              </aside>
             </div>
-            {props.combinedLimit ? (
-              <p
-                className={cx(
-                  "mt-4 text-xs",
-                  combinedUsed > props.combinedLimit.max ? "text-destructive" : "text-muted-foreground",
-                )}
+
+            {mobilePreviewOpen ? (
+              <div
+                className="fixed inset-0 z-50 lg:hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Attendee preview"
               >
-                {props.combinedLimit.label}: {combinedUsed} / {props.combinedLimit.max} characters
-              </p>
+                <button
+                  type="button"
+                  className="absolute inset-0 bg-ink/40"
+                  aria-label="Close preview"
+                  onClick={() => setMobilePreviewOpen(false)}
+                />
+                <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-card border border-rule bg-paper p-4 shadow-[var(--shadow-card)]">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-ink">Attendee preview</h3>
+                    <button
+                      type="button"
+                      className={buttonClass("ghost", "sm")}
+                      onClick={() => setMobilePreviewOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <AttendeePreview data={previewData} />
+                </div>
+              </div>
             ) : null}
           </section>
         ) : null}
@@ -778,11 +976,13 @@ function QuestionInput({
   question,
   value,
   error,
+  tip,
   onChange,
 }: {
   question: WizardQuestion;
   value: string | string[] | undefined;
   error?: string;
+  tip?: { title: string; principles: string[]; example?: string };
   onChange: (value: string | string[]) => void;
 }) {
   const id = `q-${question.id}`;
@@ -791,11 +991,14 @@ function QuestionInput({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-neutral">
-        {question.label}
-        {question.required ? <span className="ml-0.5 text-destructive">*</span> : null}
-      </label>
-      {question.helpText ? (
+      <div className="mb-1 flex items-center gap-1.5">
+        <label htmlFor={id} className="block text-sm font-medium text-neutral">
+          {question.label}
+          {question.required ? <span className="ml-0.5 text-destructive">*</span> : null}
+        </label>
+        {tip ? <FieldTips tip={tip} /> : null}
+      </div>
+      {!tip && question.helpText ? (
         <p className="mb-1 text-xs text-muted-foreground">{question.helpText}</p>
       ) : null}
 
@@ -912,4 +1115,40 @@ function inputTypeFor(type: string): string {
     default:
       return "text";
   }
+}
+
+function FieldTips({
+  tip,
+}: {
+  tip: { title: string; principles: string[]; example?: string };
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger
+        type="button"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-rule hover:text-ink"
+        aria-label="Tips"
+      >
+        <Icon name="info" size={14} />
+        <span className="sr-only">Tips</span>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-80 p-3">
+        <PopoverHeader>
+          <PopoverTitle className="text-sm">{tip.title}</PopoverTitle>
+          <PopoverDescription className="sr-only">Writing tips for this field.</PopoverDescription>
+        </PopoverHeader>
+        <ul className="list-disc space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
+          {tip.principles.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        {tip.example ? (
+          <p className="rounded-md bg-paper-2 px-2.5 py-2 text-xs leading-relaxed text-neutral">
+            <span className="font-medium text-ink">Better: </span>
+            {tip.example}
+          </p>
+        ) : null}
+      </PopoverContent>
+    </Popover>
+  );
 }

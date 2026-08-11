@@ -37,6 +37,7 @@ import {
   countSubmissionsBySubmitter,
   createSubmission,
   getSubmission,
+  latestDraftForSubmitter,
   listParticipants,
   removeParticipant,
   updateSubmission,
@@ -256,6 +257,11 @@ export async function saveDraftAction(payload: WizardPayload): Promise<WizardRes
     "Untitled draft";
 
   let submissionId = payload.submissionId ?? null;
+  if (!submissionId && !form.allow_multiple_drafts) {
+    // Single-draft forms: keep saving into the existing draft instead of erroring
+    // after a refresh that dropped the in-memory submission id (R-PUB-6).
+    submissionId = latestDraftForSubmitter(event.id, contact.id, form.id)?.id ?? null;
+  }
   if (submissionId) {
     const existing = getSubmission(submissionId);
     if (!existing || existing.event_id !== event.id || existing.submitter_contact_id !== contact.id) {
@@ -269,12 +275,6 @@ export async function saveDraftAction(payload: WizardPayload): Promise<WizardRes
       status: "draft",
     });
   } else {
-    if (!form.allow_multiple_drafts) {
-      const drafts = countSubmissionsBySubmitter(event.id, contact.id, form.id);
-      if (drafts > 0) {
-        return { ok: false, error: "You already have a draft on this form." };
-      }
-    }
     const created = createSubmission(event.id, {
       form_id: form.id,
       kind: form.collects === "sessions" ? "session" : "abstract",
