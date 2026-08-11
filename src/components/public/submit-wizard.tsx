@@ -79,6 +79,7 @@ export function SubmitWizard(props: WizardProps) {
   const [banner, setBanner] = useState<{ tone: "error" | "success"; text: string } | null>(null);
   const [done, setDone] = useState<null | { redirectTo: string }>(null);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [accountMode, setAccountMode] = useState<"signup" | "signin">("signup");
   const [pending, startTransition] = useTransition();
 
   const step = steps[stepIndex];
@@ -272,6 +273,13 @@ export function SubmitWizard(props: WizardProps) {
     });
   }
 
+  const needsAccountAction = step === 1 && !signedIn;
+  const showBack = stepIndex > 0;
+  const showNext = stepIndex < steps.length - 1 && !needsAccountAction;
+  const showSubmit = stepIndex === steps.length - 1;
+  const showDraft = props.allowDrafts && signedIn && step >= 2;
+  const showFooter = showBack || showNext || showSubmit || showDraft;
+
   if (done) {
     return (
       <section aria-live="polite" className="rounded-lg border border-rule bg-paper p-8">
@@ -382,28 +390,35 @@ export function SubmitWizard(props: WizardProps) {
                   You need an account so you can edit your submission and track its status. No email
                   confirmation is required.
                 </p>
-                <div className="mt-4 grid gap-6 md:grid-cols-2">
-                  <form
-                    action={handleAccount}
-                    className="rounded-md border border-rule p-4"
-                  >
+
+                {accountMode === "signup" ? (
+                  <form action={handleAccount} className="mt-6 max-w-md">
                     <input type="hidden" name="mode" value="signup" />
-                    <h3 className="text-sm font-semibold text-ink">Create an account</h3>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                    <h3 className="text-sm font-semibold text-ink">New here?</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Create an account to continue with your proposal.
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
                       <label className="block text-xs font-medium text-neutral">
                         First name
-                        <input name="first_name" className={inputClass} required />
+                        <input name="first_name" className={inputClass} required autoComplete="given-name" />
                       </label>
                       <label className="block text-xs font-medium text-neutral">
                         Last name
-                        <input name="last_name" className={inputClass} required />
+                        <input name="last_name" className={inputClass} required autoComplete="family-name" />
                       </label>
                     </div>
-                    <label className="mt-2 block text-xs font-medium text-neutral">
+                    <label className="mt-3 block text-xs font-medium text-neutral">
                       Email
-                      <input name="email" type="email" className={inputClass} required />
+                      <input
+                        name="email"
+                        type="email"
+                        className={inputClass}
+                        required
+                        autoComplete="email"
+                      />
                     </label>
-                    <label className="mt-2 block text-xs font-medium text-neutral">
+                    <label className="mt-3 block text-xs font-medium text-neutral">
                       Password
                       <input
                         name="password"
@@ -411,37 +426,79 @@ export function SubmitWizard(props: WizardProps) {
                         minLength={8}
                         className={inputClass}
                         required
+                        autoComplete="new-password"
                       />
                     </label>
                     <button
                       type="submit"
                       disabled={pending}
-                      className={cx(buttonClass("primary", "md"), "mt-3 w-full")}
+                      className={cx(buttonClass("primary", "md"), "mt-4 w-full")}
                     >
                       Create account and continue
                     </button>
+                    <p className="mt-5 text-sm text-neutral">
+                      Already have an account?{" "}
+                      <button
+                        type="button"
+                        className="font-medium text-ink underline decoration-rule-2 underline-offset-2 hover:decoration-ink"
+                        onClick={() => {
+                          setAccountMode("signin");
+                          setBanner(null);
+                        }}
+                      >
+                        Sign in →
+                      </button>
+                    </p>
                   </form>
-
-                  <form action={handleAccount} className="rounded-md border border-rule p-4">
+                ) : (
+                  <form action={handleAccount} className="mt-6 max-w-md">
                     <input type="hidden" name="mode" value="signin" />
-                    <h3 className="text-sm font-semibold text-ink">I already have one</h3>
-                    <label className="mt-3 block text-xs font-medium text-neutral">
+                    <h3 className="text-sm font-semibold text-ink">Welcome back</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Sign in to continue with your proposal.
+                    </p>
+                    <label className="mt-4 block text-xs font-medium text-neutral">
                       Email
-                      <input name="email" type="email" className={inputClass} required />
+                      <input
+                        name="email"
+                        type="email"
+                        className={inputClass}
+                        required
+                        autoComplete="email"
+                      />
                     </label>
-                    <label className="mt-2 block text-xs font-medium text-neutral">
+                    <label className="mt-3 block text-xs font-medium text-neutral">
                       Password
-                      <input name="password" type="password" className={inputClass} required />
+                      <input
+                        name="password"
+                        type="password"
+                        className={inputClass}
+                        required
+                        autoComplete="current-password"
+                      />
                     </label>
                     <button
                       type="submit"
                       disabled={pending}
-                      className={cx(buttonClass("secondary", "md"), "mt-3 w-full")}
+                      className={cx(buttonClass("primary", "md"), "mt-4 w-full")}
                     >
                       Sign in and continue
                     </button>
+                    <p className="mt-5 text-sm text-neutral">
+                      New here?{" "}
+                      <button
+                        type="button"
+                        className="font-medium text-ink underline decoration-rule-2 underline-offset-2 hover:decoration-ink"
+                        onClick={() => {
+                          setAccountMode("signup");
+                          setBanner(null);
+                        }}
+                      >
+                        Create an account →
+                      </button>
+                    </p>
                   </form>
-                </div>
+                )}
               </>
             )}
           </section>
@@ -650,42 +707,45 @@ export function SubmitWizard(props: WizardProps) {
           </section>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-rule pt-4">
-          {stepIndex > 0 ? (
-            <button type="button" onClick={goBack} className={buttonClass("secondary", "md")}>
-              Back
-            </button>
-          ) : null}
-          {stepIndex < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={pending}
-              className={buttonClass("primary", "md")}
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={pending || !signedIn}
-              className={buttonClass("primary", "lg")}
-            >
-              {pending ? "Submitting…" : submissionId ? "Save and submit" : "Submit proposal"}
-            </button>
-          )}
-          {props.allowDrafts && signedIn && step >= 2 ? (
-            <button
-              type="button"
-              onClick={saveDraft}
-              disabled={pending}
-              className={buttonClass("secondary", "md")}
-            >
-              Save as draft
-            </button>
-          ) : null}
-        </div>
+        {showFooter ? (
+          <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-rule pt-4">
+            {showBack ? (
+              <button type="button" onClick={goBack} className={buttonClass("secondary", "md")}>
+                Back
+              </button>
+            ) : null}
+            {showNext ? (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={pending}
+                className={buttonClass("primary", "md")}
+              >
+                Next
+              </button>
+            ) : null}
+            {showSubmit ? (
+              <button
+                type="button"
+                onClick={submit}
+                disabled={pending || !signedIn}
+                className={buttonClass("primary", "lg")}
+              >
+                {pending ? "Submitting…" : submissionId ? "Save and submit" : "Submit proposal"}
+              </button>
+            ) : null}
+            {showDraft ? (
+              <button
+                type="button"
+                onClick={saveDraft}
+                disabled={pending}
+                className={buttonClass("secondary", "md")}
+              >
+                Save as draft
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
