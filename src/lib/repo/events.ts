@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { all, get, run } from "../db";
 import { id, slugify } from "../ids";
 import { nowIso } from "../datetime";
@@ -45,9 +47,9 @@ export function getEvent(eventId: string): Event | undefined {
   return get<Event>("SELECT * FROM events WHERE id = ?", eventId);
 }
 
-export function getEventBySlug(slug: string): Event | undefined {
+export const getEventBySlug = cache(function getEventBySlug(slug: string): Event | undefined {
   return get<Event>("SELECT * FROM events WHERE slug = ?", slug);
-}
+});
 
 /** The event a bare /admin or /sessions URL should resolve to. */
 export function defaultEvent(): Event | undefined {

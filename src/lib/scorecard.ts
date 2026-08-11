@@ -1,5 +1,18 @@
 /** Client-safe scorecard types and helpers (no DB imports). */
 
+export type ScorecardQuestion = {
+  id: string;
+  round_id: string;
+  type: string;
+  label: string;
+  options: string;
+  weight: number;
+  min: number | null;
+  max: number | null;
+  is_required: number;
+  sort_order: number;
+};
+
 export const SCORECARD_TYPES = [
   "scale_1_3",
   "scale_1_5",

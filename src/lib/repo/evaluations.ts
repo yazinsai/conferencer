@@ -7,9 +7,11 @@ import {
   SCORECARD_TYPE_LABELS,
   scaleRange,
   isScored,
+  type ScorecardQuestion,
 } from "../scorecard";
 
 export { SCORECARD_TYPES, SCORECARD_TYPE_LABELS, scaleRange, isScored };
+export type { ScorecardQuestion };
 
 export type EvaluationPlan = {
   id: string;
@@ -43,19 +45,6 @@ export type EvaluationRound = {
   filter_fields: string;
   show_participants: number;
   created_at: string;
-};
-
-export type ScorecardQuestion = {
-  id: string;
-  round_id: string;
-  type: string;
-  label: string;
-  options: string;
-  weight: number;
-  min: number | null;
-  max: number | null;
-  is_required: number;
-  sort_order: number;
 };
 
 export type Assignment = {

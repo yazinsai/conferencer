@@ -85,6 +85,40 @@ h6 {
   white-space: nowrap;
 }
 
+/* Inline Link pending hint (useLinkStatus). Fixed size, delayed show. */
+.nav-hint {
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.nav-hint.is-pending {
+  visibility: visible;
+  animation-name: nav-hint-fade, nav-hint-pulse;
+  animation-duration: 200ms, 1s;
+  animation-delay: 100ms, 100ms;
+  animation-timing-function: ease, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: forwards, none;
+}
+
+@keyframes nav-hint-fade {
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes nav-hint-pulse {
+  50% {
+    opacity: 0.15;
+  }
+}
+
 /* The single orchestrated entrance in the whole product: the landing hero.
    Staggered by DOM index, capped at 300ms, opacity+transform only. */
 @keyframes hm-reveal {
