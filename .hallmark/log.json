@@ -1,0 +1,15 @@
+[
+  {
+    "date": "2026-08-11",
+    "scope": "app",
+    "macrostructure": "Workbench (marketing) · Marquee Hero (public event) · Stat-Led (app)",
+    "theme": "studied-DNA",
+    "theme_axes": "light paper / grotesk-sans display / neutral accent (ink-as-accent)",
+    "genre": "modern-minimal",
+    "nav": "N1b (marketing) · N12 (public event) · N3 (app)",
+    "footer": "Ft5 (marketing) · Ft1 (public event) · none (app)",
+    "enrichment": "real product screenshots in hairline figures (no re-drawn chrome)",
+    "design_system": "design.md",
+    "brief": "Conferencer · open-source conference programme management — product landing page, public conference site and organizer dashboard redesigned from a user-supplied reference DNA"
+  }
+]

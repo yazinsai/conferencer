@@ -1,0 +1,60 @@
+{
+  "scannedAt": "2026-08-11",
+  "project": "conferencer",
+  "framework": {
+    "name": "Next.js",
+    "version": "16.3.0",
+    "router": "app",
+    "citation": "package.json L24",
+    "notes": "Turbopack dev. Server components read SQLite synchronously; no client-side data fetching anywhere."
+  },
+  "fontStack": {
+    "found": "system stack only — no web font is loaded",
+    "citation": "src/app/globals.css L20-23 (--font-sans: ui-sans-serif, system-ui, …)",
+    "constraint": "src/app/layout.tsx L16 — `next build` must succeed inside a Docker build with no network, so no font may be fetched at build time.",
+    "verdict": "Hallmark slop gate 1 fails today (system default as display face). Fix must be a LOCAL font — never next/font/google."
+  },
+  "palette": {
+    "found": [
+      "Tailwind v4 @theme brand-50…brand-900, hex indigo — src/app/globals.css L10-19",
+      "shadcn/ui OKLCH variables in :root — src/app/globals.css L25-63 (--primary: oklch(0.511 0.262 276.966))",
+      "an inert .dark block — src/app/globals.css L188-216 (project is light-only on purpose)"
+    ],
+    "debt": "slate-<n> appears ~800 times across 84 .tsx files; brand-<n> throughout. Remapping the Tailwind ramps is cheaper and safer than a mass find/replace."
+  },
+  "motion": {
+    "libraries": [],
+    "found": "tw-animate-css (CSS keyframe utilities) — package.json L31",
+    "stance": "motion-cut — no framer-motion / gsap / motion / lenis / lottie."
+  },
+  "spacing": {
+    "scale": "Tailwind v4 default 4-pt scale",
+    "custom": "none"
+  },
+  "designSystem": {
+    "library": "shadcn/ui",
+    "style": "radix-nova",
+    "baseColor": "neutral",
+    "citation": "components.json",
+    "adapter": "src/components/ui/index.tsx — every screen renders through it, so the product restyles from one file.",
+    "deliberateDeviations": [
+      "Select and checkbox stay native elements (server actions with progressive enhancement).",
+      "List-view tabs are links, not stateful tabs (every filtered view is a shareable URL)."
+    ]
+  },
+  "preserve": [
+    "Tailwind v4 @theme as the token surface",
+    "the shadcn variable names (--background, --foreground, --primary, …)",
+    "per-event accent tinting via --event-accent",
+    "native select / checkbox and the no-JavaScript form contract",
+    "every route, guard, server action and repo module"
+  ],
+  "introduce": [
+    "a locked design.md (multi-page redesign — consistency, not variety)",
+    "self-hosted Geist + Switzer + Geist Mono via next/font/local (offline-build safe)",
+    "src/app/tokens.css — the Hallmark token block, imported by globals.css",
+    "three macrostructure families: Workbench (marketing) · Marquee Hero (public event) · Stat-Led (app)",
+    "slop-test gates 1–58 as an acceptance bar"
+  ],
+  "conflicts": []
+}
