@@ -95,9 +95,14 @@ Four of those values were tuned by the audit rather than picked by eye:
 regression, so this is checked rather than asserted.
 
 **The accent is monochrome and the signal is rationed.** `--color-signal` is the one chromatic colour
-in the system. It is allowed on focus rings, the active sidebar item, links inside app chrome, and
-nothing else — held under 5 % of any viewport (gate 23). Marketing and public surfaces are
+in the system. It is allowed on focus rings, on links inside app chrome, and on the one chart series —
+and nothing else. Held under 5 % of any viewport (gate 23). Marketing and public surfaces are
 ink-on-paper only.
+
+The **active navigation item** is *not* signal-coloured. It is a `--color-paper-3` fill with ink text
+at medium weight — the same quiet fill the hover state uses, one step stronger. Tinting fifteen
+sidebar rows with the brand hue would blow the 5 % budget on chrome, and the item that matters
+(the CTA) would stop being the loudest thing on screen.
 
 **Per-event accent survives.** `--event-accent` still carries `event.accent_color` on the public site.
 That is product behaviour — a conference brands its own page — not decoration.
