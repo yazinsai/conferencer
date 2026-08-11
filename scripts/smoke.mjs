@@ -8,6 +8,8 @@
  * content and — most importantly — that role scoping actually blocks people.
  */
 
+import { hasNestedForms } from "./nested-forms.mjs";
+
 const BASE = process.env.SMOKE_BASE ?? "http://localhost:3000";
 const SLUG = process.env.SMOKE_SLUG ?? "devflow-conf-2027";
 
@@ -255,12 +257,21 @@ async function main() {
     ["Taming 40-Minute CI", "Accept Queue"],
     "submissions list with status tabs",
   );
-  await expectContains(
-    organizer,
-    `/admin/e/${SLUG}/speakers`,
-    ["Priya", "Raman"],
-    "speaker roster",
-  );
+  {
+    const body = await expectContains(
+      organizer,
+      `/admin/e/${SLUG}/speakers`,
+      ["Priya", "Raman"],
+      "speaker roster",
+    );
+    // SearchBox owns a <form>; it must not sit inside the portal-invite form
+    // (React hydration: "<form> cannot be a descendant of <form>").
+    if (typeof body === "string" && !hasNestedForms(body)) {
+      ok("speaker roster has no nested forms");
+    } else if (typeof body === "string") {
+      fail("speaker roster has no nested forms", "SSR HTML contains a <form> inside a <form>");
+    }
+  }
   await expectContains(organizer, `/admin/e/${SLUG}/forms`, ["Call for Speakers"], "forms index");
   await expectContains(
     organizer,
