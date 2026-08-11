@@ -142,18 +142,25 @@ fallback stays visible in the demo.
  */
 const SCENES = [
   {
+    // A wide, empty auditorium — geometry and texture, nobody in it, and it
+    // takes a heavy scrim without turning to mud.
     name: "venue",
-    id: 2565153,
-    query: "conference hall",
-    alt: "A conference auditorium seen from the back of the room.",
+    id: 6651873,
+    alt: "An empty conference auditorium, rows of seats facing the stage.",
     width: 2000,
+    // Pulled well off full saturation: the system is monochrome, and a
+    // photograph that shouts its own colour reads as stock rather than as part
+    // of the page. Both live under a scrim anyway.
+    saturation: 0.45,
   },
   {
+    // A full house shot from the back of the room: every person is a silhouette
+    // from behind, so no individual is the subject.
     name: "audience",
-    id: 1597531,
-    query: "conference audience",
-    alt: "An audience seated in a conference auditorium.",
+    id: 83519,
+    alt: "A full conference audience seen from the back of the auditorium.",
     width: 2000,
+    saturation: 0.6,
   },
 ];
 
@@ -185,8 +192,9 @@ async function fetchScenes() {
     const target = join(out, `${scene.name}.webp`);
     execFileSync("ffmpeg", [
       "-y", "-loglevel", "error", "-i", source,
-      "-vf", `crop='min(iw,ih*16/9)':'min(ih,iw*9/16)',scale=${scene.width}:-2`,
-      "-quality", "80", target,
+      "-vf",
+      `crop='min(iw,ih*16/9)':'min(ih,iw*9/16)',scale=${scene.width}:-2,eq=saturation=${scene.saturation ?? 1}`,
+      "-quality", String(scene.quality ?? 72), target,
     ]);
     const bytes = readFileSync(target).length;
     rows.push(

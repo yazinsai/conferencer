@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { buttonClass, cx } from "@/components/ui";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,13 @@ import {
 
 export type NavGroup = {
   label?: string;
-  items: Array<{ href: string; label: string; exact?: boolean; badge?: number }>;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: IconName;
+    exact?: boolean;
+    badge?: number;
+  }>;
 };
 
 /**
@@ -73,7 +79,14 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
                           : "text-neutral hover:bg-paper-2 hover:text-ink",
                       )}
                     >
-                      <span className="truncate">{item.label}</span>
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <Icon
+                          name={item.icon}
+                          size={17}
+                          className={active ? "text-ink" : "text-muted-foreground"}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
                       {item.badge ? (
                         <span
                           className={cx(
@@ -143,7 +156,14 @@ export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventN
                         active ? "bg-paper-3 font-medium text-ink" : "text-neutral",
                       )}
                     >
-                      <span className="truncate">{item.label}</span>
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <Icon
+                          name={item.icon}
+                          size={17}
+                          className={active ? "text-ink" : "text-muted-foreground"}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
                       {item.badge ? (
                         <span className="tnum rounded-pill bg-paper-3 px-1.5 text-[0.6875rem] text-muted-foreground">
                           {item.badge}

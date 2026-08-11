@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "./icon";
 import { Button as ShadButton, buttonVariants } from "./button";
 import { Card as ShadCard, CardAction, CardContent, CardDescription, CardTitle } from "./card";
 import { Badge } from "./badge";
@@ -40,6 +41,7 @@ import {
  */
 
 export { cn as cx };
+export { Icon, type IconName };
 
 /* --------------------------------------------------------------- buttons -- */
 
@@ -400,13 +402,18 @@ export function EmptyState({
   title,
   description,
   action,
+  icon = "deliverables",
 }: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  icon?: IconName | null;
 }) {
   return (
     <div className="rounded-card border border-dashed border-rule-2 bg-paper-2 px-6 py-10 text-center">
+      {icon ? (
+        <Icon name={icon} size={26} className="mx-auto mb-3 text-muted-foreground" />
+      ) : null}
       <p className="text-sm font-semibold text-ink">{title}</p>
       {description ? (
         <p className="mx-auto mt-1.5 max-w-md text-sm text-neutral">{description}</p>

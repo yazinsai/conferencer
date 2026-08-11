@@ -20,6 +20,7 @@
 
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
+import { inflateSync } from "node:zlib";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -30,8 +31,14 @@ const ORGANIZER = { email: "sbek-organizer@example.com", password: "SbekTest!202
 
 const WIDTHS = [320, 375, 414, 768, 1280, 1440];
 const PAGES = [
-  { path: "/", name: "landing page", hero: true, scrollState: "frost" },
-  { path: `/e/${SLUG}`, name: "public event home", hero: true, scrollState: "retract" },
+  { path: "/", name: "landing page", hero: true, scrollState: "frost", scrim: "[data-scrim]" },
+  {
+    path: `/e/${SLUG}`,
+    name: "public event home",
+    hero: true,
+    scrollState: "retract",
+    scrim: "[data-scrim]",
+  },
   { path: `/e/${SLUG}/sessions`, name: "public sessions" },
   { path: `/e/${SLUG}/agenda`, name: "public agenda" },
   { path: `/admin/e/${SLUG}`, name: "organizer dashboard", auth: true },
@@ -48,6 +55,82 @@ const fail = (name, detail) => {
   if (detail) console.log(`      ${String(detail).slice(0, 600)}`);
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* ------------------------------------------------- pixels behind the text -- */
+
+/**
+ * Minimal PNG reader — 8-bit non-interlaced RGB/RGBA, which is what
+ * `Page.captureScreenshot` returns. Dependency-free, like everything else in
+ * scripts/; the repo already hand-rolls a PNG *writer* in seed/avatars.ts.
+ */
+function decodePng(buffer) {
+  let width = 0;
+  let height = 0;
+  let channels = 4;
+  const idat = [];
+  let offset = 8;
+  while (offset < buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    const data = buffer.subarray(offset + 8, offset + 8 + length);
+    if (type === "IHDR") {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      if (data[8] !== 8) throw new Error("only 8-bit PNGs are supported");
+      channels = data[9] === 6 ? 4 : data[9] === 2 ? 3 : 0;
+      if (!channels) throw new Error(`unsupported PNG colour type ${data[9]}`);
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    offset += 12 + length;
+  }
+
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  const pixels = Buffer.alloc(height * stride);
+  let pos = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[pos];
+    pos += 1;
+    const line = raw.subarray(pos, pos + stride);
+    pos += stride;
+    const out = pixels.subarray(y * stride, (y + 1) * stride);
+    const prior = y > 0 ? pixels.subarray((y - 1) * stride, y * stride) : null;
+    for (let x = 0; x < stride; x += 1) {
+      const a = x >= channels ? out[x - channels] : 0;
+      const b = prior ? prior[x] : 0;
+      const c = prior && x >= channels ? prior[x - channels] : 0;
+      let value = line[x];
+      if (filter === 1) value += a;
+      else if (filter === 2) value += b;
+      else if (filter === 3) value += (a + b) >> 1;
+      else if (filter === 4) {
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        value += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      }
+      out[x] = value & 0xff;
+    }
+  }
+  return { width, height, channels, pixels };
+}
+
+const channelLuminance = (v) => {
+  const s = v / 255;
+  return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
+
+const luminanceAt = (image, x, y) => {
+  const i = y * image.width * image.channels + x * image.channels;
+  return (
+    0.2126 * channelLuminance(image.pixels[i]) +
+    0.7152 * channelLuminance(image.pixels[i + 1]) +
+    0.0722 * channelLuminance(image.pixels[i + 2])
+  );
+};
+
+const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
 /* -------------------------------------------------------- browser plumbing -- */
 
@@ -344,6 +427,85 @@ async function main() {
 
             if (!r.lazyAboveFold.length) ok("no above-the-fold image is lazy-loaded");
             else fail("no above-the-fold image is lazy-loaded", r.lazyAboveFold.join(" | "));
+
+            // Text over a photograph cannot be checked from tokens: what matters
+            // is the pixel that actually lands behind each glyph. Hide the text,
+            // photograph the surface, and read the worst case underneath it.
+            if (page.scrim) {
+              const measured = await tab.send("Runtime.evaluate", {
+                expression: `(() => {
+                  const runs = [];
+                  for (const scrim of document.querySelectorAll(${JSON.stringify(page.scrim)})) {
+                    for (const el of scrim.querySelectorAll("h1,h2,h3,p,dd,dt,span,a")) {
+                      const text = (el.textContent || "").trim();
+                      if (!text) continue;
+                      // Only the element that actually paints the glyphs.
+                      if ([...el.children].some((c) => (c.textContent || "").trim())) continue;
+                      const s = getComputedStyle(el);
+                      const size = parseFloat(s.fontSize);
+                      const large = size >= 24 || (size >= 18.66 && parseInt(s.fontWeight, 10) >= 700);
+                      // Per-line boxes, not the union: a wrapped inline's bounding
+                      // box covers empty space the text never reaches.
+                      for (const r of el.getClientRects()) {
+                        if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > innerHeight) continue;
+                        runs.push({
+                          text: text.slice(0, 32), color: s.color, large,
+                          rect: {
+                            x: Math.round(r.x), y: Math.round(r.y + r.height * 0.2),
+                            w: Math.round(r.width), h: Math.max(1, Math.round(r.height * 0.6)),
+                          },
+                        });
+                      }
+                    }
+                  }
+                  // Take every glyph out without touching a single background.
+                  const style = document.createElement("style");
+                  style.id = "audit-hide";
+                  style.textContent =
+                    "[data-scrim] *{color:transparent !important;text-shadow:none !important;" +
+                    "text-decoration-color:transparent !important;-webkit-text-fill-color:transparent !important}";
+                  document.head.append(style);
+                  return runs;
+                })()`,
+                returnByValue: true,
+              });
+              const runs = measured.result.value;
+              const shot = await tab.send("Page.captureScreenshot", { format: "png" });
+              await tab.send("Runtime.evaluate", {
+                expression: `document.getElementById("audit-hide")?.remove()`,
+              });
+
+              if (process.env.AUDIT_DUMP) {
+                const { writeFileSync } = await import("node:fs");
+                writeFileSync(`/tmp/scrim-${page.name.replace(/\W+/g, "-")}.png`, Buffer.from(shot.data, "base64"));
+              }
+              const image = decodePng(Buffer.from(shot.data, "base64"));
+              const failures = [];
+              for (const run of runs) {
+                const rgb = /rgba?\(([^)]+)\)/.exec(run.color)?.[1].split(",").map(Number) ?? [255, 255, 255];
+                const ink =
+                  0.2126 * channelLuminance(rgb[0]) +
+                  0.7152 * channelLuminance(rgb[1]) +
+                  0.0722 * channelLuminance(rgb[2]);
+                // Worst case is the background pixel closest in luminance to the
+                // text, so scan the whole run rather than sampling its centre.
+                let worst = Infinity;
+                for (let y = run.rect.y; y < Math.min(run.rect.y + run.rect.h, image.height); y += 2) {
+                  for (let x = run.rect.x; x < Math.min(run.rect.x + run.rect.w, image.width); x += 3) {
+                    if (x < 0 || y < 0) continue;
+                    const ratio = contrast(ink, luminanceAt(image, x, y));
+                    if (ratio < worst) worst = ratio;
+                  }
+                }
+                const min = run.large ? 3 : 4.5;
+                if (worst < min) failures.push(`"${run.text}" ${worst.toFixed(2)} < ${min}`);
+              }
+              if (!failures.length) {
+                ok("text over photography clears its threshold", `${runs.length} runs`);
+              } else {
+                fail("text over photography clears its threshold", failures.join(" | "));
+              }
+            }
 
             // The two scroll-driven navs are the only stateful chrome in the
             // product, and they fail silently when they fail — the bar simply

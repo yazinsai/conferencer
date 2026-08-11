@@ -268,7 +268,11 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------- T4 · live figures ----- */}
-      <Band band="ink" bordered={false}>
+      <Band
+        band="ink"
+        bordered={false}
+        photo={{ src: "/media/audience.webp", width: 2000, height: 1125 }}
+      >
         <div className="py-10">
           <dl className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
             {[

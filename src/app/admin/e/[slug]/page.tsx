@@ -14,13 +14,13 @@ import {
   CardHeader,
   Chip,
   cx,
-  Dot,
   LinkButton,
   Progress,
   Td,
   Th,
   Table,
 } from "@/components/ui";
+import { Icon, type IconName } from "@/components/ui/icon";
 import {
   daysUntil,
   formatDate,
@@ -81,33 +81,45 @@ export default async function DashboardPage({
     .filter((row) => row.assigned > row.complete);
 
   const countdown = daysUntil(event.starts_at);
+  // The icon names the *kind* of thing needing attention, which a severity dot
+  // could not; the tone still carries urgency.
   const nudges = [
     needSlot > 0 && {
       text: `${needSlot} accepted ${needSlot === 1 ? "session still needs" : "sessions still need"} a time slot on the agenda`,
       href: `${base}/agenda`,
       tone: "amber" as const,
+      icon: "agenda" as const,
     },
     awaitingDecision > 0 && {
       text: `${awaitingDecision} submissions are awaiting a decision`,
       href: `${base}/submissions?status=pending`,
       tone: "blue" as const,
+      icon: "decision" as const,
     },
     missingProfile > 0 && {
       text: `${missingProfile} accepted speakers are missing a bio or headshot`,
       href: `${base}/speakers`,
       tone: "amber" as const,
+      icon: "person" as const,
     },
     overdueSpeakers > 0 && {
       text: `${overdueSpeakers} speakers have overdue onboarding tasks`,
       href: `${base}/tasks/deliverables?overdue=1`,
       tone: "red" as const,
+      icon: "clock" as const,
     },
     laggingReviewers.length > 0 && {
       text: `${laggingReviewers.length} reviewers have not finished their assigned reviews`,
       href: `${base}/evaluation`,
       tone: "violet" as const,
+      icon: "evaluation" as const,
     },
-  ].filter(Boolean) as Array<{ text: string; href: string; tone: "amber" | "blue" | "red" | "violet" }>;
+  ].filter(Boolean) as Array<{
+    text: string;
+    href: string;
+    tone: "amber" | "blue" | "red" | "violet";
+    icon: IconName;
+  }>;
 
   const readiness = all<{
     contact_id: string;
@@ -262,23 +274,22 @@ export default async function DashboardPage({
                   className="group flex items-center justify-between gap-4 py-3 text-sm transition-colors duration-[120ms] ease-out"
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
-                    <Dot
-                      color={
-                        nudge.tone === "red"
-                          ? "var(--color-danger)"
-                          : nudge.tone === "amber"
-                            ? "var(--color-warn)"
-                            : "var(--color-signal)"
-                      }
+                    <Icon
+                      name={nudge.icon}
+                      size={17}
+                      className={cx(
+                        nudge.tone === "red" && "text-destructive",
+                        nudge.tone === "amber" && "text-warn",
+                        (nudge.tone === "blue" || nudge.tone === "violet") && "text-signal",
+                      )}
                     />
                     <span className="text-neutral group-hover:text-ink">{nudge.text}</span>
                   </span>
-                  <span
-                    aria-hidden
-                    className="shrink-0 text-muted-foreground transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5 group-hover:text-ink"
-                  >
-                    →
-                  </span>
+                  <Icon
+                    name="arrowRight"
+                    size={15}
+                    className="text-muted-foreground transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5 group-hover:text-ink"
+                  />
                 </Link>
               </li>
             ))}

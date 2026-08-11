@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Avatar, Chip, cx } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { ShowMore } from "@/components/client/basics";
 import { formatDate, formatRange, formatTime } from "@/lib/datetime";
 import type { PublicSession, SpeakerBrief } from "@/lib/repo/submissions";
@@ -82,10 +83,20 @@ export function SessionMeta({ session }: { session: PublicSession }) {
   const when = session.pub_starts_at
     ? formatRange(session.pub_starts_at, session.pub_ends_at)
     : "Time to be announced";
+  // Two different kinds of fact on one line; the icons separate them faster
+  // than a middot does.
   return (
-    <p className="wordmark tnum mt-1.5 text-xs text-muted-foreground">
-      <span>{when}</span>
-      {session.room_name ? <span> · {session.room_name}</span> : null}
+    <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span className="wordmark tnum inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Icon name="clock" size={14} />
+        {when}
+      </span>
+      {session.room_name ? (
+        <span className="wordmark inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Icon name="place" size={14} />
+          {session.room_name}
+        </span>
+      ) : null}
     </p>
   );
 }

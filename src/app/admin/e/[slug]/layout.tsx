@@ -18,52 +18,52 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
   const roles = roleSet(user.id, event.id);
 
   const groups: NavGroup[] = [
-    { items: [{ href: base, label: "Dashboard", exact: true }] },
+    { items: [{ href: base, label: "Dashboard", icon: "dashboard", exact: true }] },
     {
       label: "Submissions",
       items: [
-        { href: `${base}/submissions`, label: "View All", badge: counts.all },
-        { href: `${base}/abstracts`, label: "Abstracts" },
-        { href: `${base}/sessions`, label: "Sessions" },
-        { href: `${base}/files`, label: "Files" },
+        { href: `${base}/submissions`, label: "View All", icon: "submissions", badge: counts.all },
+        { href: `${base}/abstracts`, label: "Abstracts", icon: "abstracts" },
+        { href: `${base}/sessions`, label: "Sessions", icon: "sessions" },
+        { href: `${base}/files`, label: "Files", icon: "files" },
       ],
     },
     {
       label: "Collect & Review",
       items: [
-        { href: `${base}/forms`, label: "Forms" },
-        { href: `${base}/evaluation`, label: "Evaluation" },
-        { href: `${base}/agenda`, label: "Agenda" },
-        { href: `${base}/embeds`, label: "Site & Embeds" },
+        { href: `${base}/forms`, label: "Forms", icon: "forms" },
+        { href: `${base}/evaluation`, label: "Evaluation", icon: "evaluation" },
+        { href: `${base}/agenda`, label: "Agenda", icon: "agenda" },
+        { href: `${base}/embeds`, label: "Site & Embeds", icon: "embeds" },
       ],
     },
     {
       label: "Portals",
       items: [
-        { href: `${base}/portals`, label: "Portals" },
-        { href: `${base}/tasks`, label: "Tasks", badge: outstanding },
-        { href: `${base}/tasks/deliverables`, label: "Deliverables" },
+        { href: `${base}/portals`, label: "Portals", icon: "portals" },
+        { href: `${base}/tasks`, label: "Tasks", icon: "tasks", badge: outstanding },
+        { href: `${base}/tasks/deliverables`, label: "Deliverables", icon: "deliverables" },
       ],
     },
     {
       label: "People",
       items: [
-        { href: `${base}/speakers`, label: "Speakers" },
-        { href: `${base}/team`, label: "Event Team" },
-        { href: "/crm", label: "Speaker CRM" },
+        { href: `${base}/speakers`, label: "Speakers", icon: "speakers" },
+        { href: `${base}/team`, label: "Event Team", icon: "team" },
+        { href: "/crm", label: "Speaker CRM", icon: "crm" },
       ],
     },
     {
       label: "Communications",
       items: [
-        { href: `${base}/emails`, label: "Emails" },
-        { href: `${base}/emails/templates`, label: "Templates" },
+        { href: `${base}/emails`, label: "Emails", icon: "emails" },
+        { href: `${base}/emails/templates`, label: "Templates", icon: "templates" },
       ],
     },
     {
       items: [
-        { href: `${base}/reports`, label: "Reports" },
-        { href: `${base}/settings`, label: "Settings" },
+        { href: `${base}/reports`, label: "Reports", icon: "reports" },
+        { href: `${base}/settings`, label: "Settings", icon: "settings" },
       ],
     },
   ];

@@ -5,6 +5,7 @@ import { defaultForm, formIsOpen } from "@/lib/repo/forms";
 import { publicSessions, publicSpeakers, speakersForSubmissions } from "@/lib/repo/submissions";
 import { SpeakerLine } from "@/components/public/pieces";
 import { Avatar, LinkButton } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { formatDate, formatEventDates, formatRange, daysUntil } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
@@ -46,21 +47,45 @@ export default async function EventHomePage({ params }: PageProps<"/e/[slug]">) 
 
   return (
     <div>
-      {/* ---------------------------------------------------------- the fold -- */}
-      <section className="border-b-2 border-ink">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16">
-          <p
-            className="wordmark text-xs uppercase tracking-[0.16em]"
-            style={{ color: event.accent_color }}
-          >
+      {/* ---------------------------------------------------------- the fold -- *
+       * Macrostructure 03 allows the marquee fold to sit on a single full-bleed
+       * photograph. The type stays the design; the venue is the backdrop. The
+       * scrim is what makes that safe — every rule that darkens the surface
+       * flips its text colour in the same place, and the ratios are measured
+       * against the rendered pixels rather than assumed (npm run audit).       */}
+      <section
+        data-scrim
+        className="relative isolate overflow-hidden border-b-2 border-ink bg-ink"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- a fixed-size
+            local WebP that is already the right dimensions. next/image would add
+            a runtime optimiser (and a native sharp dependency) to a product whose
+            whole claim is that it needs neither. */}
+        <img
+          src="/media/venue.webp"
+          alt=""
+          width={2000}
+          height={1125}
+          fetchPriority="high"
+          decoding="sync"
+          className="absolute inset-0 -z-10 size-full object-cover"
+        />
+        {/* Two stops, on a background, never on text. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_88%,transparent)_52%,color-mix(in_oklch,var(--color-ink)_62%,transparent)_100%)]"
+        />
+
+        <div className="mx-auto w-full max-w-6xl px-4 pb-20 pt-14 text-paper sm:px-6 sm:pb-28 sm:pt-20">
+          <p className="wordmark text-xs uppercase tracking-[0.16em] text-paper/85">
             {formatEventDates(event.starts_at, event.ends_at)}
             {event.location ? ` · ${event.location}` : ""}
           </p>
 
-          <h1 className="display mt-5 max-w-[16ch] text-display text-ink">{event.name}</h1>
+          <h1 className="display mt-5 max-w-[16ch] text-display text-paper">{event.name}</h1>
 
           {event.tagline ? (
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-neutral">{event.tagline}</p>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-paper/85">{event.tagline}</p>
           ) : null}
         </div>
       </section>
@@ -133,12 +158,13 @@ export default async function EventHomePage({ params }: PageProps<"/e/[slug]">) 
                 href={`/e/${event.slug}/sessions`}
                 className="nowrap-affordance group text-sm font-medium text-ink underline-offset-4 hover:underline"
               >
-                All {sessions.length} sessions{" "}
-                <span
-                  aria-hidden
-                  className="inline-block transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5"
-                >
-                  →
+                <span className="inline-flex items-center gap-1.5">
+                  All {sessions.length} sessions
+                  <Icon
+                    name="arrowRight"
+                    size={15}
+                    className="transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5"
+                  />
                 </span>
               </Link>
             </div>
@@ -181,9 +207,14 @@ export default async function EventHomePage({ params }: PageProps<"/e/[slug]">) 
               <h2 className="display text-2xl text-ink">Speaking</h2>
               <Link
                 href={`/e/${event.slug}/gallery`}
-                className="nowrap-affordance text-sm font-medium text-ink underline-offset-4 hover:underline"
+                className="nowrap-affordance group inline-flex items-center gap-1.5 text-sm font-medium text-ink underline-offset-4 hover:underline"
               >
-                Speaker gallery →
+                Speaker gallery
+                <Icon
+                  name="arrowRight"
+                  size={15}
+                  className="transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5"
+                />
               </Link>
             </div>
             <ul className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-4 md:grid-cols-6">

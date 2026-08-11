@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cx } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Shared parts of the marketing page. Macrostructure 05 · Workbench: real
@@ -17,26 +18,51 @@ export function Band({
   className,
   id,
   bordered = true,
+  photo,
 }: {
   children: ReactNode;
   band?: "paper" | "paper-2" | "ink";
   className?: string;
   id?: string;
   bordered?: boolean;
+  /** Only an ink band may carry a photograph, and only under a scrim. */
+  photo?: { src: string; width: number; height: number };
 }) {
   return (
     <section
       id={id}
+      data-scrim={photo ? "" : undefined}
       className={cx(
         // Any rule that flips the surface dark flips the text with it, in the
         // same rule. Inheriting ink onto ink is the contrast bug that ships most.
         band === "paper" && "bg-paper text-ink",
         band === "paper-2" && "bg-paper-2 text-ink",
         band === "ink" && "bg-ink text-paper",
+        photo && "relative isolate overflow-hidden",
         bordered && band !== "ink" && "border-t border-rule",
         className,
       )}
     >
+      {photo && band === "ink" ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- see Shot below. */}
+          <img
+            src={photo.src}
+            alt=""
+            width={photo.width}
+            height={photo.height}
+            // The band is the second section, inside the first viewport on a
+            // laptop, so it is not a lazy-load candidate.
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 -z-10 size-full object-cover"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_90%,transparent)_60%,color-mix(in_oklch,var(--color-ink)_74%,transparent)_100%)]"
+          />
+        </>
+      ) : null}
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">{children}</div>
     </section>
   );
@@ -110,11 +136,8 @@ export function Faq({ items }: { items: Array<{ q: string; a: ReactNode }> }) {
             )}
           >
             <span className="min-w-0">{item.q}</span>
-            <span
-              aria-hidden
-              className="grid size-6 shrink-0 place-items-center rounded-full border border-rule-2 text-muted-foreground transition-transform duration-[180ms] ease-out group-open:rotate-45"
-            >
-              +
+            <span className="grid size-7 shrink-0 place-items-center rounded-full border border-rule text-muted-foreground transition-transform duration-[180ms] ease-out group-open:rotate-180">
+              <Icon name="chevronDown" size={16} />
             </span>
           </summary>
           <div className="max-w-[68ch] pb-5 text-[0.9375rem] leading-relaxed text-neutral">
