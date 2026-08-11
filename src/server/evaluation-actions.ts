@@ -22,6 +22,7 @@ import {
   deleteScorecardQuestion,
   getPlan,
   getRound,
+  listScorecard,
   removeRoundReviewer,
   unassign,
   updatePlan,
@@ -176,6 +177,70 @@ export async function deleteScorecardQuestionAction(formData: FormData) {
   const { slug } = await ctx(formData);
   deleteScorecardQuestion(String(formData.get("question_id")));
   revalidatePath(`/admin/e/${slug}/evaluation`, "layout");
+}
+
+/** Persist round settings + full scorecard in one shot (round editor page). */
+export async function saveRoundEditorAction(formData: FormData) {
+  const { slug, event } = await ctx(formData);
+  const roundId = String(formData.get("round_id"));
+  const round = getRound(roundId);
+  const plan = round ? getPlan(round.plan_id) : undefined;
+  if (!round || !plan || plan.event_id !== event.id) return;
+
+  updateRound(roundId, {
+    name: String(formData.get("name") ?? round.name),
+    opens_at: normalizeLocal(String(formData.get("opens_at") ?? "")),
+    closes_at: normalizeLocal(String(formData.get("closes_at") ?? "")),
+    anonymize: formData.get("anonymize") ? 1 : 0,
+    instructions: String(formData.get("instructions") ?? "") || null,
+    show_participants: formData.get("show_participants") ? 1 : 0,
+    visible_fields: JSON.stringify(formData.getAll("visible_fields").map(String)),
+    card_fields: JSON.stringify(formData.getAll("card_fields").map(String).slice(0, 3)),
+    filter_fields: JSON.stringify(formData.getAll("filter_fields").map(String)),
+  });
+
+  let scorecard: Array<{
+    id: string;
+    label: string;
+    type: string;
+    weight: number;
+    is_required: number;
+    options_text: string;
+    min: number | null;
+    max: number | null;
+  }> = [];
+  try {
+    scorecard = JSON.parse(String(formData.get("scorecard_json") ?? "[]"));
+  } catch {
+    scorecard = [];
+  }
+
+  const existing = listScorecard(roundId);
+  const keep = new Set(scorecard.filter((q) => !q.id.startsWith("new_")).map((q) => q.id));
+  for (const question of existing) {
+    if (!keep.has(question.id)) deleteScorecardQuestion(question.id);
+  }
+
+  scorecard.forEach((question, index) => {
+    const patch = {
+      type: question.type,
+      label: question.label || "Criterion",
+      options: JSON.stringify(textToOptions(question.options_text ?? "")),
+      weight: Number(question.weight ?? 1),
+      min: question.min ?? null,
+      max: question.max ?? null,
+      is_required: question.is_required ? 1 : 0,
+      sort_order: index,
+    };
+    if (question.id.startsWith("new_")) {
+      addScorecardQuestion(roundId, patch);
+    } else {
+      updateScorecardQuestion(question.id, patch);
+    }
+  });
+
+  revalidatePath(`/admin/e/${slug}/evaluation`, "layout");
+  redirect(`/admin/e/${slug}/evaluation/${plan.id}/rounds/${roundId}?saved=1`);
 }
 
 /* ------------------------------------------------------------- reviewers -- */
