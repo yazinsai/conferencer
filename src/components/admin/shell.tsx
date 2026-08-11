@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChevronDownIcon } from "lucide-react";
-
 import { buttonClass, cx } from "@/components/ui";
+import { Icon, type IconName } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,23 +16,52 @@ import {
 
 export type NavGroup = {
   label?: string;
-  items: Array<{ href: string; label: string; exact?: boolean; badge?: number }>;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: IconName;
+    exact?: boolean;
+    badge?: number;
+  }>;
 };
 
+/**
+ * N3 side-rail — the app family's nav archetype (see design.md § Macrostructure
+ * families). The wordmark lives at the top of the rail rather than in the top
+ * bar, so the bar is free to be nothing but search and account.
+ *
+ * The active row is a quiet paper-3 fill, not a brand-tinted one: fifteen rows
+ * of signal colour would spend the whole accent budget on chrome and leave the
+ * primary action competing with the navigation.
+ */
 export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: string }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Admin" className="w-56 shrink-0 border-r border-slate-200 bg-white">
-      <div className="sticky top-0 max-h-screen overflow-y-auto px-3 py-4">
-        <p className="px-2 pb-3 text-sm font-semibold text-slate-900">{eventName}</p>
+    <nav
+      aria-label="Admin"
+      className="hidden w-60 shrink-0 border-r border-rule bg-paper md:block"
+    >
+      <div className="sticky top-0 flex max-h-screen flex-col overflow-y-auto px-3 py-4">
+        <div className="px-2 pb-4">
+          <Link
+            href="/admin"
+            className="wordmark nowrap-affordance block text-[0.9375rem] text-ink"
+          >
+            Conferencer
+          </Link>
+          <p className="mt-1 truncate text-xs text-muted-foreground" title={eventName}>
+            {eventName}
+          </p>
+        </div>
+
         {groups.map((group, index) => (
           <div key={group.label ?? index} className="mb-4">
             {group.label ? (
-              <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <p className="wordmark px-2 pb-1 text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground">
                 {group.label}
               </p>
             ) : null}
-            <ul className="space-y-0.5">
+            <ul className="space-y-px">
               {group.items.map((item) => {
                 const active = item.exact
                   ? pathname === item.href
@@ -44,15 +72,28 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cx(
-                        "flex items-center justify-between rounded-md px-2 py-1.5 text-sm",
+                        "nowrap-affordance flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-[0.8125rem]",
+                        "transition-[background-color,color] duration-[120ms] ease-out",
                         active
-                          ? "bg-brand-50 font-medium text-brand-800"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                          ? "bg-paper-3 font-medium text-ink"
+                          : "text-neutral hover:bg-paper-2 hover:text-ink",
                       )}
                     >
-                      <span>{item.label}</span>
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <Icon
+                          name={item.icon}
+                          size={17}
+                          className={active ? "text-ink" : "text-muted-foreground"}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
                       {item.badge ? (
-                        <span className="rounded-full bg-slate-200 px-1.5 text-[11px] font-medium text-slate-700">
+                        <span
+                          className={cx(
+                            "tnum rounded-pill px-1.5 text-[0.6875rem] font-medium",
+                            active ? "bg-ink text-paper" : "bg-paper-3 text-muted-foreground",
+                          )}
+                        >
                           {item.badge}
                         </span>
                       ) : null}
@@ -68,6 +109,78 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
   );
 }
 
+/**
+ * Below the layout breakpoint the rail collapses into a native <details>
+ * disclosure. No JavaScript, no focus trap to get wrong, and it still works if
+ * the bundle never arrives.
+ */
+export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventName: string }) {
+  const pathname = usePathname();
+  return (
+    <details className="group border-b border-rule bg-paper md:hidden">
+      <summary
+        className={cx(
+          "flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3",
+          "[&::-webkit-details-marker]:hidden",
+        )}
+      >
+        <span className="min-w-0">
+          <span className="wordmark block text-[0.9375rem] text-ink">Conferencer</span>
+          <span className="block truncate text-xs text-muted-foreground">{eventName}</span>
+        </span>
+        <span className={cx(buttonClass("secondary", "sm"), "pointer-events-none")}>
+          Menu
+          <Icon name="chevronDown" size={14} className="transition-transform duration-[180ms] ease-out group-open:rotate-180" />
+        </span>
+      </summary>
+      <div className="px-3 pb-4">
+        {groups.map((group, index) => (
+          <div key={group.label ?? index} className="mb-4">
+            {group.label ? (
+              <p className="wordmark px-2 pb-1 text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground">
+                {group.label}
+              </p>
+            ) : null}
+            <ul className="space-y-px">
+              {group.items.map((item) => {
+                const active = item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cx(
+                        "nowrap-affordance flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-sm",
+                        active ? "bg-paper-3 font-medium text-ink" : "text-neutral",
+                      )}
+                    >
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <Icon
+                          name={item.icon}
+                          size={17}
+                          className={active ? "text-ink" : "text-muted-foreground"}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
+                      {item.badge ? (
+                        <span className="tnum rounded-pill bg-paper-3 px-1.5 text-[0.6875rem] text-muted-foreground">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 export function AccountMenu({
   name,
   email,
@@ -79,8 +192,8 @@ export function AccountMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className={cx(buttonClass("secondary", "md"), "gap-2")}>
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+      <DropdownMenuTrigger className={cx(buttonClass("ghost", "md"), "gap-2 pl-1.5")}>
+        <span className="wordmark inline-flex size-6 items-center justify-center rounded-full bg-paper-3 text-[0.625rem] font-medium text-ink-2">
           {name
             .split(" ")
             .slice(0, 2)
@@ -88,7 +201,7 @@ export function AccountMenu({
             .join("")}
         </span>
         <span className="hidden sm:inline">{name}</span>
-        <ChevronDownIcon aria-hidden className="size-3.5 opacity-60" />
+        <Icon name="chevronDown" size={14} className="opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal text-muted-foreground">

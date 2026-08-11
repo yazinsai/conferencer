@@ -4,7 +4,7 @@ import { eventBySlugOr404 } from "@/lib/guards";
 import { listLookup } from "@/lib/repo/events";
 import { publicSessions, speakersForSubmissions } from "@/lib/repo/submissions";
 import { AgendaGrid, type GridBlock } from "@/components/public/agenda-grid";
-import { DayTabs } from "@/components/public/pieces";
+import { DayTabs, PublicPage } from "@/components/public/pieces";
 import { Card, Chip, EmptyState, LinkButton } from "@/components/ui";
 import { dateOf, daysBetween, formatRange } from "@/lib/datetime";
 import { stripHtml } from "@/lib/fields";
@@ -54,11 +54,11 @@ export default async function AgendaPage({ params, searchParams }: PageProps<"/e
   const gridRooms = usedRooms.length ? usedRooms : rooms;
 
   return (
-    <div>
+    <PublicPage>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Agenda</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="display text-2xl text-ink sm:text-3xl">Agenda</h1>
+          <p className="mt-1 text-sm text-neutral">
             Room-by-room schedule for {event.name}. Pick a day, then a session for details.
           </p>
         </div>
@@ -76,11 +76,11 @@ export default async function AgendaPage({ params, searchParams }: PageProps<"/e
       ) : null}
 
       {selected ? (
-        <Card className="mb-4 border-brand-200 p-4">
+        <Card className="mb-4 border-rule-2 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">{selected.title}</h2>
-              <p className="mt-0.5 text-sm text-slate-600">
+              <h2 className="display text-lg text-ink">{selected.title}</h2>
+              <p className="mt-0.5 text-sm text-neutral">
                 {formatRange(selected.pub_starts_at, selected.pub_ends_at)}
                 {selected.room_name ? ` · ${selected.room_name}` : ""}
               </p>
@@ -92,20 +92,20 @@ export default async function AgendaPage({ params, searchParams }: PageProps<"/e
                 {selected.speakers ? <Chip tone="blue">{selected.speakers}</Chip> : null}
               </div>
               {selected.description ? (
-                <p className="mt-3 max-w-2xl text-sm text-slate-700">
+                <p className="mt-3 max-w-2xl text-sm text-neutral">
                   {stripHtml(selected.description)}
                 </p>
               ) : null}
               <Link
                 href={`/e/${event.slug}/sessions/${selected.id}`}
-                className="mt-3 inline-block text-sm font-medium text-brand-700 hover:underline"
+                className="mt-3 inline-block text-sm font-medium text-signal hover:underline"
               >
                 Full session page →
               </Link>
             </div>
             <Link
               href={`/e/${event.slug}/agenda?day=${day}`}
-              className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="rounded-md border border-rule-2 px-2.5 py-1.5 text-xs font-medium text-neutral hover:bg-paper-2"
             >
               Close
             </Link>
@@ -122,6 +122,6 @@ export default async function AgendaPage({ params, searchParams }: PageProps<"/e
           action={<LinkButton href={`/e/${event.slug}/sessions`}>Browse sessions</LinkButton>}
         />
       )}
-    </div>
+    </PublicPage>
   );
 }

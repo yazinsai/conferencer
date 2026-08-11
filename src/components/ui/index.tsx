@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "./icon";
 import { Button as ShadButton, buttonVariants } from "./button";
 import { Card as ShadCard, CardAction, CardContent, CardDescription, CardTitle } from "./card";
 import { Badge } from "./badge";
@@ -20,10 +21,12 @@ import {
 } from "./table";
 
 /**
- * The application's design system, built on shadcn/ui primitives.
+ * The application's design system, built on shadcn/ui primitives and driven by
+ * the tokens in `src/app/tokens.css`. The system it implements is written down
+ * in `design.md`; read that first.
  *
  * Everything the app renders goes through this module, so the whole product can
- * be restyled from one place. Two deliberate departures from stock shadcn:
+ * be restyled from one place. Three deliberate departures from stock shadcn:
  *
  *  1. `Select` and checkboxes stay **native elements**. Every form here posts to a
  *     server action with progressive enhancement, and a native control submits its
@@ -31,9 +34,14 @@ import {
  *     for the automated agents that evaluate this product.
  *  2. `SubNav` is a set of links, not stateful tabs, because every list view is
  *     URL-driven and must survive a reload and a shared link.
+ *  3. Controls run at 36px in app chrome rather than the 44px touch floor — the
+ *     organizer screens are dense tables where 44px costs a row of context. The
+ *     rule that matters (an input and its neighbouring button share one height)
+ *     is enforced at both sizes. Marketing and public surfaces use `lg`.
  */
 
 export { cn as cx };
+export { Icon, type IconName };
 
 /* --------------------------------------------------------------- buttons -- */
 
@@ -60,7 +68,7 @@ const SIZE_MAP: Record<Size, "xs" | "sm" | "default" | "lg"> = {
 
 // Success has no stock shadcn equivalent; it is the "accept this proposal" green.
 const SUCCESS =
-  "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600/30";
+  "bg-positive text-white hover:bg-[color-mix(in_oklch,var(--color-positive),white_12%)] focus-visible:outline-positive";
 
 export function buttonClass(variant: Variant = "secondary", size: Size = "md") {
   return cn(
@@ -108,9 +116,9 @@ export function Label({
   hint?: ReactNode;
 }) {
   return (
-    <ShadLabel htmlFor={htmlFor} className="mb-1 block">
+    <ShadLabel htmlFor={htmlFor} className="mb-1.5 block">
       <span className="flex flex-col gap-0.5">
-        <span>
+        <span className="text-[0.8125rem] font-medium text-ink-2">
           {children}
           {required ? <span className="ml-0.5 text-destructive">*</span> : null}
         </span>
@@ -125,9 +133,19 @@ export function Label({
 /**
  * Shared input classes, kept as a plain string because the client islands
  * (form wizard, review scorecard, agenda board) build their own controls.
+ * Mirrors `ui/input.tsx` exactly — same height, same 1px border in every state,
+ * same reserved outline — so a hand-rolled field never looks like a different
+ * component from a kit one.
  */
-export const inputClass =
-  "flex h-9 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20";
+export const inputClass = cn(
+  "flex h-9 w-full min-w-0 rounded-input border border-input bg-background px-3 py-1 text-sm",
+  "transition-[background-color,border-color] duration-[120ms] ease-out",
+  "outline-2 outline-offset-1 outline-transparent",
+  "placeholder:text-muted-foreground hover:bg-muted/60",
+  "focus-visible:border-ink-2 focus-visible:outline-ring [&:focus-visible]:transition-none",
+  "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-55",
+  "aria-invalid:border-destructive",
+);
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <ShadInput {...props} className={cn(className)} />;
@@ -145,8 +163,8 @@ export function Select({ className, ...props }: ComponentProps<"select">) {
       {...props}
       className={cn(
         inputClass,
-        "appearance-none bg-[length:1rem] bg-[right_0.5rem_center] bg-no-repeat pr-8",
-        "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22%236b7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')]",
+        "appearance-none bg-[length:1rem] bg-[right_0.625rem_center] bg-no-repeat pr-9",
+        "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22%23686c73%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')]",
         className,
       )}
     />
@@ -169,7 +187,9 @@ export function Field({
   children: ReactNode;
 }) {
   // flex-col + a growing label keeps inputs on a shared baseline when fields sit
-  // side by side in a grid and only some of them carry a hint.
+  // side by side in a grid and only some of them carry a hint. The error slot
+  // reserves a line even when empty, so a failed validation doesn't shove the
+  // rest of the form down the page.
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1">
@@ -178,18 +198,22 @@ export function Field({
         </Label>
       </div>
       {children}
-      {error ? (
-        <p role="alert" className="mt-1 text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
+      <p
+        role={error ? "alert" : undefined}
+        className={cn(
+          "mt-1 min-h-[1lh] text-xs font-medium text-destructive",
+          !error && "sr-only",
+        )}
+      >
+        {error ?? ""}
+      </p>
     </div>
   );
 }
 
 /** Browsers style file inputs themselves; this makes them match the button set. */
 export const fileInputClass =
-  "block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
+  "block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-pill file:border file:border-rule-2 file:bg-background file:px-3.5 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
 
 export function FormError({ children }: { children?: ReactNode }) {
   if (!children) return null;
@@ -201,10 +225,10 @@ export function FormError({ children }: { children?: ReactNode }) {
 }
 
 const NOTICE_TONES = {
-  info: "border-sky-200 bg-sky-50 text-sky-900 [&>svg]:text-sky-600",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  warning: "border-amber-200 bg-amber-50 text-amber-900",
-  danger: "border-destructive/30 bg-destructive/5 text-destructive",
+  info: "border-signal/25 bg-signal-soft text-ink [&>svg]:text-signal",
+  success: "border-positive/25 bg-positive-soft text-ink",
+  warning: "border-warn/25 bg-warn-soft text-ink",
+  danger: "border-destructive/25 bg-danger-soft text-destructive",
 } as const;
 
 export function Notice({
@@ -217,7 +241,7 @@ export function Notice({
   className?: string;
 }) {
   return (
-    <Alert className={cn(NOTICE_TONES[tone], className)}>
+    <Alert className={cn("rounded-card", NOTICE_TONES[tone], className)}>
       <AlertDescription className="text-current [&_p]:text-current">
         {children}
       </AlertDescription>
@@ -243,7 +267,7 @@ export function Card({
     <Tag
       data-slot="card"
       className={cn(
-        "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+        "rounded-card border border-rule bg-card text-card-foreground shadow-[var(--shadow-card)]",
         className,
       )}
     >
@@ -262,11 +286,11 @@ export function CardHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule px-4 py-3">
       <div className="min-w-0">
         <CardTitle className="text-sm font-semibold">{title}</CardTitle>
         {description ? (
-          <CardDescription className="mt-0.5 text-xs">{description}</CardDescription>
+          <CardDescription className="mt-0.5 text-xs text-muted-foreground">{description}</CardDescription>
         ) : null}
       </div>
       {actions ? <CardAction className="flex items-center gap-2">{actions}</CardAction> : null}
@@ -275,6 +299,77 @@ export function CardHeader({
 }
 
 export { CardContent };
+
+/**
+ * A page-width band. Sections alternate paper / paper-2 and carry their own
+ * padding, because a page where every section is padded identically reads as a
+ * template (slop gate 9).
+ */
+export function Section({
+  children,
+  band = "paper",
+  className,
+  id,
+  as: Tag = "section",
+  bordered = false,
+}: {
+  children: ReactNode;
+  band?: "paper" | "paper-2" | "ink";
+  className?: string;
+  id?: string;
+  as?: "section" | "div" | "footer" | "header";
+  bordered?: boolean;
+}) {
+  return (
+    <Tag
+      id={id}
+      className={cn(
+        band === "paper" && "bg-paper text-ink",
+        band === "paper-2" && "bg-paper-2 text-ink",
+        // Any rule that flips the surface dark must flip the text with it, in
+        // the same rule — ink-on-ink is the contrast bug that ships most often.
+        band === "ink" && "bg-ink text-paper",
+        bordered && "border-t border-rule",
+        className,
+      )}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/**
+ * A section heading. Always a vertical stack: the optional eyebrow sits directly
+ * above the heading in the same column, never beside it. The eyebrow-left /
+ * heading-right two-column head is the single most reliable templated-editorial
+ * tell there is (slop gate 54), so this component makes it unrepresentable.
+ */
+export function SectionHead({
+  eyebrow,
+  title,
+  lede,
+  action,
+  className,
+}: {
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  lede?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-3", className)}>
+      <div className="min-w-0 max-w-2xl">
+        {eyebrow ? (
+          <p className="wordmark mb-2 text-xs uppercase tracking-[0.14em] text-muted-foreground">{eyebrow}</p>
+        ) : null}
+        <h2 className="display text-2xl text-ink sm:text-3xl">{title}</h2>
+        {lede ? <p className="mt-3 text-[0.9375rem] leading-relaxed text-neutral">{lede}</p> : null}
+      </div>
+      {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
+    </div>
+  );
+}
 
 export function PageHeader({
   title,
@@ -288,14 +383,14 @@ export function PageHeader({
   breadcrumb?: ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         {breadcrumb ? (
-          <div className="mb-1 text-xs text-muted-foreground">{breadcrumb}</div>
+          <div className="mb-1.5 text-xs text-muted-foreground">{breadcrumb}</div>
         ) : null}
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="display text-xl text-ink sm:text-2xl">{title}</h1>
         {description ? (
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
+          <p className="mt-1.5 max-w-2xl text-sm text-neutral">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -307,16 +402,21 @@ export function EmptyState({
   title,
   description,
   action,
+  icon = "deliverables",
 }: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  icon?: IconName | null;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
-      <p className="text-sm font-semibold">{title}</p>
+    <div className="rounded-card border border-dashed border-rule-2 bg-paper-2 px-6 py-10 text-center">
+      {icon ? (
+        <Icon name={icon} size={26} className="mx-auto mb-3 text-muted-foreground" />
+      ) : null}
+      <p className="text-sm font-semibold text-ink">{title}</p>
       {description ? (
-        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+        <p className="mx-auto mt-1.5 max-w-md text-sm text-neutral">{description}</p>
       ) : null}
       {action ? <div className="mt-4 flex justify-center gap-2">{action}</div> : null}
     </div>
@@ -326,12 +426,12 @@ export function EmptyState({
 /* ----------------------------------------------------------------- chips -- */
 
 const CHIP_TONES = {
-  slate: "border-transparent bg-muted text-muted-foreground",
-  green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-800",
-  red: "border-destructive/20 bg-destructive/10 text-destructive",
-  blue: "border-sky-200 bg-sky-50 text-sky-700",
-  violet: "border-violet-200 bg-violet-50 text-violet-700",
+  slate: "border-rule bg-paper-3 text-neutral",
+  green: "border-positive/25 bg-positive-soft text-positive",
+  amber: "border-warn/25 bg-warn-soft text-warn",
+  red: "border-destructive/25 bg-danger-soft text-destructive",
+  blue: "border-signal/25 bg-signal-soft text-signal",
+  violet: "border-signal/25 bg-signal-soft text-signal",
 } as const;
 
 export function Chip({
@@ -352,11 +452,11 @@ export function Chip({
       <Badge
         title={title}
         variant="outline"
-        className={cn("gap-1", className)}
+        className={cn("gap-1 rounded-pill font-medium", className)}
         style={{
-          backgroundColor: `${color}18`,
+          backgroundColor: `${color}14`,
           color: shade(color),
-          borderColor: `${color}44`,
+          borderColor: `${color}3d`,
         }}
       >
         {children}
@@ -364,17 +464,23 @@ export function Chip({
     );
   }
   return (
-    <Badge title={title} variant="outline" className={cn(CHIP_TONES[tone], className)}>
+    <Badge
+      title={title}
+      variant="outline"
+      className={cn("rounded-pill font-medium", CHIP_TONES[tone], className)}
+    >
       {children}
     </Badge>
   );
 }
 
 function shade(hex: string): string {
-  // Darken a hex colour a touch so text on the tinted chip stays readable.
+  // Derived from the event's or track's own colour, which is user data rather
+  // than a design token — darkened a touch so the label stays readable on the
+  // tint. This is the one place a colour is computed instead of named.
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!m) return hex;
-  const rgb = [1, 2, 3].map((i) => Math.round(parseInt(m[i], 16) * 0.62));
+  const rgb = [1, 2, 3].map((i) => Math.round(parseInt(m[i], 16) * 0.55));
   return `rgb(${rgb.join(",")})`;
 }
 
@@ -392,7 +498,7 @@ export function Dot({ color }: { color?: string | null }) {
 
 export function Table({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("overflow-x-auto rounded-xl border border-border bg-card", className)}>
+    <div className={cn("overflow-x-auto rounded-card border border-rule bg-card", className)}>
       <ShadTable className="w-full min-w-full border-collapse text-sm">{children}</ShadTable>
     </div>
   );
@@ -411,7 +517,7 @@ export function Th({
     <TableHead
       scope={scope}
       className={cn(
-        "h-auto whitespace-nowrap border-b border-border bg-muted/50 px-3 py-2 text-left align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+        "wordmark h-auto whitespace-nowrap border-b border-rule bg-paper-2 px-3 py-2.5 text-left align-middle text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-muted-foreground",
         className,
       )}
     >
@@ -432,7 +538,7 @@ export function Td({
   return (
     <TableCell
       colSpan={colSpan}
-      className={cn("border-b border-border/60 px-3 py-2 align-top", className)}
+      className={cn("border-b border-rule/70 px-3 py-2.5 align-top", className)}
     >
       {children}
     </TableCell>
@@ -464,12 +570,12 @@ export function Avatar({
   return (
     <ShadAvatar
       style={{ width: size, height: size }}
-      className={cn("shrink-0 ring-1 ring-border", className)}
+      className={cn("shrink-0 ring-1 ring-rule", className)}
     >
       {src ? <AvatarImage src={src} alt={name} /> : null}
       <AvatarFallback
-        style={{ fontSize: Math.max(10, size * 0.36) }}
-        className="bg-primary/10 font-semibold text-primary"
+        style={{ fontSize: Math.max(10, size * 0.34) }}
+        className="wordmark bg-paper-3 font-medium text-ink-2"
       >
         {initials}
       </AvatarFallback>
@@ -477,6 +583,11 @@ export function Avatar({
   );
 }
 
+/**
+ * A figure and what it means. Figures are set in the outlier face with tabular
+ * numerals so a column of them lines up — the second of the outlier's two
+ * permitted slots (the first is the wordmark).
+ */
 export function Stat({
   label,
   value,
@@ -491,25 +602,31 @@ export function Stat({
   tone?: "brand" | "green" | "amber" | "red";
 }) {
   const tones = {
-    brand: "text-primary",
-    green: "text-emerald-700",
-    amber: "text-amber-700",
+    brand: "text-signal",
+    green: "text-positive",
+    amber: "text-warn",
     red: "text-destructive",
   } as const;
   const body = (
     <>
-      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="wordmark text-[0.6875rem] uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </div>
-      <div className={cn("mt-1 text-2xl font-semibold", tone ? tones[tone] : undefined)}>
+      <div
+        className={cn(
+          "wordmark tnum mt-2 text-2xl font-medium tracking-[-0.02em]",
+          tone ? tones[tone] : "text-ink",
+        )}
+      >
         {value}
       </div>
-      {hint ? <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div> : null}
+      {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
     </>
   );
-  const cls = "block rounded-xl border border-border bg-card px-4 py-3 shadow-sm transition-shadow";
+  const cls =
+    "block rounded-card border border-rule bg-card px-4 py-3.5 shadow-[var(--shadow-card)] transition-[border-color] duration-[120ms] ease-out";
   return href ? (
-    <Link href={href} className={cn(cls, "hover:border-primary/40 hover:shadow")}>
+    <Link href={href} className={cn(cls, "hover:border-ink-2")}>
       {body}
     </Link>
   ) : (
@@ -519,7 +636,7 @@ export function Stat({
 
 export function Progress({ value, max = 100 }: { value: number; max?: number }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
-  return <ShadProgress value={pct} className="h-2" />;
+  return <ShadProgress value={pct} className="h-1.5 bg-paper-3" />;
 }
 
 export function SubNav({
@@ -530,7 +647,7 @@ export function SubNav({
   current: string;
 }) {
   return (
-    <nav className="mb-4 flex flex-wrap gap-1 border-b border-border" aria-label="Views">
+    <nav className="mb-5 flex flex-wrap gap-1 border-b border-rule" aria-label="Views">
       {items.map((item) => {
         const active = item.href === current;
         return (
@@ -539,18 +656,18 @@ export function SubNav({
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+              "nowrap-affordance -mb-px border-b-2 px-3 py-2.5 text-sm font-medium transition-colors duration-[120ms] ease-out",
               active
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                ? "border-ink text-ink"
+                : "border-transparent text-muted-foreground hover:border-rule-2 hover:text-ink",
             )}
           >
             {item.label}
             {item.count !== undefined ? (
               <span
                 className={cn(
-                  "ml-1.5 rounded-full px-1.5 py-0.5 text-xs",
-                  active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                  "tnum ml-1.5 rounded-pill px-1.5 py-0.5 text-xs",
+                  active ? "bg-ink text-paper" : "bg-paper-3 text-muted-foreground",
                 )}
               >
                 {item.count}

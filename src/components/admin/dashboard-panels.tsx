@@ -32,7 +32,9 @@ export function DashboardPanels({
 
   return (
     <section className="mt-6">
-      <h2 className="mb-2 text-sm font-semibold text-slate-900">Programme analytics</h2>
+      <h2 className="wordmark mb-3 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
+        Programme analytics
+      </h2>
       <Card>
         <div className="px-4 pt-3">
           <SubNav
@@ -79,41 +81,43 @@ function FormsPanel({ eventId, slug }: { eventId: string; slug: string }) {
   return (
     <div className="grid gap-5 md:grid-cols-2">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Submission pacing · {total} in the last {pacing.length} active days
         </p>
         <div className="mt-2 flex h-32 items-end gap-1">
           {pacing.map((point) => (
-            <div key={point.day} className="flex flex-1 flex-col items-center gap-1">
+            // The column has to carry a real height or the bar's percentage
+            // resolves against `auto` and every day renders as a 3px dash.
+            <div key={point.day} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
               <div
-                className="w-full rounded-t bg-brand-500"
-                style={{ height: `${(point.n / max) * 100}%`, minHeight: 3 }}
+                className="w-full rounded-t-sm bg-ink"
+                style={{ height: `${10 + (point.n / max) * 85}%`, minHeight: 4 }}
                 title={`${point.n} on ${point.day}`}
               />
-              <span className="text-[9px] text-slate-400">{point.day.slice(8)}</span>
+              <span className="wordmark tnum text-[9px] text-muted-foreground">{point.day.slice(8)}</span>
             </div>
           ))}
-          {!pacing.length ? <p className="text-sm text-slate-500">No submissions yet.</p> : null}
+          {!pacing.length ? <p className="text-sm text-muted-foreground">No submissions yet.</p> : null}
         </div>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Forms</p>
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">Forms</p>
         <ul className="mt-2 space-y-2">
           {forms.map((form) => (
             <li key={form.id} className="flex items-center justify-between gap-2 text-sm">
               <Link
                 href={`/admin/e/${slug}/forms/${form.id}`}
-                className="text-slate-700 hover:text-brand-700"
+                className="text-neutral hover:text-signal"
               >
                 {form.name}
               </Link>
-              <span className="flex items-center gap-2 text-xs text-slate-500">
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 {form.total} submitted · {form.drafts} draft
                 <Chip tone={form.status === "open" ? "green" : "slate"}>{form.status}</Chip>
               </span>
             </li>
           ))}
-          {!forms.length ? <li className="text-sm text-slate-500">No forms yet.</li> : null}
+          {!forms.length ? <li className="text-sm text-muted-foreground">No forms yet.</li> : null}
         </ul>
       </div>
     </div>
@@ -149,34 +153,34 @@ function ParticipantsPanel({ eventId }: { eventId: string }) {
   return (
     <div className="grid gap-5 md:grid-cols-3">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Participants by role
         </p>
         <ul className="mt-2 space-y-1 text-sm">
           {roles.map((row) => (
             <li key={row.role} className="flex justify-between capitalize">
-              <span className="text-slate-700">{row.role}</span>
-              <span className="font-medium text-slate-900">{row.n}</span>
+              <span className="text-neutral">{row.role}</span>
+              <span className="wordmark tnum font-medium text-ink">{row.n}</span>
             </li>
           ))}
-          {!roles.length ? <li className="text-slate-500">Nobody attached yet.</li> : null}
+          {!roles.length ? <li className="text-muted-foreground">Nobody attached yet.</li> : null}
         </ul>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Speaker workflow status
         </p>
         <ul className="mt-2 space-y-1 text-sm">
           {speakerStatuses.map((row) => (
             <li key={row.speaker_status} className="flex justify-between capitalize">
-              <span className="text-slate-700">{row.speaker_status}</span>
-              <span className="font-medium text-slate-900">{row.n}</span>
+              <span className="text-neutral">{row.speaker_status}</span>
+              <span className="wordmark tnum font-medium text-ink">{row.n}</span>
             </li>
           ))}
         </ul>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Submissions by status
         </p>
         <div className="mt-2 flex h-4 w-full overflow-hidden rounded-full">
@@ -198,8 +202,8 @@ function ParticipantsPanel({ eventId }: { eventId: string }) {
                 className="inline-block h-2 w-2 rounded-full"
                 style={{ backgroundColor: colors[row.status] ?? "#94a3b8" }}
               />
-              <span className="capitalize text-slate-700">{row.status.replace("_", " ")}</span>
-              <span className="ml-auto text-slate-500">{row.n}</span>
+              <span className="capitalize text-neutral">{row.status.replace("_", " ")}</span>
+              <span className="ml-auto text-muted-foreground">{row.n}</span>
             </li>
           ))}
         </ul>
@@ -220,16 +224,16 @@ function EvaluationsPanel({ eventId, slug }: { eventId: string; slug: string }) 
   return (
     <div className="grid gap-5 md:grid-cols-2">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Reviewer progress
         </p>
         <ul className="mt-2 space-y-2">
           {progress.map((row) => (
             <li key={`${row.round_id}-${row.user_id}`}>
-              <div className="flex justify-between text-xs text-slate-600">
+              <div className="flex justify-between text-xs text-neutral">
                 <span>
                   {row.first_name} {row.last_name}
-                  <span className="text-slate-400"> · {row.round_name}</span>
+                  <span className="text-muted-foreground"> · {row.round_name}</span>
                 </span>
                 <span>
                   {row.complete}/{row.assigned}
@@ -239,12 +243,12 @@ function EvaluationsPanel({ eventId, slug }: { eventId: string; slug: string }) 
             </li>
           ))}
           {!progress.length ? (
-            <li className="text-sm text-slate-500">No reviewers assigned yet.</li>
+            <li className="text-sm text-muted-foreground">No reviewers assigned yet.</li>
           ) : null}
         </ul>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Scores {average !== null ? `· mean ${average.toFixed(2)}` : ""}
         </p>
         <ul className="mt-2 space-y-1 text-sm">
@@ -252,17 +256,17 @@ function EvaluationsPanel({ eventId, slug }: { eventId: string; slug: string }) 
             <li key={row.submission_id} className="flex items-center justify-between gap-2">
               <Link
                 href={`/admin/e/${slug}/submissions/${row.submission_id}`}
-                className="truncate text-slate-700 hover:text-brand-700"
+                className="truncate text-neutral hover:text-signal"
               >
                 {row.title}
               </Link>
-              <span className="shrink-0 font-medium text-slate-900">
+              <span className="shrink-0 wordmark tnum font-medium text-ink">
                 {row.avg_score?.toFixed(2)}
               </span>
             </li>
           ))}
           {!scored.length ? (
-            <li className="text-slate-500">No reviews submitted yet.</li>
+            <li className="text-muted-foreground">No reviews submitted yet.</li>
           ) : null}
         </ul>
       </div>
@@ -313,7 +317,7 @@ function AgendaPanel({
   return (
     <div className="grid gap-5 md:grid-cols-2">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
           Slots filled by day
         </p>
         <ul className="mt-2 space-y-2">
@@ -321,10 +325,10 @@ function AgendaPanel({
             const filled = scheduled.find((row) => row.day === day)?.n ?? 0;
             return (
               <li key={day}>
-                <div className="flex justify-between text-xs text-slate-600">
+                <div className="flex justify-between text-xs text-neutral">
                   <Link
                     href={`/admin/e/${slug}/agenda?day=${day}`}
-                    className="hover:text-brand-700"
+                    className="hover:text-signal"
                   >
                     {formatDate(day, { weekday: true })}
                   </Link>
@@ -336,11 +340,11 @@ function AgendaPanel({
               </li>
             );
           })}
-          {!dayList.length ? <li className="text-sm text-slate-500">No event dates set.</li> : null}
+          {!dayList.length ? <li className="text-sm text-muted-foreground">No event dates set.</li> : null}
         </ul>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Rooms</p>
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">Rooms</p>
         <ul className="mt-2 space-y-1 text-sm">
           {rooms.map((room) => {
             const n =
@@ -352,8 +356,8 @@ function AgendaPanel({
               )?.n ?? 0;
             return (
               <li key={room.id} className="flex justify-between">
-                <span className="text-slate-700">{room.name}</span>
-                <span className="text-slate-500">{n} sessions</span>
+                <span className="text-neutral">{room.name}</span>
+                <span className="text-muted-foreground">{n} sessions</span>
               </li>
             );
           })}
