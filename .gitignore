@@ -41,3 +41,7 @@ next-env.d.ts
 
 # project
 .firecrawl/
+
+# data
+/data/
+
