@@ -8,12 +8,11 @@ import { daysUntil, formatEventDates } from "@/lib/datetime";
 import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
 import { LogoMark } from "@/components/ui/logo";
-import { HeroVideo } from "@/components/marketing/hero-video";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
 
 /* Hallmark · genre: modern-minimal · macrostructure: 05 Workbench ·
  * design-system: design.md · designed-as-app
- * hero: full-bleed outcome video + left copy over ink scrim ·
+ * hero: H8 split — plain copy left, real product capture right (rule 8, dev. 5) ·
  * figures: T4 4-up display-weight · loop: F4 hairline lattice ·
  * price: F3 ledger with inverted final row · tour: full-width captures ·
  * inside: F3 two-up · footer: Ft5 statement over photography (rule 8.4) ·
@@ -23,67 +22,71 @@ import { Band, Faq, Shot } from "@/components/marketing/pieces";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Conferencer — the conference programme you own",
+  title: "Conferencer — open-source conference programme software",
   description:
-    "MIT-licensed conference programme management: call for speakers, committee review, decisions, speaker onboarding, agenda and a public schedule. One container, one SQLite file, no per-event fee, no cut of your ticket sales, and no vendor who can switch it off.",
+    "Free software for running a conference programme: the call for speakers, committee review, accept and decline emails, speaker onboarding, the agenda and the public schedule site. MIT licensed, self-hosted in one container, no per-event fee.",
 };
 
 /**
  * Macrostructure 05 · Workbench (see design.md § Macrostructure families).
  *
- * The product is the pitch, so the page is a guided tour of real screenshots of
- * this repository's own UI. Deliberately absent: a logo cloud, testimonials and
- * percentage claims. Conferencer has no customers to name, and a fabricated
- * proof bar is worse than no proof bar. What stands in their place is checkable:
- * real captures, real repository facts, and counts read out of the database on
- * this instance at request time.
+ * The product is the pitch, so every image on this page is a real screenshot of
+ * this repository's own UI, and the copy beside each one describes what is
+ * actually visible in it. Deliberately absent: a logo cloud, testimonials,
+ * percentage claims, and any photograph or footage of a conference that did not
+ * happen. Conferencer has no customers to name, and a fabricated proof bar is
+ * worse than no proof bar. What stands in their place is checkable: real
+ * captures, real repository facts, and counts read out of the database on this
+ * instance at request time.
  *
- * The argument the page is built to make is ownership — MIT source, one file, no
- * vendor who can reprice or close it — so § the price names competitors and
- * quotes what they charge. That section carries its own evidence rule: every
- * figure comes from the vendor's own public pricing page, is linked, is dated in
- * the footnote, and describes only cost. No claim about a rival's product
- * quality appears here, because we cannot check one and do not need to.
+ * Clarity comes first in the copy: the fold names the job in three plain verbs
+ * and the category in one sentence, before the page argues anything. The
+ * argument it then makes is ownership — MIT source, one file, no vendor who can
+ * reprice or close it — so § the price names competitors and quotes what they
+ * charge. That section carries its own evidence rule: every figure comes from
+ * the vendor's own public pricing page, is linked, is dated in the footnote, and
+ * describes only cost. No claim about a rival's product quality appears here,
+ * because we cannot check one and do not need to.
  */
 
 const NAV_LINKS = [
-  { href: "#loop", label: "The loop" },
-  { href: "#price", label: "The price" },
+  { href: "#loop", label: "How it works" },
+  { href: "#price", label: "What it costs" },
   { href: "#tour", label: "The product" },
-  { href: "#inside", label: "What's inside" },
+  { href: "#inside", label: "Features" },
   { href: "/api-docs", label: "API" },
 ];
 
 const LOOP = [
   {
     n: "01",
-    title: "Build the call",
-    body: "Seven steps, thirteen field types, and show-when rules that keep a question hidden until it matters. Route a track straight into a review round on arrival.",
+    title: "You build the call for speakers",
+    body: "Write your questions in the form builder: 14 field types, required and locked flags, and rules that hide a question until an earlier answer calls for it.",
   },
   {
     n: "02",
     title: "Speakers submit",
-    body: "A five-step public wizard a stranger can finish without an invitation: account, submission, participants, review. Drafts save and resume.",
+    body: "A public form anyone can fill in, no invitation needed. It creates their account along the way, and saves a draft they can come back to.",
   },
   {
     n: "03",
     title: "The committee reviews",
-    body: "Multi-round plans, each with its own reviewer pool and scorecard. Blind rounds hide the author. Conflicts recuse themselves.",
+    body: "Reviewers score submissions against your scorecard, in one round or several. An anonymized round hides the author from them.",
   },
   {
     n: "04",
-    title: "You decide",
-    body: "Accept or decline individually or in bulk, with a templated email, merge fields and a per-recipient preview of what actually goes out.",
+    title: "You accept or decline",
+    body: "One at a time or in bulk, with a templated email you can preview per recipient before it sends.",
   },
   {
     n: "05",
     title: "Speakers onboard",
-    body: "Accepting activates the speaker record, grants portal access and assigns the onboarding tasks — bio, headshot, slides — in one hand-off.",
+    body: "Accepting opens each speaker their own portal and assigns their tasks — bio, headshot, slides — so you can chase the deliverables in one place.",
   },
   {
     n: "06",
-    title: "The agenda publishes",
-    body: "Drag sessions into rooms. Room clashes are blocked, speaker clashes are flagged, and publishing shows you a diff of what changed.",
+    title: "You publish the agenda",
+    body: "Drag sessions into rooms and days. Room clashes are blocked, speaker clashes are flagged, and publishing shows you what changed.",
   },
 ];
 
@@ -98,80 +101,80 @@ const ELSEWHERE = [
     name: "Sessionboard",
     href: "https://www.sessionboard.com/pricing",
     price: "From $249 / mo",
-    note: "The suite whose Program module this was written to replace. Every plan on the pricing page — Professional, Enterprise, Tailored — ends in the same button: request a demo.",
+    note: "The suite whose Program module this was written to replace. Every plan — Professional, Enterprise, Tailored — ends in the same button: request a demo.",
   },
   {
     name: "Sessionize",
     href: "https://sessionize.com/pricing",
     price: "$499 / event",
-    note: "Per event occurrence, plus tax. The free tier is for free community events only, and is explicitly not valid for internal, private, promotional, marketing or commercial ones.",
+    note: "Per event occurrence, plus tax. The free tier is for free community events only, not for commercial, private or internal ones.",
   },
   {
     name: "Oxford Abstracts",
     href: "https://oxfordabstracts.com/pricing/",
     price: "$890–$3,450 / event",
-    note: "Add-ons on top at $150 to $850 each — a second submission stream is $850, grouping abstracts into panels is another $850. Registration costs 2.5% of your ticket revenue, capped at $5,000.",
+    note: "Add-ons cost $150 to $850 each — a second submission stream is $850. Registration takes 2.5% of your ticket revenue, capped at $5,000.",
   },
   {
     name: "Ex Ordo",
     href: "https://www.exordo.com/pricing/",
     price: "Ask us",
-    note: "The pricing page is a contact form. It asks how many submissions you expect — 125, 250, 500, up to 2,000+ — and then a person sends you a number.",
+    note: "The pricing page is a contact form. It asks how many submissions you expect, and then a person sends you a number.",
   },
   {
     name: "PaperCall",
     href: "https://www.papercall.io",
     price: "$0, until August",
-    note: "Free, well liked, and closing on 31 August 2026. New events can no longer be created. This is the risk that every hosted option carries and none of them price in.",
+    note: "Free, well liked, and closing on 31 August 2026. New events can no longer be created.",
   },
   {
     name: "pretalx",
     href: "https://pretalx.com/p/pricing",
     price: "From €199 / event",
-    note: "Open source and genuinely good, hosted or self-run. Self-hosting wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy, and it hands off after the schedule is released.",
+    note: "Open source and genuinely good, hosted or self-run. Self-hosting wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy.",
   },
 ] as const;
 
 const INSIDE = [
   [
     "Call for speakers",
-    "Seven-step builder, 13 field types, conditional show-when logic, track routing, close dates, per-person limits, drafts, a custom success page.",
+    "A form builder with 14 field types, show-when logic, track routing, close dates, per-person limits, saved drafts and your own success page.",
   ],
   [
     "Submissions",
-    "Status tabs with counts, inline and bulk changes, a column picker, saved views, search across titles and speaker names, CSV export, change history with restore.",
+    "Status tabs with counts, inline and bulk edits, a column picker, saved views, search, CSV export, and a change history you can restore from.",
   ],
   [
     "Review",
-    "Multi-round evaluation plans, eight scorecard field types, blind rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, weighted results.",
+    "Multi-round plans, eight scorecard types, anonymized rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, weighted results.",
   ],
   [
     "Decisions",
-    "Bulk accept and decline, templated mail with merge fields and preview, a per-submission notified flag. Acceptance hands off to onboarding automatically.",
+    "Accept and decline in bulk, with templated email, merge fields and a per-recipient preview. Acceptance hands off to onboarding on its own.",
   ],
   [
     "Speaker portal",
-    "Submissions, profile and tasks, scoped to the signed-in speaker in SQL rather than by hiding links. Cross-user access returns a real 403.",
+    "Each speaker's own submissions, profile and tasks, scoped in SQL rather than by hiding links. Another speaker's page returns a real 403.",
   ],
   [
     "Speaker CRM",
-    "An org-level directory that outlives a single event: cross-event history, duplicate detection and merge, a kanban sourcing pipeline, saved segments and bulk email.",
+    "An organization-level directory that outlives one event: cross-event history, duplicate merge, a sourcing pipeline, saved segments, bulk email.",
   ],
   [
     "Tasks and files",
-    "Action, file-request and form tasks. Versioned uploads with the latest flagged, cross-role comments, a deliverables matrix, ZIP export by session or speaker.",
+    "Action, file-request and form tasks. Versioned uploads with the latest flagged, comments across roles, a deliverables matrix, ZIP export.",
   ],
   [
     "Agenda",
-    "Rooms grid with drag-and-drop and click-to-assign, list, day, week, month and conflict views, auto-schedule assist, .ics invites and per-speaker calendar feeds.",
+    "A rooms grid you drag sessions onto; list, day, week, month and conflict views; auto-schedule assist; .ics invites and per-speaker calendar feeds.",
   ],
   [
     "Public site",
-    "Sessions, speakers, agenda, itinerary, gallery and a personal schedule with .ics export — every one of them readable logged out.",
+    "Sessions, speakers, agenda, itinerary, gallery and a personal schedule with .ics export — all of it readable without signing in.",
   ],
   [
     "Embeds and API",
-    "One script tag per widget plus HTML, JSON, XML and iCal feeds. A bearer-token REST API with cursor pagination, OpenAPI 3, and HMAC-signed outbound webhooks.",
+    "One script tag per widget, plus HTML, JSON, XML and iCal feeds. A bearer-token REST API with cursor pagination, OpenAPI 3 and signed webhooks.",
   ],
 ] as const;
 
@@ -180,10 +183,10 @@ const FAQ = [
     q: "It's free. What's the catch?",
     a: (
       <>
-        There is no paid tier, no seat limit, no feature held back for an enterprise plan and no
-        licence clause that turns commercial use into a phone call. One repository, MIT, all of it.
-        It was written to replace the programme module of a suite that costs a real conference about
-        forty thousand dollars a year — publishing the result costs nothing extra.
+        There is no paid tier, no seat limit and no feature held back for an enterprise plan. One
+        repository, MIT licensed, all of it. It was written to replace the programme module of a
+        suite that cost one conference about forty thousand dollars a year, and publishing the
+        result cost nothing extra.
       </>
     ),
   },
@@ -192,9 +195,8 @@ const FAQ = [
     a: (
       <>
         Nothing. It is already on your machine: no licence server to check in with, no phone-home,
-        no key that expires, and it runs with the network unplugged. An abandoned repository still
-        boots, and you can fork it. Compare the failure mode of a hosted tool — PaperCall was free
-        and well liked, and it closes on 31 August 2026, taking new events with it.
+        no key that expires. An abandoned repository still boots, and you can fork it. Compare a
+        hosted tool: PaperCall is free and well liked, and it closes on 31 August 2026.
       </>
     ),
   },
@@ -203,10 +205,10 @@ const FAQ = [
     a: (
       <>
         It is, it is excellent, and if it fits your conference you should use it. Two differences.
-        It hands off once the schedule is released, where this carries on through decisions, speaker
-        onboarding tasks, versioned file deliverables and a cross-event speaker CRM. And its install
-        wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy in front; this wants Node
-        22, or one <Code>docker compose up</Code>.
+        Conferencer keeps going after the schedule is released — decisions, onboarding tasks,
+        versioned deliverables, a speaker CRM across events. And it installs with Node 22, or one{" "}
+        <Code>docker compose up</Code>, where pretalx wants Python, PostgreSQL, Redis, a cron runner
+        and a reverse proxy.
       </>
     ),
   },
@@ -214,21 +216,10 @@ const FAQ = [
     q: "How do I get my data out?",
     a: (
       <>
-        The database is the export: <Code>data/conferencer.db</Code> is a single SQLite file you can
-        copy, open in any tool and query with plain SQL. On top of that there is CSV for
-        submissions, speakers, tasks and evaluation scores, a ZIP of every uploaded file by session
-        or speaker, iCal feeds, and a bearer-token REST API with an OpenAPI 3 document. Leaving is a{" "}
-        <Code>cp</Code>.
-      </>
-    ),
-  },
-  {
-    q: "Where does the data live?",
-    a: (
-      <>
-        In <Code>data/conferencer.db</Code>, a SQLite file sitting next to the app, with uploads in{" "}
-        <Code>data/uploads/</Code>. Both are gitignored. Delete the directory and re-run{" "}
-        <Code>npm run seed</Code> whenever you want a clean slate.
+        The database is the export: <Code>data/conferencer.db</Code> is one SQLite file you can
+        copy, open in any tool and query with plain SQL, with the uploads beside it in{" "}
+        <Code>data/uploads/</Code>. There is also CSV for submissions, speakers, tasks and scores, a
+        ZIP of every uploaded file, iCal feeds, and a REST API with an OpenAPI 3 document.
       </>
     ),
   },
@@ -236,10 +227,9 @@ const FAQ = [
     q: "Do I need Postgres, Redis or a queue?",
     a: (
       <>
-        No — Node 22 and nothing else. That is the whole dependency list, and it is the difference
-        between an afternoon and a weekend when you self-host. Queries are synchronous and
-        sub-millisecond, which is exactly what lets every page render in one server pass. There is
-        no client-side data fetching and no loading-spinner waterfall anywhere in the product.
+        No — Node 22 and nothing else. Queries are synchronous and sub-millisecond, which is what
+        lets every page render in one server pass. There is no client-side data fetching and no
+        loading-spinner waterfall anywhere in the product.
       </>
     ),
   },
@@ -247,8 +237,8 @@ const FAQ = [
     q: "Can a stranger submit a talk without an invitation?",
     a: (
       <>
-        Yes. The public wizard creates the account inline — an email address and a password, with no
-        confirmation step in the way — then walks through the submission, the participants and a
+        Yes. The public form creates the account as it goes — an email address and a password, with
+        no confirmation step in the way — then walks through the submission, the participants and a
         review screen before it posts.
       </>
     ),
@@ -260,7 +250,7 @@ const FAQ = [
         The send still succeeds and lands in the in-app outbox, so you can see exactly what would
         have gone out. Set <Code>RESEND_API_KEY</Code> when you want it to leave the building.
         Missing credentials never break a feature: with no OpenAI key, AI triage falls back to a
-        transparent local rubric that reads the abstract.
+        local rubric that reads the abstract.
       </>
     ),
   },
@@ -270,8 +260,7 @@ const FAQ = [
       <>
         <Code>npm run deploy</Code> is <Code>docker compose up -d --build</Code>. One container, one
         volume at <Code>/data</Code> holding the database and the uploads. Set{" "}
-        <Code>SESSION_SECRET</Code> and <Code>APP_URL</Code> and you are done. The image
-        deliberately fetches no web font at build time, so it builds on a machine with no network.
+        <Code>SESSION_SECRET</Code> and <Code>APP_URL</Code> and you are done.
       </>
     ),
   },
@@ -280,10 +269,10 @@ const FAQ = [
     a: (
       <>
         It was built for one real conference and opened up because there was no reason not to. Read
-        every line before you trust it with a call for speakers — roughly thirty-five thousand of
-        them, plain SQL and no ORM, a schema in one <Code>schema.sql</Code> file. Change a review
-        rule, add a field type, rip out a module you do not want: that is a pull request against
-        your own fork, not a feature request in someone else&rsquo;s backlog.
+        it before you trust it with a call for speakers: plain SQL, no ORM, the schema in one{" "}
+        <Code>schema.sql</Code> file. Changing a review rule, adding a field type or deleting a
+        module you do not want is a pull request against your own fork, not a feature request in
+        someone else&rsquo;s backlog.
       </>
     ),
   },
@@ -332,82 +321,78 @@ export default function HomePage() {
 
   return (
     <>
-      <MarketingNav
-        links={NAV_LINKS}
-        ctaHref={ctaHref}
-        ctaLabel={ctaLabel}
-        overMedia
-      />
+      <MarketingNav links={NAV_LINKS} ctaHref={ctaHref} ctaLabel={ctaLabel} />
 
-      {/* ------------------------------------------- hero · outcome video --
-          Full-bleed loop of the conference people came for. Copy sits on an
-          ink scrim so the type stays readable; product captures live lower. */}
-      <section
-        data-scrim
-        className="relative isolate min-h-[min(92svh,56rem)] overflow-hidden bg-ink text-paper"
-      >
-        <HeroVideo
-          src="/media/hero-conference-v3.mp4"
-          poster="/media/hero-conference-v3.webp"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_88%,transparent)_42%,color-mix(in_oklch,var(--color-ink)_55%,transparent)_72%,color-mix(in_oklch,var(--color-ink)_35%,transparent)_100%)]"
-        />
-
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col justify-end px-4 pb-20 pt-[calc(var(--nav-height)+4.5rem)] sm:px-6 sm:pb-24 sm:pt-[calc(var(--nav-height)+6rem)]">
-          <div className="min-w-0 max-w-[38rem]">
-            <h1 className="reveal display text-display-m text-paper" style={{ ["--i" as string]: 0 }}>
-              <span className="block">Open the call.</span>
-              <span className="block">Ship the agenda.</span>
-              <span className="block">Own every line.</span>
+      {/* ------------------------------------------- hero · H8 split -------
+          The fold's job is to say what this is. Three plain verbs name the
+          job, one sentence names the category, and the image beside them is
+          the actual organizer dashboard — not a photograph of a conference,
+          which is the one thing on this page a reader could not check. */}
+      <section className="border-b border-rule bg-paper">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-[calc(var(--nav-height)+3rem)] sm:px-6 sm:pb-20 sm:pt-[calc(var(--nav-height)+4.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+          <div className="min-w-0">
+            <h1 className="reveal display text-display-m text-ink" style={{ ["--i" as string]: 0 }}>
+              <span className="block">Collect talks.</span>
+              <span className="block">Review them.</span>
+              <span className="block">Publish the agenda.</span>
             </h1>
 
             <p
-              className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-paper/75"
+              className="reveal mt-6 max-w-[46ch] text-lg leading-relaxed text-neutral"
               style={{ ["--i" as string]: 1 }}
             >
-              Conferencer runs the entire programme — call for speakers, committee review,
-              decisions, speaker onboarding, agenda, public site — and every line of it is MIT.
-              No per-event licence, no per-submission tier, no percentage of your ticket sales,
-              no demo to sit through. One container, one file, and a copy of the source nobody
-              can take back.
+              Conferencer is free, open-source software for running a conference programme: the
+              call for speakers, committee review, the accept and decline emails, speaker
+              onboarding, the agenda, and the public schedule site.
+            </p>
+            <p
+              className="reveal mt-4 max-w-[46ch] text-[0.9375rem] leading-relaxed text-neutral"
+              style={{ ["--i" as string]: 2 }}
+            >
+              You run it yourself — one container, one SQLite file, no database server. It is MIT
+              licensed, so there is no per-event fee, no cut of your ticket sales, and no demo to
+              sit through.
             </p>
 
             <div
               className="reveal mt-8 flex flex-wrap items-center gap-3"
-              style={{ ["--i" as string]: 2 }}
+              style={{ ["--i" as string]: 3 }}
             >
-              <Link
-                href={ctaHref}
-                className="nowrap-affordance inline-flex h-11 items-center rounded-pill bg-paper px-6 text-[0.9375rem] font-medium text-ink transition-colors duration-[120ms] ease-out hover:bg-paper-3 active:translate-y-px"
-              >
+              <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
                 {event ? "Open the live demo" : "Create an account"}
-              </Link>
-              <Link
-                href="/sign-in"
-                className="nowrap-affordance inline-flex h-11 items-center rounded-pill border border-paper/35 bg-transparent px-6 text-[0.9375rem] font-medium text-paper transition-colors duration-[120ms] ease-out hover:bg-paper/10 active:translate-y-px"
-              >
+              </LinkButton>
+              <LinkButton href="/sign-in" size="lg" className="nowrap-affordance">
                 Sign in as an organizer
-              </Link>
+              </LinkButton>
             </div>
 
             {event ? (
               <p
-                className="reveal wordmark mt-6 text-xs leading-relaxed text-paper/55"
-                style={{ ["--i" as string]: 3 }}
+                className="reveal wordmark mt-6 text-xs leading-relaxed text-muted-foreground"
+                style={{ ["--i" as string]: 4 }}
               >
                 Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
               </p>
             ) : (
               <p
-                className="reveal mt-6 text-xs text-paper/55"
-                style={{ ["--i" as string]: 3 }}
+                className="reveal mt-6 text-xs text-muted-foreground"
+                style={{ ["--i" as string]: 4 }}
               >
                 No event on this instance yet — run <Code>npm run seed</Code> to load the demo
                 conference.
               </p>
             )}
+          </div>
+
+          <div className="reveal min-w-0" style={{ ["--i" as string]: 2 }}>
+            <Shot
+              src="/screens/dashboard.webp"
+              alt="The organizer dashboard: 274 days until the event opens, then counts for submissions, accepted speakers, sessions scheduled and outstanding tasks."
+              caption="The organizer's view of the demo conference, on the day this was captured."
+              priority
+              width={1440}
+              height={900}
+            />
           </div>
         </div>
       </section>
@@ -435,16 +420,15 @@ export default function HomePage() {
             ))}
           </dl>
           <p className="mt-10 max-w-[60ch] border-t border-paper/20 pt-6 text-sm leading-relaxed text-paper/65">
-            Read out of the database on this instance at request time
+            Counted when you loaded this page, in the demo conference this instance is running
             {event ? (
               <>
                 {" "}
-                for <span className="text-paper">{event.name}</span>,{" "}
+                — <span className="text-paper">{event.name}</span>,{" "}
                 {formatEventDates(event.starts_at, event.ends_at)}
               </>
             ) : null}
-            , out of the one SQLite file this instance runs on. Nothing on this page is a marketing
-            number, and there is no logo cloud under it because there is nobody to name yet.
+            . They come out of its SQLite file, not a marketing deck.
           </p>
         </div>
       </Band>
@@ -452,15 +436,14 @@ export default function HomePage() {
       {/* ------------------------------------------- F4 · the loop --------- */}
       <Band id="loop" band="paper" bordered={false}>
         <div className="py-20 sm:py-28">
-          <Eyebrow>The loop</Eyebrow>
-          <h2 className="display mt-3 max-w-[18ch] text-2xl text-ink sm:text-3xl">
-            One loop, covered properly.
+          <Eyebrow>How it works</Eyebrow>
+          <h2 className="display mt-3 max-w-[20ch] text-2xl text-ink sm:text-3xl">
+            From an open call to a published agenda, in six steps.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Everything in the product serves the same circuit, and anything that does not sit on it
-            was left out. Note where the loop keeps going after step four: the accepted-speaker
-            half — onboarding, chasing slides, versioned deliverables — is the part free tools hand
-            back to you and paid ones charge for.
+            One loop, and anything that does not sit on it was left out. The half after step four —
+            onboarding accepted speakers, chasing their bios and slides — is the part free tools
+            hand back to you and paid ones charge for.
           </p>
 
           {/* A hairline lattice: gap-px over a rule-coloured track draws the
@@ -484,14 +467,14 @@ export default function HomePage() {
       {/* ------------------------------ the price ------------------------- */}
       <Band id="price" band="paper-2">
         <div className="py-20 sm:py-28">
-          <Eyebrow>The price</Eyebrow>
+          <Eyebrow>What it costs</Eyebrow>
           <h2 className="display mt-3 max-w-[22ch] text-2xl text-ink sm:text-3xl">
-            What the same loop costs everywhere else.
+            Nothing. Here is what the same work costs elsewhere.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Quoted from each vendor&rsquo;s own pricing page, linked so you can check it. Notice
-            the shapes as much as the numbers: per event, per submission band, per month, or a
-            slice of the registrations you sold.
+            Every figure is quoted from that vendor&rsquo;s own pricing page and linked so you can
+            check it. Watch the shapes as much as the numbers: per event, per submission band, per
+            month, or a slice of the tickets you sold.
           </p>
 
           <dl className="mt-14 border-t border-rule">
@@ -520,8 +503,8 @@ export default function HomePage() {
             <p className="display text-md">Conferencer</p>
             <p className="wordmark tnum text-md">$0, always</p>
             <p className="text-sm leading-relaxed text-paper/75">
-              No plan, no per-event fee, no submission ceiling, no share of your revenue, no
-              account to create. Your only bill is the box it runs on, and a $5 VPS clears it.
+              No plan, no per-event fee, no limit on submissions, no share of your revenue, no
+              account to create. Your only bill is the box it runs on, and a $5 VPS covers it.
             </p>
           </div>
 
@@ -543,19 +526,17 @@ export default function HomePage() {
             </h3>
             <div className="mt-4 lg:mt-0">
               <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
-                A price you can plan around is the small half of this. The other half is that a
-                hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
-                repositioned upmarket, or closed. PaperCall is free and widely used, and it shuts
-                down on 31 August 2026 — new events can no longer be created, and the existing ones
-                are guaranteed only until that date.
+                A hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
+                moved upmarket, or shut down. PaperCall is free and widely used, and it closes on
+                31 August 2026 — no new events, and the existing ones are guaranteed only to that
+                date.
               </p>
               <p className="mt-4 max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
-                Conferencer cannot do that to you. There is no licence check, no phone-home and no
-                key with an expiry; it runs with the network unplugged. Every submission, review
-                score, decision and uploaded slide deck sits in one SQLite file on a disk you
-                control, which you can back up with <Code>cp</Code> and read with any tool that
-                speaks SQL. If this repository went quiet tomorrow, your conference would not
-                notice.
+                Conferencer cannot do that to you. No licence check, no phone-home, no key that
+                expires; it runs with the network unplugged. Every submission, score, decision and
+                uploaded slide deck sits in one SQLite file on a disk you control — back it up with{" "}
+                <Code>cp</Code>, read it with any tool that speaks SQL. If this repository went
+                quiet tomorrow, your conference would not notice.
               </p>
             </div>
           </div>
@@ -572,28 +553,32 @@ export default function HomePage() {
           <h2 className="display mt-3 max-w-[20ch] text-2xl text-ink sm:text-3xl">
             Three screens do most of the work.
           </h2>
+          <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
+            Real screenshots of this repository, running the demo conference. Nothing below was
+            drawn for the page.
+          </p>
 
           <div className="mt-16 space-y-20 sm:space-y-24">
             <TourStep
               n="01"
               src="/screens/cfp-builder.webp"
-              alt="The call-for-speakers builder, on its question-list step: fields with types, required and locked flags."
-              title="The call for speakers"
-              body="Thirteen field types, required and locked flags, character limits, and show-when rules that keep a question hidden until an earlier answer calls for it. A track can route a submission into a review round the moment it lands."
+              alt="Step 3 of 7 of the call-for-speakers builder: a section heading, then questions tagged Short text, Long text, Required, Locked and a 4000-character limit."
+              title="The form builder"
+              body="You write the call for speakers question by question: 14 field types, required and locked flags, character limits, and a show-when rule that hides a question until an earlier answer calls for it."
             />
             <TourStep
               n="02"
               src="/screens/review.webp"
-              alt="An evaluation plan: two rounds, reviewer progress, scorecards and blind-round settings."
-              title="The committee"
-              body="Rounds carry their own reviewer pool and their own scorecard. A blind round hides the author from reviewers while the organizer still sees everything. Distribution respects per-reviewer caps and conflicts of interest."
+              alt="An evaluation plan with two rounds: the first anonymized, each with its own scorecard of scales, weights and free text, and its own named reviewers."
+              title="The review committee"
+              body="Every round has its own reviewers and its own scorecard — scales, weighted questions, free text. An anonymized round hides the author from reviewers while you still see everything."
             />
             <TourStep
               n="03"
               src="/screens/agenda.webp"
-              alt="The agenda board: unscheduled sessions on the left, a rooms-by-time grid on the right."
-              title="The agenda"
-              body="Drag a session into a room, or click to place it. Two talks in one room is never right, so it is blocked; a five-minute panel overlap can be deliberate, so it only warns. Publishing shows a diff of what moved."
+              alt="The agenda board: two unscheduled sessions on the left, a rooms-by-time grid for day one on the right, and a Conflicts tab reading zero."
+              title="The agenda board"
+              body="Accepted sessions wait on the left until you drag one onto the grid, or click Place to pick a slot. Two talks in one room is never right, so it is blocked; a short overlap between rooms can be deliberate, so it is only flagged."
             />
           </div>
         </div>
@@ -602,12 +587,11 @@ export default function HomePage() {
       {/* ------------------------------ F3 · the spec sheet ---------------- */}
       <Band id="inside" band="paper-2">
         <div className="py-20 sm:py-28">
-          <Eyebrow>The spec sheet</Eyebrow>
-          <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">What is in the box</h2>
+          <Eyebrow>Features</Eyebrow>
+          <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">Everything it does</h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Roughly thirty-five thousand lines across a hundred and sixteen pages. The list below
-            is the whole of it, not a highlight reel — and unusually for a feature list, you can
-            go and check it line by line.
+            The whole list, not a highlight reel: 116 pages across ten areas. Unusually for a
+            feature list, you can go and check it line by line.
           </p>
 
           <dl className="mt-14 grid grid-cols-1 gap-x-12 border-t border-rule md:grid-cols-2">
@@ -626,15 +610,15 @@ export default function HomePage() {
         <div className="py-20 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16">
             <div className="min-w-0">
-              <Eyebrow>The result</Eyebrow>
+              <Eyebrow>What attendees see</Eyebrow>
               <h2 className="display mt-3 max-w-[16ch] text-2xl text-ink sm:text-3xl">
                 And then it is just a website.
               </h2>
               <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-neutral">
-                The public side is server-rendered and readable logged out: sessions, speakers,
-                the agenda grid, an itinerary, a speaker gallery and a personal schedule that
-                exports to <Code>.ics</Code>. Only accepted and approved submissions ever appear —
-                acceptance and content approval are separate gates.
+                Publishing gives your conference a public site nobody has to sign in to read:
+                sessions, speakers, the agenda grid, an itinerary, a speaker gallery, and a
+                personal schedule that exports to <Code>.ics</Code>. Only sessions you have
+                accepted <em>and</em> approved appear on it — those are two separate gates.
               </p>
               {event ? (
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -660,8 +644,8 @@ export default function HomePage() {
             </div>
             <Shot
               src="/screens/public-agenda.webp"
-              alt="The public agenda grid: three days, four rooms, sessions coloured by track."
-              caption="The same programme, published."
+              alt="The public agenda for day one: four rooms across the top, times down the side, each session card showing its title, time and track."
+              caption="The same agenda, published — no login, and a banner carrying the open call."
             />
           </div>
         </div>
