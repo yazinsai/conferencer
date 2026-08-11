@@ -30,8 +30,8 @@ const ORGANIZER = { email: "sbek-organizer@example.com", password: "SbekTest!202
 
 const WIDTHS = [320, 375, 414, 768, 1280, 1440];
 const PAGES = [
-  { path: "/", name: "landing page", hero: true },
-  { path: `/e/${SLUG}`, name: "public event home", hero: true },
+  { path: "/", name: "landing page", hero: true, scrollState: "frost" },
+  { path: `/e/${SLUG}`, name: "public event home", hero: true, scrollState: "retract" },
   { path: `/e/${SLUG}/sessions`, name: "public sessions" },
   { path: `/e/${SLUG}/agenda`, name: "public agenda" },
   { path: `/admin/e/${SLUG}`, name: "organizer dashboard", auth: true },
@@ -344,6 +344,39 @@ async function main() {
 
             if (!r.lazyAboveFold.length) ok("no above-the-fold image is lazy-loaded");
             else fail("no above-the-fold image is lazy-loaded", r.lazyAboveFold.join(" | "));
+
+            // The two scroll-driven navs are the only stateful chrome in the
+            // product, and they fail silently when they fail — the bar simply
+            // never frosts. Assert the state actually changes.
+            if (page.scrollState) {
+              const state = await tab.send("Runtime.evaluate", {
+                expression: `new Promise((resolve) => {
+                  const header = document.querySelector("header");
+                  const read = () => {
+                    const s = getComputedStyle(header);
+                    return { bg: s.backgroundColor, top: Math.round(header.getBoundingClientRect().top) };
+                  };
+                  const rest = read();
+                  window.scrollTo(0, 700);
+                  setTimeout(() => {
+                    const moved = read();
+                    window.scrollTo(0, 0);
+                    setTimeout(() => resolve({ rest, moved }), 500);
+                  }, 900);
+                })`,
+                awaitPromise: true,
+                returnByValue: true,
+              });
+              const { rest, moved } = state.result.value;
+              const transparent = (c) => /rgba\(0, 0, 0, 0\)|transparent/.test(c);
+              const changed =
+                page.scrollState === "frost"
+                  ? transparent(rest.bg) && !transparent(moved.bg)
+                  : rest.top === 0 && moved.top < 0;
+              const what = page.scrollState === "frost" ? "nav frosts on scroll" : "banner retracts on scroll";
+              if (changed) ok(what, `${JSON.stringify(rest)} → ${JSON.stringify(moved)}`);
+              else fail(what, `${JSON.stringify(rest)} → ${JSON.stringify(moved)}`);
+            }
 
             // Before the tab sweep, which scrolls the page off the top.
             if (page.hero) {

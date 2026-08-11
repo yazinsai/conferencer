@@ -46,6 +46,10 @@ export function EventNavShell({
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (frame.current) cancelAnimationFrame(frame.current);
+      // Reset the handle, not just the frame. React double-invokes effects in
+      // development, and a cancelled-but-non-zero handle makes the guard below
+      // swallow every subsequent scroll — the bar would never frost again.
+      frame.current = 0;
     };
   }, [banner, dismissed]);
 

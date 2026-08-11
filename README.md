@@ -175,7 +175,7 @@ horizontal scroll, no clickable label wrapping onto a second line, every interac
 named, every image with alt text, nothing above the fold lazy-loaded, the hero fitting a
 1280×800 laptop, and — by dispatching real Tab keys, because `:focus-visible` is a keyboard
 heuristic that a scripted `.focus()` will not trigger — a visible ring on every keyboard
-stop. 104 checks.
+stop, and that the two scroll-driven navs actually change state. 106 checks.
 
 **Authorization lives in one place** — `src/lib/guards.ts` — and is called by every page
 *and* every server action. Server actions are reachable by direct POST, so hiding a link is
