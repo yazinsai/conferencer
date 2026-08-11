@@ -96,45 +96,48 @@ export default async function SpeakersPage({
         </Notice>
       ) : null}
 
+      {/* Filters own their own <form> (SearchBox); keep them outside the invite form. */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <SearchBox
+          param="q"
+          label="Search speakers"
+          placeholder="Search name, email or company…"
+          className="w-full sm:w-72"
+        />
+        <FilterSelect
+          param="status"
+          label="Status"
+          allLabel="Any status"
+          options={SPEAKER_STATUSES.map((s) => ({ value: s, label: s }))}
+        />
+        <FilterSelect
+          param="track"
+          label="Track"
+          allLabel="Any track"
+          options={tracks.map((t) => ({ value: t.id, label: t.name }))}
+        />
+        <FilterSelect
+          param="completion"
+          label="Tasks"
+          allLabel="Any"
+          options={[
+            { value: "complete", label: "All complete" },
+            { value: "outstanding", label: "Outstanding" },
+          ]}
+        />
+        {q || status || trackId || completion ? (
+          <LinkButton href={`/admin/e/${slug}/speakers`} size="sm">
+            Clear
+          </LinkButton>
+        ) : null}
+        <span className="text-sm text-slate-500" role="status">
+          Showing <strong className="text-slate-800">{roster.length}</strong> of {total} speakers
+        </span>
+      </div>
+
       <form action={invitePortalAction}>
         <input type="hidden" name="slug" value={slug} />
-
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <SearchBox
-            param="q"
-            label="Search speakers"
-            placeholder="Search name, email or company…"
-            className="w-full sm:w-72"
-          />
-          <FilterSelect
-            param="status"
-            label="Status"
-            allLabel="Any status"
-            options={SPEAKER_STATUSES.map((s) => ({ value: s, label: s }))}
-          />
-          <FilterSelect
-            param="track"
-            label="Track"
-            allLabel="Any track"
-            options={tracks.map((t) => ({ value: t.id, label: t.name }))}
-          />
-          <FilterSelect
-            param="completion"
-            label="Tasks"
-            allLabel="Any"
-            options={[
-              { value: "complete", label: "All complete" },
-              { value: "outstanding", label: "Outstanding" },
-            ]}
-          />
-          {q || status || trackId || completion ? (
-            <LinkButton href={`/admin/e/${slug}/speakers`} size="sm">
-              Clear
-            </LinkButton>
-          ) : null}
-          <span className="text-sm text-slate-500" role="status">
-            Showing <strong className="text-slate-800">{roster.length}</strong> of {total} speakers
-          </span>
+        <div className="mb-3">
           <Button type="submit" size="sm" variant="secondary">
             Send portal invite to selected
           </Button>
