@@ -1,7 +1,7 @@
 import { eventBySlugOr404 } from "@/lib/guards";
 import { listLookup } from "@/lib/repo/events";
 import { publicSessions, speakersForSubmissions } from "@/lib/repo/submissions";
-import { SessionCard } from "@/components/public/pieces";
+import { PublicPage, SessionCard } from "@/components/public/pieces";
 import { FilterSelect, SearchBox } from "@/components/client/basics";
 import { EmptyState, LinkButton } from "@/components/ui";
 
@@ -36,10 +36,10 @@ export default async function SessionsPage({
   const filtered = Boolean(q || trackId || formatId || roomId);
 
   return (
-    <div>
+    <PublicPage>
       <div className="mb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Sessions</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="display text-2xl text-ink sm:text-3xl">Sessions</h1>
+        <p className="mt-1 text-sm text-neutral">
           The full programme for {event.name}. Search by session title or speaker name.
         </p>
       </div>
@@ -78,8 +78,8 @@ export default async function SessionsPage({
         </div>
       </div>
 
-      <p className="mb-3 text-sm text-slate-500" role="status">
-        Showing <strong className="text-slate-800">{sessions.length}</strong> of {total} sessions
+      <p className="mb-3 text-sm text-muted-foreground" role="status">
+        Showing <strong className="text-ink">{sessions.length}</strong> of {total} sessions
       </p>
 
       {sessions.length ? (
@@ -100,6 +100,6 @@ export default async function SessionsPage({
           action={<LinkButton href={`/e/${event.slug}/sessions`}>Clear filters</LinkButton>}
         />
       )}
-    </div>
+    </PublicPage>
   );
 }

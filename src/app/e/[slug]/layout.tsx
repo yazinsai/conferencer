@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getEventBySlug } from "@/lib/repo/events";
-import { formatEventDates } from "@/lib/datetime";
+import { formatDate, formatEventDates } from "@/lib/datetime";
 import { currentUser } from "@/lib/auth";
 import { landingFor } from "@/lib/guards";
-import { defaultForm } from "@/lib/repo/forms";
+import { defaultForm, formIsOpen } from "@/lib/repo/forms";
 import { PublicNav } from "@/components/public/nav";
+import { EventNavShell } from "@/components/client/event-nav";
+import { buttonClass, cx } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -19,76 +21,124 @@ export default async function PublicEventLayout({
   if (!event) notFound();
   const user = await currentUser();
   const form = defaultForm(event.id);
+  const open = form ? formIsOpen(form) : false;
+
+  /**
+   * The banner carries the deadline, not a promotion. A conference site has
+   * exactly one time-sensitive fact, and this is it. When there is no call for
+   * speakers at all the banner does not render and the bar docks on its own.
+   */
+  const banner = form ? (
+    open ? (
+      <>
+        <span className="hidden sm:inline">Call for speakers is open</span>
+        <span className="sm:hidden">CFP open</span>
+        {form.closes_at ? (
+          <span className="hidden md:inline"> · closes {formatDate(form.closes_at)}</span>
+        ) : null}{" "}
+        <Link
+          href={`/e/${event.slug}/submit/${form.id}`}
+          className="nowrap-affordance font-medium underline underline-offset-4"
+        >
+          Submit a talk →
+        </Link>
+      </>
+    ) : (
+      <>
+        The call for speakers has closed{" "}
+        <Link
+          href={`/e/${event.slug}/agenda`}
+          className="nowrap-affordance font-medium underline underline-offset-4"
+        >
+          See the agenda →
+        </Link>
+      </>
+    )
+  ) : null;
+
+  const bar = (
+    <div className="mx-auto flex h-[var(--nav-height)] w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
+      <Link href={`/e/${event.slug}`} className="min-w-0 shrink-0">
+        <span
+          className="wordmark nowrap-affordance block truncate text-[0.9375rem]"
+          style={{ color: event.accent_color }}
+        >
+          {event.name}
+        </span>
+      </Link>
+      <div className="hidden min-w-0 flex-1 lg:block">
+        <PublicNav slug={event.slug} />
+      </div>
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        {user ? (
+          <Link href={landingFor(user)} className={cx(buttonClass("ghost", "sm"), "nowrap-affordance")}>
+            My account
+          </Link>
+        ) : (
+          <Link href="/sign-in" className={cx(buttonClass("ghost", "sm"), "nowrap-affordance hidden sm:inline-flex")}>
+            Sign in
+          </Link>
+        )}
+        {form ? (
+          <Link
+            href={`/e/${event.slug}/submit/${form.id}`}
+            className={cx(buttonClass("primary", "sm"), "nowrap-affordance")}
+          >
+            {open ? "Submit a talk" : "Call for speakers"}
+          </Link>
+        ) : null}
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ ["--event-accent" as string]: event.accent_color }}>
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-0">
-              <Link href={`/e/${event.slug}`} className="block">
-                <span
-                  className="text-lg font-semibold tracking-tight"
-                  style={{ color: event.accent_color }}
-                >
-                  {event.name}
-                </span>
-              </Link>
-              <p className="text-xs text-slate-500">
-                {formatEventDates(event.starts_at, event.ends_at)}
-                {event.location ? ` · ${event.location}` : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              {form ? (
-                <Link
-                  href={`/e/${event.slug}/submit/${form.id}`}
-                  className="rounded-md px-3 py-2 font-medium text-white"
-                  style={{ backgroundColor: event.accent_color }}
-                >
-                  Submit a talk
-                </Link>
-              ) : null}
-              {user ? (
-                <Link
-                  href={landingFor(user)}
-                  className="rounded-md border border-slate-300 px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  My account
-                </Link>
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="rounded-md border border-slate-300 px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Sign in
-                </Link>
-              )}
-            </div>
-          </div>
+    <div
+      className="flex min-h-screen flex-col bg-paper"
+      style={{ ["--event-accent" as string]: event.accent_color }}
+    >
+      <EventNavShell banner={banner} bar={bar} />
+
+      {/* The link row lives under the bar below the desktop breakpoint, where the
+          bar itself only has room for the wordmark and the primary action. */}
+      <div className="border-b border-rule bg-paper px-4 py-2 lg:hidden">
+        <div className="mx-auto w-full max-w-6xl">
           <PublicNav slug={event.slug} />
         </div>
-      </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-xs text-slate-500">
-          <p>
-            {event.name}
-            {event.website_url ? (
-              <>
-                {" · "}
-                <a href={event.website_url} className="hover:text-slate-800">
+      </div>
+
+      <main className="flex-1">{children}</main>
+
+      {/* Ft1 Mast-headed — a wordmark, a line about the event, and the credit. */}
+      <footer className="border-t border-rule bg-paper-2">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+          <p className="wordmark text-lg text-ink">{event.name}</p>
+          <p className="mt-1 text-sm text-neutral">
+            {formatEventDates(event.starts_at, event.ends_at)}
+            {event.location ? ` · ${event.location}` : ""}
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-rule pt-5 text-xs text-muted-foreground">
+            <p>
+              {event.website_url ? (
+                <a
+                  href={event.website_url}
+                  className="nowrap-affordance underline-offset-4 hover:text-ink hover:underline"
+                >
                   {event.website_url.replace(/^https?:\/\//, "")}
                 </a>
-              </>
-            ) : null}
-          </p>
-          <p>
-            Programme powered by{" "}
-            <Link href="/" className="font-medium text-slate-700 hover:text-slate-900">
-              Conferencer
-            </Link>
-          </p>
+              ) : (
+                "Programme and schedule"
+              )}
+            </p>
+            <p>
+              Programme run on{" "}
+              <Link
+                href="/"
+                className="nowrap-affordance font-medium text-ink underline-offset-4 hover:underline"
+              >
+                Conferencer
+              </Link>
+            </p>
+          </div>
         </div>
       </footer>
     </div>

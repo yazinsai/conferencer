@@ -1,4 +1,41 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
+
+const PORTRAIT_DIR = fileURLToPath(new URL("assets/portraits", import.meta.url));
+
+export type Headshot = { buffer: Buffer; contentType: string; extension: string };
+
+/**
+ * A speaker's headshot: a real photograph if one is vendored for them, and the
+ * generated SVG below if not.
+ *
+ * The photographs live in `seed/assets/portraits/` and are committed, so seeding
+ * stays offline and instant. `npm run media faces` refreshes them; the people
+ * they illustrate are fictional and the portraits do not depict them — see
+ * `seed/assets/NOTICE.md`.
+ */
+export function headshotFor(key: string, first: string, last: string): Headshot {
+  const photo = join(PORTRAIT_DIR, `${key}.jpg`);
+  if (existsSync(photo)) {
+    return { buffer: readFileSync(photo), contentType: "image/jpeg", extension: "jpg" };
+  }
+  return {
+    buffer: Buffer.from(avatarSvg(first, last), "utf8"),
+    contentType: "image/svg+xml",
+    extension: "svg",
+  };
+}
+
+/** Every vendored portrait, in a stable order, for seeding synthetic speakers. */
+export function portraitPool(): Buffer[] {
+  if (!existsSync(PORTRAIT_DIR)) return [];
+  return readdirSync(PORTRAIT_DIR)
+    .filter((name) => name.endsWith(".jpg"))
+    .sort()
+    .map((name) => readFileSync(join(PORTRAIT_DIR, name)));
+}
 
 /** Deterministic pastel from a name so a speaker's avatar never changes colour. */
 export function colorFor(seed: string): { bg: string; fg: string } {

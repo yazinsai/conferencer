@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { eventBySlugOr404 } from "@/lib/guards";
 import { publicSession, speakersForSubmissions } from "@/lib/repo/submissions";
-import { SessionMeta, SessionTags } from "@/components/public/pieces";
+import { PublicPage, SessionMeta, SessionTags } from "@/components/public/pieces";
 import { Avatar, Card } from "@/components/ui";
 import { stripHtml } from "@/lib/fields";
 
@@ -24,21 +24,21 @@ export default async function SessionDetailPage({ params }: PageProps<"/e/[slug]
   const speakers = speakersForSubmissions([session.id]).get(session.id) ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <PublicPage width="prose">
       <Link
         href={`/e/${event.slug}/sessions`}
-        className="text-sm font-medium text-brand-700 hover:underline"
+        className="text-sm font-medium text-signal hover:underline"
       >
         ← Back to sessions
       </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {session.title}
       </h1>
       <SessionMeta session={session} />
       <SessionTags session={session} />
 
       {session.description ? (
-        <div className="prose-cf mt-5 text-slate-700">
+        <div className="prose-cf mt-5 text-neutral">
           {stripHtml(session.description)
             .split("\n")
             .filter(Boolean)
@@ -50,7 +50,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/e/[slug]
 
       {speakers.length ? (
         <Card className="mt-6 p-4">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-ink">
             {speakers.length === 1 ? "Speaker" : "Speakers"}
           </h2>
           <ul className="mt-3 space-y-4">
@@ -60,11 +60,11 @@ export default async function SessionDetailPage({ params }: PageProps<"/e/[slug]
                 <div>
                   <Link
                     href={`/e/${event.slug}/speakers/${s.contact_id}`}
-                    className="font-medium text-slate-900 hover:text-brand-700"
+                    className="font-medium text-ink hover:text-signal"
                   >
                     {s.first_name} {s.last_name}
                   </Link>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     {[s.job_title, s.company].filter(Boolean).join(", ")}
                   </p>
                 </div>
@@ -73,6 +73,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/e/[slug]
           </ul>
         </Card>
       ) : null}
-    </div>
+    </PublicPage>
   );
 }

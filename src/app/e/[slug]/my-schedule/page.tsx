@@ -2,6 +2,7 @@ import { eventBySlugOr404 } from "@/lib/guards";
 import { publicSessions, speakersForSubmissions } from "@/lib/repo/submissions";
 import { MySchedule, type StarSession } from "@/components/client/schedule";
 import { formatRange } from "@/lib/datetime";
+import { PublicPage } from "@/components/public/pieces";
 
 export const dynamic = "force-dynamic";
 
@@ -31,14 +32,14 @@ export default async function MySchedulePage({ params }: PageProps<"/e/[slug]/my
   }));
 
   return (
-    <div>
+    <PublicPage>
       <div className="mb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">My schedule</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="display text-2xl text-ink sm:text-3xl">My schedule</h1>
+        <p className="mt-1 text-sm text-neutral">
           Your personal picks for {event.name}. Saved in this browser — no account needed.
         </p>
       </div>
       <MySchedule slug={event.slug} sessions={payload} eventName={event.name} />
-    </div>
+    </PublicPage>
   );
 }

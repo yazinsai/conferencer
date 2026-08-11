@@ -1,83 +1,123 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
-/* Conferencer design tokens. Light-only on purpose: the product is judged from
-   screenshots and a surprise dark mode helps nobody. */
-@theme {
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans", sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-
-:root {
-  color-scheme: light;
-  --accent: oklch(0.97 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Conferencer brand indigo (#4f46e5) rather than the stock neutral primary. */
-  --primary: oklch(0.511 0.262 276.966);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.511 0.262 276.966);
-  --chart-1: oklch(0.511 0.262 276.966);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+/* The design system lives in ./tokens.css — colours, type, motion, shapes.
+   This file is only the base layer that sits on top of it. Light-only on
+   purpose: the product is judged from screenshots and a surprise dark mode
+   helps nobody. */
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* `clip`, never `hidden`: clip stops the document scrolling sideways when a
+     figure or a marquee deliberately overruns its column, while preserving
+     position: sticky on descendants. */
+  overflow-x: clip;
 }
 
 body {
-  background: #f8fafc;
-  color: #0f172a;
-  font-family: var(--font-sans);
+  overflow-x: clip;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-synthesis-weight: none;
+}
+
+/* Headings carry the display face everywhere, including the screens this
+   redesign didn't restructure. Roman always — italic display is the most
+   reliable AI tell there is. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-style: normal;
+  letter-spacing: -0.02em;
+  /* Long compound words ("double-booking", "DevFlow") must break inside the
+     word rather than push the viewport sideways on a 320px screen. */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 /* Visible focus everywhere (R-NFR-6). shadcn rings cover its own primitives;
-   this catches links and anything hand-rolled. */
+   this catches links and anything hand-rolled. Never transitioned — a ring
+   that fades in leaves keyboard users with no indicator while it does. */
 :where(a, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   border-radius: 4px;
+  transition: none;
 }
+
+/* ------------------------------------------------------------- utilities -- */
+
+/* Figures that hold a number: prices, counts, times, countdowns. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Display type: the clamp lives in the token, the wrapping rules live here. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* The wordmark and the outlier register. Two slots, per the 2+1 rule. */
+.wordmark {
+  font-family: var(--font-outlier);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* A clickable affordance is a one-line object. If the row can't fit, the row
+   reflows — the label doesn't break in half. */
+.nowrap-affordance {
+  white-space: nowrap;
+}
+
+/* The single orchestrated entrance in the whole product: the landing hero.
+   Staggered by DOM index, capped at 300ms, opacity+transform only. */
+@keyframes hm-reveal {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: hm-reveal var(--dur-long) var(--ease-out) forwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    transform: none;
+    animation-delay: 0ms;
+  }
+}
+
+/* ----------------------------------------------------------- rich text --- */
 
 /* Rich text rendering (bios, welcome messages, email bodies). */
 .prose-cf {
@@ -88,11 +128,11 @@ body {
 }
 .prose-cf h1 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 .prose-cf h2 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 .prose-cf h3 {
   font-size: 1.05rem;
@@ -107,8 +147,9 @@ body {
   padding-left: 1.4em;
 }
 .prose-cf a {
-  color: var(--event-accent, var(--primary));
+  color: var(--event-accent, var(--color-signal));
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .prose-cf strong {
   font-weight: 600;
@@ -117,22 +158,22 @@ body {
   font-style: italic;
 }
 .prose-cf blockquote {
-  border-left: 3px solid #e2e8f0;
+  border-left: var(--rule-fine) solid var(--color-rule);
   padding-left: 0.9em;
-  color: #475569;
+  color: var(--color-neutral);
 }
 
 /* Contenteditable rich-text editor placeholder. */
 [contenteditable][data-placeholder]:empty::before {
   content: attr(data-placeholder);
-  color: #94a3b8;
+  color: var(--muted-foreground);
 }
 
 /* Agenda grid drag affordances. */
 .dropzone-active {
-  outline: 2px dashed var(--event-accent, var(--primary));
+  outline: var(--rule-fine) dashed var(--event-accent, var(--color-signal));
   outline-offset: -3px;
-  background: color-mix(in oklch, var(--primary) 8%, transparent);
+  background: color-mix(in oklch, var(--color-signal) 8%, transparent);
 }
 
 @media print {
@@ -141,81 +182,27 @@ body {
   }
 }
 
-@theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
-
+/* The product is light-only; this block is inert but kept so a future dark
+   mode has somewhere to land. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(14% 0.008 265);
+  --foreground: oklch(96% 0.004 265);
+  --card: oklch(18% 0.008 265);
+  --card-foreground: oklch(96% 0.004 265);
+  --popover: oklch(18% 0.008 265);
+  --popover-foreground: oklch(96% 0.004 265);
+  --primary: oklch(96% 0.004 265);
+  --primary-foreground: oklch(17% 0.008 265);
+  --secondary: oklch(26% 0.008 265);
+  --secondary-foreground: oklch(96% 0.004 265);
+  --muted: oklch(26% 0.008 265);
+  --muted-foreground: oklch(72% 0.01 265);
+  --accent: oklch(26% 0.008 265);
+  --accent-foreground: oklch(96% 0.004 265);
+  --destructive: oklch(65% 0.19 27);
+  --border: oklch(100% 0 0 / 12%);
+  --input: oklch(100% 0 0 / 16%);
+  --ring: oklch(64% 0.19 277);
 }
 
 @layer base {

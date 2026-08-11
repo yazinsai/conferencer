@@ -9,7 +9,7 @@ import { getEventBySlug, listLookup } from "../src/lib/repo/events";
 import { addParticipant, createSubmission } from "../src/lib/repo/submissions";
 import { assignTask, listTasks } from "../src/lib/repo/tasks";
 import { storeBuffer } from "../src/lib/repo/uploads";
-import { avatarSvg } from "./avatars";
+import { avatarSvg, portraitPool } from "./avatars";
 import { EVENT } from "./fixtures";
 
 const FIRST = [
@@ -58,6 +58,9 @@ function main() {
 
   let speakers = 0;
   const contacts: string[] = [];
+  // Cycle the vendored portraits so the scale test looks like a real roster.
+  // Falls back to the generated SVG when no photographs are vendored.
+  const portraits = portraitPool();
   for (let i = 0; i < 40; i += 1) {
     const first = FIRST[i % FIRST.length];
     const last = LAST[(i * 7) % LAST.length];
@@ -73,11 +76,12 @@ function main() {
         COMPANIES[i % COMPANIES.length]
       } and has been shipping to production for longer than they care to admit.`,
     });
+    const portrait = portraits.length ? portraits[i % portraits.length] : null;
     const upload = storeBuffer({
       eventId: event.id,
-      filename: `${first.toLowerCase()}-${last.toLowerCase()}.svg`,
-      contentType: "image/svg+xml",
-      buffer: Buffer.from(avatarSvg(first, last), "utf8"),
+      filename: `${first.toLowerCase()}-${last.toLowerCase()}.${portrait ? "jpg" : "svg"}`,
+      contentType: portrait ? "image/jpeg" : "image/svg+xml",
+      buffer: portrait ?? Buffer.from(avatarSvg(first, last), "utf8"),
       kind: "headshot",
       contactId: contact.id,
       isPublic: true,

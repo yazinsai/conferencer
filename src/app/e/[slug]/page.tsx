@@ -3,9 +3,10 @@ import Link from "next/link";
 import { eventBySlugOr404 } from "@/lib/guards";
 import { defaultForm, formIsOpen } from "@/lib/repo/forms";
 import { publicSessions, publicSpeakers, speakersForSubmissions } from "@/lib/repo/submissions";
-import { SessionCard } from "@/components/public/pieces";
-import { Avatar, Card, LinkButton } from "@/components/ui";
-import { formatDate, formatEventDates, daysUntil } from "@/lib/datetime";
+import { SpeakerLine } from "@/components/public/pieces";
+import { Avatar, LinkButton } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
+import { formatDate, formatEventDates, formatRange, daysUntil } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,16 @@ export async function generateMetadata({ params }: PageProps<"/e/[slug]">) {
   return { title: event.name, description: event.theme ?? event.tagline ?? undefined };
 }
 
+/**
+ * Macrostructure 03 · Marquee Hero (see design.md § Macrostructure families).
+ *
+ * A conference home page has one job above the fold: say which conference, when,
+ * and where, at poster scale. The fold is typographic — no card, no image, no
+ * three-up grid. A rule closes it, and below the rule the page becomes a list.
+ *
+ * The primary action lives in the N12 banner the layout renders, which is why
+ * this fold can afford to be quiet.
+ */
 export default async function EventHomePage({ params }: PageProps<"/e/[slug]">) {
   const { slug } = await params;
   const event = eventBySlugOr404(slug);
@@ -22,124 +33,211 @@ export default async function EventHomePage({ params }: PageProps<"/e/[slug]">) 
   const open = form ? formIsOpen(form) : false;
   const sessions = publicSessions(event.id);
   const speakers = publicSpeakers(event.id);
-  const featured = sessions.slice(0, 4);
+  const featured = sessions.slice(0, 5);
   const speakerMap = speakersForSubmissions(featured.map((s) => s.id));
   const countdown = daysUntil(event.starts_at);
 
+  const facts = [
+    { label: "Sessions", value: sessions.length, href: `/e/${event.slug}/sessions` },
+    { label: "Speakers", value: speakers.length, href: `/e/${event.slug}/speakers` },
+    countdown !== null && countdown > 0
+      ? { label: "Days to go", value: countdown, href: `/e/${event.slug}/agenda` }
+      : { label: "Opens", value: formatDate(event.starts_at), href: `/e/${event.slug}/agenda` },
+  ];
+
   return (
     <div>
+      {/* ---------------------------------------------------------- the fold -- *
+       * Macrostructure 03 allows the marquee fold to sit on a single full-bleed
+       * photograph. The type stays the design; the venue is the backdrop. The
+       * scrim is what makes that safe — every rule that darkens the surface
+       * flips its text colour in the same place, and the ratios are measured
+       * against the rendered pixels rather than assumed (npm run audit).       */}
       <section
-        className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm"
-        style={{ borderTopColor: event.accent_color, borderTopWidth: 4 }}
+        data-scrim
+        className="relative isolate overflow-hidden border-b-2 border-ink bg-ink"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          {formatEventDates(event.starts_at, event.ends_at)}
-          {event.location ? ` · ${event.location}` : ""}
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{event.name}</h1>
-        {event.tagline ? (
-          <p className="mt-1 text-lg text-slate-600">{event.tagline}</p>
-        ) : null}
-        {event.theme ? (
-          <p className="mt-3 max-w-2xl text-sm text-slate-600">{event.theme}</p>
-        ) : null}
-        <div className="mt-5 flex flex-wrap gap-2">
-          {form ? (
-            <LinkButton href={`/e/${event.slug}/submit/${form.id}`} variant="primary" size="lg">
-              {open ? "Submit a talk" : "Call for speakers"}
-            </LinkButton>
-          ) : null}
-          <LinkButton href={`/e/${event.slug}/agenda`} size="lg">
-            View the agenda
-          </LinkButton>
-          <LinkButton href={`/e/${event.slug}/speakers`} size="lg">
-            Meet the speakers
-          </LinkButton>
-        </div>
-        {form?.closes_at ? (
-          <p className="mt-3 text-sm text-slate-500">
-            {open ? (
-              <>
-                Submissions close <strong>{formatDate(form.closes_at)}</strong>.
-              </>
-            ) : (
-              <>Submissions are closed.</>
-            )}
+        {/* eslint-disable-next-line @next/next/no-img-element -- a fixed-size
+            local WebP that is already the right dimensions. next/image would add
+            a runtime optimiser (and a native sharp dependency) to a product whose
+            whole claim is that it needs neither. */}
+        <img
+          src="/media/venue.webp"
+          alt=""
+          width={2000}
+          height={1125}
+          fetchPriority="high"
+          decoding="sync"
+          className="absolute inset-0 -z-10 size-full object-cover"
+        />
+        {/* Two stops, on a background, never on text. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_88%,transparent)_52%,color-mix(in_oklch,var(--color-ink)_62%,transparent)_100%)]"
+        />
+
+        <div className="mx-auto w-full max-w-6xl px-4 pb-20 pt-14 text-paper sm:px-6 sm:pb-28 sm:pt-20">
+          <p className="wordmark text-xs uppercase tracking-[0.16em] text-paper/85">
+            {formatEventDates(event.starts_at, event.ends_at)}
+            {event.location ? ` · ${event.location}` : ""}
           </p>
-        ) : null}
+
+          <h1 className="display mt-5 max-w-[16ch] text-display text-paper">{event.name}</h1>
+
+          {event.tagline ? (
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-paper/85">{event.tagline}</p>
+          ) : null}
+        </div>
       </section>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <Card className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sessions</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">{sessions.length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Speakers</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">{speakers.length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {countdown !== null && countdown > 0 ? "Days to go" : "Event"}
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {countdown !== null && countdown > 0 ? countdown : formatDate(event.starts_at)}
-          </p>
-        </Card>
-      </div>
+      {/* ------------------------------------------------- below the fold -- */}
+      <section className="border-b border-rule bg-paper">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-5 px-4 py-6 sm:px-6">
+          <div className="flex flex-wrap gap-2">
+            {form ? (
+              <LinkButton
+                href={`/e/${event.slug}/submit/${form.id}`}
+                variant="primary"
+                size="lg"
+                className="nowrap-affordance"
+              >
+                {open ? "Submit a talk" : "Call for speakers"}
+              </LinkButton>
+            ) : null}
+            <LinkButton href={`/e/${event.slug}/agenda`} size="lg" className="nowrap-affordance">
+              View the agenda
+            </LinkButton>
+            <LinkButton href={`/e/${event.slug}/speakers`} size="lg" className="nowrap-affordance">
+              Meet the speakers
+            </LinkButton>
+          </div>
+
+          <dl className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            {facts.map((fact) => (
+              <div key={fact.label}>
+                <dt className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+                  {fact.label}
+                </dt>
+                <dd className="wordmark tnum mt-0.5 text-xl font-medium text-ink">
+                  <Link href={fact.href} className="underline-offset-4 hover:underline">
+                    {fact.value}
+                  </Link>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {event.theme ? (
+        <section className="bg-paper-2">
+          <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+            <p className="max-w-[62ch] text-lg leading-relaxed text-ink-2">{event.theme}</p>
+            {form?.closes_at ? (
+              <p className="mt-5 text-sm text-muted-foreground">
+                {open ? (
+                  <>
+                    Submissions close on{" "}
+                    <strong className="font-medium text-ink">{formatDate(form.closes_at)}</strong>.
+                  </>
+                ) : (
+                  <>Submissions closed on {formatDate(form.closes_at)}.</>
+                )}
+              </p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {featured.length ? (
-        <section className="mt-10">
-          <div className="mb-3 flex items-end justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Featured sessions</h2>
-            <Link
-              href={`/e/${event.slug}/sessions`}
-              className="text-sm font-medium text-brand-700 hover:underline"
-            >
-              All {sessions.length} sessions →
-            </Link>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {featured.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                speakers={speakerMap.get(session.id) ?? []}
-                href={`/e/${event.slug}/sessions/${session.id}`}
-              />
-            ))}
+        <section className="border-t border-rule">
+          <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+            <div className="mb-2 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <h2 className="display text-2xl text-ink">On the programme</h2>
+              <Link
+                href={`/e/${event.slug}/sessions`}
+                className="nowrap-affordance group text-sm font-medium text-ink underline-offset-4 hover:underline"
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  All {sessions.length} sessions
+                  <Icon
+                    name="arrowRight"
+                    size={15}
+                    className="transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5"
+                  />
+                </span>
+              </Link>
+            </div>
+
+            {/* Ruled rows rather than a card grid: the sessions list is the page's
+                spine, and rows read faster than boxes at this density. */}
+            <ul className="border-t border-rule">
+              {featured.map((session) => (
+                <li key={session.id} className="border-b border-rule">
+                  <Link
+                    href={`/e/${event.slug}/sessions/${session.id}`}
+                    className="group grid gap-x-8 gap-y-2 py-5 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
+                  >
+                    <p className="wordmark tnum text-xs text-muted-foreground md:pt-1">
+                      {session.pub_starts_at
+                        ? formatRange(session.pub_starts_at, session.pub_ends_at)
+                        : "Time to be announced"}
+                      {session.room_name ? (
+                        <span className="block md:mt-0.5">{session.room_name}</span>
+                      ) : null}
+                    </p>
+                    <div className="min-w-0">
+                      <h3 className="display text-lg text-ink underline-offset-4 group-hover:underline">
+                        {session.title}
+                      </h3>
+                      <SpeakerLine speakers={speakerMap.get(session.id) ?? []} />
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       ) : null}
 
       {speakers.length ? (
-        <section className="mt-10">
-          <div className="mb-3 flex items-end justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Speakers</h2>
-            <Link
-              href={`/e/${event.slug}/gallery`}
-              className="text-sm font-medium text-brand-700 hover:underline"
-            >
-              Speaker gallery →
-            </Link>
+        <section className="border-t border-rule bg-paper-2">
+          <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <h2 className="display text-2xl text-ink">Speaking</h2>
+              <Link
+                href={`/e/${event.slug}/gallery`}
+                className="nowrap-affordance group inline-flex items-center gap-1.5 text-sm font-medium text-ink underline-offset-4 hover:underline"
+              >
+                Speaker gallery
+                <Icon
+                  name="arrowRight"
+                  size={15}
+                  className="transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5"
+                />
+              </Link>
+            </div>
+            <ul className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-4 md:grid-cols-6">
+              {speakers.slice(0, 12).map((speaker) => (
+                <li key={speaker.id}>
+                  <Link
+                    href={`/e/${event.slug}/speakers/${speaker.id}`}
+                    className="group block text-center"
+                  >
+                    <Avatar
+                      src={speaker.headshot_url}
+                      name={`${speaker.first_name} ${speaker.last_name}`}
+                      size={72}
+                      className="mx-auto"
+                    />
+                    <p className="mt-2.5 text-xs font-medium text-ink-2 underline-offset-4 group-hover:underline">
+                      {speaker.first_name} {speaker.last_name}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="flex flex-wrap gap-4">
-            {speakers.slice(0, 12).map((speaker) => (
-              <li key={speaker.id} className="w-28 text-center">
-                <Link href={`/e/${event.slug}/speakers/${speaker.id}`} className="group block">
-                  <Avatar
-                    src={speaker.headshot_url}
-                    name={`${speaker.first_name} ${speaker.last_name}`}
-                    size={80}
-                    className="mx-auto"
-                  />
-                  <p className="mt-2 text-xs font-medium text-slate-800 group-hover:text-brand-700">
-                    {speaker.first_name} {speaker.last_name}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
         </section>
       ) : null}
     </div>

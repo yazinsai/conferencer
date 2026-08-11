@@ -9,7 +9,18 @@ import { listAssignments } from "@/lib/repo/tasks";
 import { statusCounts } from "@/lib/repo/submissions";
 import { recentActivity } from "@/lib/repo/audit";
 import { DashboardPanels } from "@/components/admin/dashboard-panels";
-import { Card, CardHeader, Chip, LinkButton, Progress, Stat, Td, Th, Table } from "@/components/ui";
+import {
+  Card,
+  CardHeader,
+  Chip,
+  cx,
+  LinkButton,
+  Progress,
+  Td,
+  Th,
+  Table,
+} from "@/components/ui";
+import { Icon, type IconName } from "@/components/ui/icon";
 import {
   daysUntil,
   formatDate,
@@ -70,33 +81,45 @@ export default async function DashboardPage({
     .filter((row) => row.assigned > row.complete);
 
   const countdown = daysUntil(event.starts_at);
+  // The icon names the *kind* of thing needing attention, which a severity dot
+  // could not; the tone still carries urgency.
   const nudges = [
     needSlot > 0 && {
       text: `${needSlot} accepted ${needSlot === 1 ? "session still needs" : "sessions still need"} a time slot on the agenda`,
       href: `${base}/agenda`,
       tone: "amber" as const,
+      icon: "agenda" as const,
     },
     awaitingDecision > 0 && {
       text: `${awaitingDecision} submissions are awaiting a decision`,
       href: `${base}/submissions?status=pending`,
       tone: "blue" as const,
+      icon: "decision" as const,
     },
     missingProfile > 0 && {
       text: `${missingProfile} accepted speakers are missing a bio or headshot`,
       href: `${base}/speakers`,
       tone: "amber" as const,
+      icon: "person" as const,
     },
     overdueSpeakers > 0 && {
       text: `${overdueSpeakers} speakers have overdue onboarding tasks`,
       href: `${base}/tasks/deliverables?overdue=1`,
       tone: "red" as const,
+      icon: "clock" as const,
     },
     laggingReviewers.length > 0 && {
       text: `${laggingReviewers.length} reviewers have not finished their assigned reviews`,
       href: `${base}/evaluation`,
       tone: "violet" as const,
+      icon: "evaluation" as const,
     },
-  ].filter(Boolean) as Array<{ text: string; href: string; tone: "amber" | "blue" | "red" | "violet" }>;
+  ].filter(Boolean) as Array<{
+    text: string;
+    href: string;
+    tone: "amber" | "blue" | "red" | "violet";
+    icon: IconName;
+  }>;
 
   const readiness = all<{
     contact_id: string;
@@ -123,54 +146,103 @@ export default async function DashboardPage({
 
   const activity = recentActivity(event.id, 6);
 
+  // Stat-Led hero: a real figure, never standing alone — the words beside it say
+  // what the number means (see design.md § Macrostructure families).
+  const lead =
+    countdown === null
+      ? { figure: String(counts.all), unit: counts.all === 1 ? "submission" : "submissions", line: `In the programme for ${event.name}.` }
+      : countdown > 0
+        ? {
+            figure: String(countdown),
+            unit: countdown === 1 ? "day" : "days",
+            // The location already sits on the meta line below; repeating it here
+            // pushes the headline onto three lines at 1280px.
+            line: `Until ${event.name} opens.`,
+          }
+        : countdown === 0
+          ? { figure: "Today", unit: "", line: `${event.name} starts this morning.` }
+          : { figure: "Wrapped", unit: "", line: `${event.name} is over. The programme stays readable.` };
+
   return (
     <div>
-      <div className="mb-6">
-        <p className="text-sm text-slate-500">{formatDate(localToday(), { weekday: true })}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
-          Good to see you, {fullName(user).split(" ")[0]}
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          {event.name} · {formatEventDates(event.starts_at, event.ends_at)}
-          {countdown !== null ? (
-            <>
-              {" · "}
-              <strong className="text-slate-800">
-                {countdown > 0 ? `${countdown} days to go` : countdown === 0 ? "Today!" : "Wrapped"}
-              </strong>
-            </>
-          ) : null}
-        </p>
-      </div>
+      <section className="mb-9 grid gap-6 border-b border-rule pb-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-end">
+        <div className="min-w-0">
+          <p className="flex items-baseline gap-3">
+            <span className="wordmark tnum display text-display text-ink">{lead.figure}</span>
+            {lead.unit ? (
+              <span className="text-lg font-medium text-muted-foreground">{lead.unit}</span>
+            ) : null}
+          </p>
+          <h1 className="display mt-2 max-w-xl text-xl text-ink-2 sm:text-2xl">{lead.line}</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {formatEventDates(event.starts_at, event.ends_at)}
+            {event.location ? ` · ${event.location}` : ""}
+          </p>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Submissions" value={counts.all} href={`${base}/submissions`} />
-        <Stat
-          label="Accepted speakers"
-          value={speakers}
-          href={`${base}/speakers`}
-          tone="green"
-        />
-        <Stat
-          label="Sessions scheduled"
-          value={`${scheduled}/${acceptedTotal}`}
-          href={`${base}/agenda`}
-        />
-        <Stat
-          label="Tasks outstanding"
-          value={outstandingTasks.length}
-          hint={overdueTasks.length ? `${overdueTasks.length} overdue` : "nothing overdue"}
-          href={`${base}/tasks/deliverables`}
-          tone={overdueTasks.length ? "red" : undefined}
-        />
-      </div>
+        <div className="min-w-0 lg:text-right">
+          <p className="text-sm text-neutral">
+            Good to see you, {fullName(user).split(" ")[0]}.
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {formatDate(localToday(), { weekday: true })}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2 lg:justify-end">
+            <LinkButton href={`${base}/submissions`} variant="primary">
+              Review submissions
+            </LinkButton>
+            <LinkButton href={`${base}/agenda`}>Open the agenda</LinkButton>
+          </div>
+        </div>
+      </section>
 
-      <section className="mt-6">
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Submission status</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      {/* T4 numbered stat strip — hairline-divided, tabular, every cell a link. */}
+      <section aria-label="Programme at a glance">
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-rule bg-rule sm:grid-cols-4">
+          {[
+            { label: "Submissions", value: counts.all, hint: `${counts.pending} awaiting a decision`, href: `${base}/submissions`, tone: undefined },
+            { label: "Accepted speakers", value: speakers, hint: `${acceptedTotal} accepted sessions`, href: `${base}/speakers`, tone: "green" as const },
+            { label: "Sessions scheduled", value: `${scheduled}/${acceptedTotal}`, hint: needSlot > 0 ? `${needSlot} still need a slot` : "all placed", href: `${base}/agenda`, tone: undefined },
+            {
+              label: "Tasks outstanding",
+              value: outstandingTasks.length,
+              hint: overdueTasks.length ? `${overdueTasks.length} overdue` : "nothing overdue",
+              href: `${base}/tasks/deliverables`,
+              tone: overdueTasks.length ? ("red" as const) : undefined,
+            },
+          ].map((cell) => (
+            <Link
+              key={cell.label}
+              href={cell.href}
+              className="group bg-paper px-4 py-4 transition-colors duration-[120ms] ease-out hover:bg-paper-2"
+            >
+              <span className="wordmark block text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+                {cell.label}
+              </span>
+              <span
+                className={cx(
+                  "wordmark tnum mt-2 block text-3xl font-medium tracking-[-0.02em]",
+                  cell.tone === "green" && "text-positive",
+                  cell.tone === "red" && "text-destructive",
+                  !cell.tone && "text-ink",
+                )}
+              >
+                {cell.value}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">{cell.hint}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="wordmark mb-3 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
+          Submission status
+        </h2>
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-rule bg-rule sm:grid-cols-5 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
           {[
             { label: "Accepted", key: "accepted", tone: "green" as const },
-            { label: "Pending", key: "pending", tone: "violet" as const },
+            { label: "Pending", key: "pending", tone: "blue" as const },
             { label: "Declined", key: "declined", tone: "red" as const },
             { label: "Drafts", key: "draft", tone: "slate" as const },
             { label: "Withdrawn", key: "withdrawn", tone: "slate" as const },
@@ -178,27 +250,46 @@ export default async function DashboardPage({
             <Link
               key={item.key}
               href={`${base}/submissions?status=${item.key}`}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm hover:border-brand-300"
+              className="flex items-center justify-between gap-2 bg-paper px-4 py-3 transition-colors duration-[120ms] ease-out hover:bg-paper-2"
             >
               <Chip tone={item.tone}>{item.label}</Chip>
-              <p className="mt-2 text-xl font-semibold text-slate-900">{counts[item.key] ?? 0}</p>
+              <span className="wordmark tnum text-lg font-medium text-ink">
+                {counts[item.key] ?? 0}
+              </span>
             </Link>
           ))}
         </div>
       </section>
 
       {nudges.length ? (
-        <section className="mt-6">
-          <h2 className="mb-2 text-sm font-semibold text-slate-900">Also check</h2>
-          <ul className="grid gap-2 md:grid-cols-2">
+        <section className="mt-10">
+          <h2 className="wordmark mb-1 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
+            Also check
+          </h2>
+          <ul className="grid border-t border-rule md:grid-cols-2 md:gap-x-8">
             {nudges.map((nudge) => (
-              <li key={nudge.href + nudge.text}>
+              <li key={nudge.href + nudge.text} className="border-b border-rule">
                 <Link
                   href={nudge.href}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm hover:border-brand-300"
+                  className="group flex items-center justify-between gap-4 py-3 text-sm transition-colors duration-[120ms] ease-out"
                 >
-                  <span className="text-slate-700">{nudge.text}</span>
-                  <Chip tone={nudge.tone}>Resolve →</Chip>
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <Icon
+                      name={nudge.icon}
+                      size={17}
+                      className={cx(
+                        nudge.tone === "red" && "text-destructive",
+                        nudge.tone === "amber" && "text-warn",
+                        (nudge.tone === "blue" || nudge.tone === "violet") && "text-signal",
+                      )}
+                    />
+                    <span className="text-neutral group-hover:text-ink">{nudge.text}</span>
+                  </span>
+                  <Icon
+                    name="arrowRight"
+                    size={15}
+                    className="text-muted-foreground transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5 group-hover:text-ink"
+                  />
                 </Link>
               </li>
             ))}
@@ -214,7 +305,7 @@ export default async function DashboardPage({
         eventEnd={event.ends_at}
       />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="mt-8 grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader
             title="Speaker readiness"
@@ -241,12 +332,12 @@ export default async function DashboardPage({
                     <Td>
                       <Link
                         href={`${base}/speakers/${row.contact_id}`}
-                        className="font-medium text-slate-800 hover:text-brand-700"
+                        className="font-medium text-ink hover:text-signal"
                       >
                         {row.name}
                       </Link>
                     </Td>
-                    <Td>
+                    <Td className="wordmark tnum text-ink-2">
                       {row.done}/{row.total}
                     </Td>
                     <Td className="w-40">
@@ -256,7 +347,7 @@ export default async function DashboardPage({
                       {row.overdue ? (
                         <Chip tone="red">{row.overdue} overdue</Chip>
                       ) : (
-                        <span className="text-xs text-slate-400">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </Td>
                   </tr>
@@ -264,24 +355,24 @@ export default async function DashboardPage({
               </tbody>
             </Table>
           ) : (
-            <p className="px-4 py-6 text-sm text-slate-500">No onboarding tasks assigned yet.</p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">No onboarding tasks assigned yet.</p>
           )}
         </Card>
 
         <Card>
           <CardHeader title="Recent activity" />
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-rule">
             {activity.length ? (
               activity.map((entry) => (
-                <li key={entry.id} className="px-4 py-2.5 text-sm">
-                  <p className="text-slate-700">{entry.summary ?? entry.action}</p>
-                  <p className="text-xs text-slate-400">
+                <li key={entry.id} className="px-4 py-3 text-sm">
+                  <p className="text-neutral">{entry.summary ?? entry.action}</p>
+                  <p className="wordmark mt-0.5 text-xs text-muted-foreground">
                     {entry.actor_name} · {relativeStamp(entry.created_at)}
                   </p>
                 </li>
               ))
             ) : (
-              <li className="px-4 py-6 text-sm text-slate-500">Nothing yet.</li>
+              <li className="px-4 py-6 text-sm text-muted-foreground">Nothing yet.</li>
             )}
           </ul>
         </Card>

@@ -1,0 +1,256 @@
+/* Hallmark · genre: modern-minimal · design-system: design.md · designed-as-app
+ * macrostructures: Workbench (marketing) · Marquee Hero (public event) · Stat-Led (app)
+ * theme: studied-DNA (source: image) · paper oklch(100% 0 0) · accent = ink oklch(17% 0.008 265)
+ * signal oklch(51.1% 0.262 277) held under 5% · display: Geist 600 · body: Switzer 400 · outlier: Geist Mono 500
+ * nav: N1b (marketing) · N12 (public event) · N3 (app)  ·  footer: Ft5 · Ft1 · —
+ * enrichment: real product screenshots in hairline figures (no re-drawn chrome)
+ * studied: yes · DNA-source: image (user reference)
+ * pre-emit critique: P5 H5 E4 S5 R4 V5
+ * slop test: 58/58 · contrast: pass (40-41, `npm run contrast`, 27 pairs)
+ * mobile: pass (34, 49, 50-57, `npm run audit`, 320/375/414/768/1280/1440)
+ * honest: pass (46) · chrome: pass (47) · tokens: pass (48) · icons: pass (30, Lucide only)
+ * nav: pass (42) · footer: pass (43) · hero fold: pass (44, 470px of 800px)
+ *
+ * This file is the single source of truth for the product's look. globals.css imports it,
+ * every screen renders through src/components/ui/index.tsx, and the ramps at the bottom
+ * carry the ~800 legacy `slate-*` / `brand-*` utilities in screens this redesign did not
+ * touch onto the new palette without editing them one by one.
+ */
+
+@theme {
+  /* ---------------------------------------------------------------- surface -- */
+  --color-paper: oklch(100% 0 0);
+  --color-paper-2: oklch(98.2% 0.002 265);
+  --color-paper-3: oklch(96.4% 0.003 265);
+  --color-rule: oklch(92.5% 0.004 265);
+  --color-rule-2: oklch(87% 0.005 265);
+  /* Form-control boundary. Darker than the decorative rules on purpose: when an
+     input's fill matches the page, its border is the only thing identifying it
+     as a control, and WCAG 1.4.11 wants 3:1 for that. */
+  --color-field: oklch(63% 0.013 265);
+
+  /* -------------------------------------------------------------------- ink -- *
+   * Four steps. The lightest one is shadcn's `--muted-foreground` rather than a
+   * fourth name of our own: shadcn owns `muted` and `accent` in the colour
+   * namespace (they are *surfaces* there, not text), so the system maps onto
+   * those names instead of fighting them. Hallmark's `--color-muted` is
+   * shadcn's `muted-foreground`; Hallmark's `--color-accent` is shadcn's
+   * `primary`. design.md § Exports records the mapping.                        */
+  --color-neutral: oklch(44% 0.012 265);
+  --color-ink-2: oklch(32% 0.01 265);
+  --color-ink: oklch(17% 0.008 265);
+
+  /* The one chromatic colour in the system: focus rings, the active sidebar item,
+     links inside app chrome. Never a fill. Never above 5% of a viewport. */
+  --color-signal: oklch(51.1% 0.262 277);
+  --color-signal-ink: oklch(99% 0 0);
+  --color-signal-soft: oklch(96.5% 0.016 277);
+  /* A touch brighter than the signal so the ring still clears 3:1 when it lands
+     on the ink pill rather than on paper. */
+  --color-focus: oklch(58% 0.235 277);
+
+  /* ------------------------------------------------------------------ status -- */
+  --color-positive: oklch(50% 0.13 155);
+  --color-positive-soft: oklch(96.5% 0.03 155);
+  --color-warn: oklch(52% 0.12 68);
+  --color-warn-soft: oklch(96.5% 0.04 85);
+  --color-danger: oklch(53% 0.21 27);
+  --color-danger-soft: oklch(96.5% 0.02 27);
+
+  /* -------------------------------------------------------------------- type -- */
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* `font-sans` / `font-mono` are what the 80-odd screens this redesign didn't
+     touch already ask for, so they point at the body and outlier faces. */
+  --font-sans: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Three display steps. `display` is for type that owns the full measure (the
+     event marquee); `display-m` for a split hero, where the headline only has
+     half the page; `display-s` for a closing statement or a section lead. */
+  --text-display: clamp(2.5rem, 4.4vw + 1rem, 4.5rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-display-m: clamp(2.25rem, 3.2vw + 0.9rem, 3.375rem);
+  --text-display-m--line-height: 1.06;
+  --text-display-m--letter-spacing: -0.03em;
+  --text-display-s: clamp(1.875rem, 2.4vw + 1rem, 2.75rem);
+  --text-display-s--line-height: 1.1;
+  --text-display-s--letter-spacing: -0.025em;
+
+  /* ------------------------------------------------------------------ motion -- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ------------------------------------------------------------------ shapes -- */
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --radius-input: 10px;
+
+  /* --------------------------------------------------- legacy neutral ramp --- *
+   * `slate-<n>` appears ~800 times across 84 files that this redesign leaves
+   * structurally alone. Rather than a mass find-and-replace — which would be a
+   * huge diff with no visual review behind most of it — the ramp itself is
+   * retuned onto the system's cool neutral. Same lightness steps, so nothing
+   * changes contrast; the hue and chroma now match the tokens above.           */
+  --color-slate-50: oklch(98.2% 0.002 265);
+  --color-slate-100: oklch(96.4% 0.003 265);
+  --color-slate-200: oklch(92.5% 0.004 265);
+  --color-slate-300: oklch(87% 0.005 265);
+  --color-slate-400: oklch(70.4% 0.013 265);
+  --color-slate-500: oklch(55.4% 0.013 265);
+  --color-slate-600: oklch(46% 0.013 265);
+  --color-slate-700: oklch(37.2% 0.012 265);
+  --color-slate-800: oklch(27.9% 0.011 265);
+  --color-slate-900: oklch(19% 0.009 265);
+  --color-slate-950: oklch(12.9% 0.008 265);
+
+  /* ---------------------------------------------------- legacy brand ramp --- *
+   * `brand-<n>` was the product's indigo. It becomes the signal ramp, so the
+   * untouched screens keep using it exactly where the system wants signal:
+   * active nav, links in app chrome, focus.                                    */
+  --color-brand-50: oklch(97% 0.014 277);
+  --color-brand-100: oklch(94.5% 0.028 277);
+  --color-brand-200: oklch(89% 0.055 277);
+  --color-brand-300: oklch(80% 0.1 277);
+  --color-brand-400: oklch(66% 0.19 277);
+  --color-brand-500: oklch(58% 0.235 277);
+  --color-brand-600: oklch(51.1% 0.262 277);
+  --color-brand-700: oklch(45% 0.24 277);
+  --color-brand-800: oklch(39% 0.2 277);
+  --color-brand-900: oklch(33% 0.16 277);
+}
+
+:root {
+  color-scheme: light;
+
+  /* ------------------------------------------ Hallmark tokens for raw CSS --- *
+   * The Tailwind utilities above cover component code; these are the same
+   * values for the handful of places that write plain CSS (globals.css base
+   * rules, the agenda drop zone, inline style props).                          */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+  --space-4xl: 10rem;
+
+  --dur-micro: 120ms;
+  --dur-short: 180ms;
+  --dur-long: 320ms;
+
+  --rule-hair: 1px;
+  --rule-fine: 2px;
+
+  --shadow-card: 0 1px 2px oklch(17% 0.008 265 / 0.05);
+  --shadow-raised: 0 12px 32px -16px oklch(17% 0.008 265 / 0.22);
+  --shadow-nav: 0 8px 28px -20px oklch(17% 0.008 265 / 0.4);
+
+  /* Named z-scale — no ad-hoc 9999s. The nav out-paints in-page sticky boxes. */
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* Chrome heights, so a secondary sticky element can dock beneath the nav
+     instead of bleeding over it. */
+  --nav-height: 3.5rem;
+  --banner-height: 2.75rem;
+
+  /* ------------------------------------------------ shadcn/ui variables ----- *
+   * Mapped from the tokens above; see design.md § Exports.                     */
+  --background: oklch(100% 0 0);
+  --foreground: oklch(17% 0.008 265);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(17% 0.008 265);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(17% 0.008 265);
+  --primary: oklch(17% 0.008 265);
+  --primary-foreground: oklch(99% 0 0);
+  --secondary: oklch(96.4% 0.003 265);
+  --secondary-foreground: oklch(32% 0.01 265);
+  --muted: oklch(96.4% 0.003 265);
+  /* Hallmark's `--color-muted` lives here — the lightest readable ink, 4.76:1
+     even on a table head. shadcn already reads this name everywhere. */
+  --muted-foreground: oklch(53% 0.012 265);
+  /* Hallmark's `--color-accent` / `--color-accent-ink`: the ink pill and its label. */
+  --accent-fill: oklch(17% 0.008 265);
+  --accent-ink: oklch(99% 0 0);
+  --accent: oklch(96.4% 0.003 265);
+  --accent-foreground: oklch(17% 0.008 265);
+  --destructive: oklch(53% 0.21 27);
+  --border: oklch(92.5% 0.004 265);
+  --input: oklch(63% 0.013 265);
+  --ring: oklch(58% 0.235 277);
+  --radius: 0.625rem;
+
+  --chart-1: oklch(51.1% 0.262 277);
+  --chart-2: oklch(53% 0.012 265);
+  --chart-3: oklch(44% 0.012 265);
+  --chart-4: oklch(32% 0.01 265);
+  --chart-5: oklch(17% 0.008 265);
+
+  --sidebar: oklch(100% 0 0);
+  --sidebar-foreground: oklch(17% 0.008 265);
+  --sidebar-primary: oklch(17% 0.008 265);
+  --sidebar-primary-foreground: oklch(99% 0 0);
+  --sidebar-accent: oklch(96.4% 0.003 265);
+  --sidebar-accent-foreground: oklch(17% 0.008 265);
+  --sidebar-border: oklch(92.5% 0.004 265);
+  --sidebar-ring: oklch(51.1% 0.262 277);
+}
+
+/* The shadcn primitives address these through Tailwind utilities (`bg-card`,
+   `text-muted-foreground`, `border-border`), so the variables above have to be
+   inlined into the colour namespace. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-heading: var(--font-display);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}

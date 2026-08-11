@@ -3,7 +3,7 @@ import Link from "next/link";
 import { eventBySlugOr404 } from "@/lib/guards";
 import { listLookup } from "@/lib/repo/events";
 import { publicSessions, speakersForSubmissions } from "@/lib/repo/submissions";
-import { DayTabs, SpeakerLine } from "@/components/public/pieces";
+import { DayTabs, PublicPage, SpeakerLine } from "@/components/public/pieces";
 import { StarButton } from "@/components/client/schedule";
 import { FilterSelect, SearchBox, ShowMore } from "@/components/client/basics";
 import { Chip, EmptyState, LinkButton } from "@/components/ui";
@@ -49,15 +49,15 @@ export default async function ItineraryPage({
   }
 
   return (
-    <div>
+    <PublicPage>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="display text-2xl text-ink sm:text-3xl">
             Schedule itinerary
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-neutral">
             Every session in time order, day by day. Star the ones you want and they will appear in{" "}
-            <Link href={`/e/${event.slug}/my-schedule`} className="font-medium text-brand-700 hover:underline">
+            <Link href={`/e/${event.slug}/my-schedule`} className="font-medium text-signal hover:underline">
               My Schedule
             </Link>
             .
@@ -88,7 +88,7 @@ export default async function ItineraryPage({
             Clear
           </LinkButton>
         ) : null}
-        <p className="text-sm text-slate-500" role="status">
+        <p className="text-sm text-muted-foreground" role="status">
           {sessions.length} {sessions.length === 1 ? "session" : "sessions"} on{" "}
           {formatDate(day, { weekday: true })}
         </p>
@@ -98,30 +98,30 @@ export default async function ItineraryPage({
         <div className="space-y-6">
           {[...groups.entries()].map(([time, items]) => (
             <section key={time}>
-              <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-500">
+              <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <span className="font-mono">{time}</span>
-                <span className="h-px flex-1 bg-slate-200" />
+                <span className="h-px flex-1 bg-rule" />
               </h2>
               <div className="space-y-3">
                 {items.map((session) => (
                   <article
                     key={session.id}
-                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-card border border-rule bg-paper p-4 shadow-sm"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         {session.track_name ? (
                           <Chip color={session.track_color}>{session.track_name}</Chip>
                         ) : null}
-                        <h3 className="mt-1.5 text-base font-semibold text-slate-900">
+                        <h3 className="mt-1.5 text-base font-semibold text-ink">
                           <Link
                             href={`/e/${event.slug}/sessions/${session.id}`}
-                            className="hover:text-brand-700"
+                            className="hover:text-signal"
                           >
                             {session.title}
                           </Link>
                         </h3>
-                        <p className="mt-0.5 text-sm text-slate-500">
+                        <p className="mt-0.5 text-sm text-muted-foreground">
                           {formatRange(session.pub_starts_at, session.pub_ends_at)}
                           {session.room_name ? ` · ${session.room_name}` : ""}
                         </p>
@@ -129,20 +129,20 @@ export default async function ItineraryPage({
                           <ShowMore
                             text={stripHtml(session.description)}
                             limit={180}
-                            className="mt-2 text-sm text-slate-600"
+                            className="mt-2 text-sm text-neutral"
                           />
                         ) : null}
                         <SpeakerLine speakers={speakerMap.get(session.id) ?? []} />
-                        <div className="mt-3 flex flex-wrap gap-1.5 text-xs text-slate-500">
+                        <div className="mt-3 flex flex-wrap gap-1.5 text-xs text-muted-foreground">
                           {session.format_name ? (
                             <span>
-                              <strong className="font-medium text-slate-700">Format:</strong>{" "}
+                              <strong className="font-medium text-neutral">Format:</strong>{" "}
                               {session.format_name}
                             </span>
                           ) : null}
                           {session.track_name ? (
                             <span>
-                              · <strong className="font-medium text-slate-700">Track:</strong>{" "}
+                              · <strong className="font-medium text-neutral">Track:</strong>{" "}
                               {session.track_name}
                             </span>
                           ) : null}
@@ -163,6 +163,6 @@ export default async function ItineraryPage({
           action={<LinkButton href={`/e/${event.slug}/itinerary`}>Clear filters</LinkButton>}
         />
       )}
-    </div>
+    </PublicPage>
   );
 }
