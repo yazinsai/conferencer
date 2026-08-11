@@ -44,5 +44,8 @@
     "typescript": "^5"
   },
   "license": "MIT",
-  "description": "Open-source conference program management (Sessionboard Program replacement)"
+  "description": "Open-source conference program management (Sessionboard Program replacement)",
+  "engines": {
+    "node": ">=22"
+  }
 }
