@@ -3,8 +3,8 @@ import Link from "next/link";
 import { requirePortalUser, roleSet } from "@/lib/guards";
 import { contactName, linkContactToUser, portalContact } from "@/lib/repo/contacts";
 import { get } from "@/lib/db";
-import { Avatar } from "@/components/ui";
-import { PortalNav } from "@/components/portal/nav";
+import { Avatar, buttonClass, cx } from "@/components/ui";
+import { PortalSidebar, PortalSidebarSheet } from "@/components/portal/nav";
 
 export const dynamic = "force-dynamic";
 
@@ -19,23 +19,32 @@ export default async function PortalLayout({ children }: LayoutProps<"/portal">)
   const accent = portal?.accent_color ?? event.accent_color;
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ ["--event-accent" as string]: accent }}>
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+    <div
+      className="flex min-h-screen flex-col bg-paper text-ink md:flex-row"
+      style={{ ["--event-accent" as string]: accent }}
+    >
+      <PortalSidebar eventName={event.name} />
+      <PortalSidebarSheet eventName={event.name} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-[300] min-h-[var(--nav-height)] border-b border-rule bg-paper/85 backdrop-blur-md">
+          <div className="flex min-h-[var(--nav-height)] flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+            <div className="min-w-0">
+              <p className="wordmark text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground">
                 Speaker portal
               </p>
-              <Link href="/portal" className="text-lg font-semibold" style={{ color: accent }}>
+              <Link
+                href="/portal"
+                className="block truncate text-sm font-semibold text-ink"
+                style={{ color: "var(--event-accent)" }}
+              >
                 {event.name}
               </Link>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               {roles.has("organizer") ? (
                 <Link
                   href="/admin"
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className={cx(buttonClass("secondary", "sm"), "nowrap-affordance")}
                 >
                   Back to Admin Mode
                 </Link>
@@ -43,32 +52,34 @@ export default async function PortalLayout({ children }: LayoutProps<"/portal">)
               {roles.has("reviewer") ? (
                 <Link
                   href="/review"
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className={cx(buttonClass("secondary", "sm"), "nowrap-affordance")}
                 >
                   Review area
                 </Link>
               ) : null}
-              <div className="flex items-center gap-2">
-                <Avatar src={contact.headshot_url} name={contactName(contact)} size={32} />
-                <span className="text-sm text-slate-700">{contactName(contact)}</span>
+              <Link
+                href={`/e/${event.slug}`}
+                className={cx(
+                  buttonClass("ghost", "sm"),
+                  "nowrap-affordance hidden text-signal sm:inline-flex",
+                )}
+              >
+                Public site
+              </Link>
+              <div className="flex items-center gap-2 pl-1">
+                <Avatar src={contact.headshot_url} name={contactName(contact)} size={28} />
+                <span className="hidden text-sm text-ink-2 sm:inline">{contactName(contact)}</span>
               </div>
               <form action="/sign-out" method="post">
-                <button
-                  type="submit"
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                >
+                <button type="submit" className={cx(buttonClass("secondary", "sm"), "nowrap-affordance")}>
                   Sign out
                 </button>
               </form>
             </div>
           </div>
-          <PortalNav />
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
-      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        Signed in as {user.email} · <Link href={`/e/${event.slug}`} className="hover:text-slate-800">Public event site</Link>
-      </footer>
+        </header>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+      </div>
     </div>
   );
 }
