@@ -279,12 +279,15 @@ These are deliberate departures. Each names the rule it bends and why.
    (gates 7 and 22 are loosened for modern-minimal) and true to the studied DNA.
 7. **The inert `.dark` block stays in `globals.css`.** The product is light-only on purpose; the block
    costs nothing and removing it would be an unrelated change.
-8. **Photography is allowed in exactly three places**, and the system is otherwise photograph-free:
+8. **Photography is allowed in exactly four places**, and the system is otherwise photograph-free:
    - **speaker headshots**, everywhere `<Avatar>` renders — a conference's speakers are its content,
      and initials on a gradient are the most placeholder-looking thing a programme site can show;
    - **the public event fold**, as a single full-bleed photograph behind the marquee, which
      Macrostructure 03 already sanctions;
-   - **the landing page's proof band**, which was already a dark surface flip.
+   - **the landing page's proof band**, which was already a dark surface flip;
+   - **the landing page's closing statement band** — an empty, unpeopled hall, because the closing
+     argument is permanence ("nobody can switch it off") and a room that stands whether or not a
+     vendor does is the photograph of that sentence.
 
    Everything else — the landing hero, feature blocks, session and speaker cards, the spec sheet —
    stays typographic. A photograph must be saying something true about the page it is on; a mood is

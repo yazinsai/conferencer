@@ -9,6 +9,15 @@ import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
 
+/* Hallmark · genre: modern-minimal · macrostructure: 05 Workbench ·
+ * design-system: design.md · designed-as-app
+ * hero: H8 knobs frame=minimal-hairline, tilt=0deg, shots=stack-of-2 ·
+ * figures: T4 4-up display-weight · loop: F4 hairline lattice ·
+ * price: F3 ledger with inverted final row · tour: full-width captures ·
+ * inside: F3 two-up · footer: Ft5 statement over photography (rule 8.4) ·
+ * nav: N1b (locked) · footer archetype: Ft5 (locked)
+ */
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -286,6 +295,17 @@ function Code({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Section eyebrow — body face, tracked uppercase. The outlier face is rationed
+    to the wordmark and tabular figures (design.md § Typography), so labels set
+    in Switzer instead. */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
 export default function HomePage() {
   const event = defaultEvent();
   const form = event ? defaultForm(event.id) : undefined;
@@ -312,68 +332,91 @@ export default function HomePage() {
     <>
       <MarketingNav links={NAV_LINKS} ctaHref={ctaHref} ctaLabel={ctaLabel} />
 
-      {/* --------------------------------------------------- H8 · hero ----- */}
-      <section className="bg-paper pt-[calc(var(--nav-height)+2.5rem)] sm:pt-[calc(var(--nav-height)+3.5rem)]">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pb-24 sm:px-6 sm:pb-32 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14">
-          <div className="min-w-0">
-            {/* Three sentences, three lines. The break is the design, not the
-                consequence of a max-width guessing where to wrap. */}
-            <h1 className="reveal display text-display-m text-ink" style={{ ["--i" as string]: 0 }}>
-              <span className="block">Open the call.</span>
-              <span className="block">Ship the agenda.</span>
-              <span className="block">Own every line.</span>
-            </h1>
+      {/* --------------------------------------------------- H8 · hero -----
+          Headline left, real capture right — a stack of two, the agenda board
+          stepping out from behind the dashboard. Both frames are the minimal
+          hairline the system allows; no browser chrome is ever drawn. */}
+      <section className="bg-paper pt-[calc(var(--nav-height)+3rem)] sm:pt-[calc(var(--nav-height)+4.5rem)]">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6 sm:pb-28">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16">
+            <div className="min-w-0">
+              {/* Three sentences, three lines. The break is the design, not the
+                  consequence of a max-width guessing where to wrap. */}
+              <h1 className="reveal display text-display-m text-ink" style={{ ["--i" as string]: 0 }}>
+                <span className="block">Open the call.</span>
+                <span className="block">Ship the agenda.</span>
+                <span className="block">Own every line.</span>
+              </h1>
 
-            <p
-              className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-neutral"
-              style={{ ["--i" as string]: 1 }}
-            >
-              Conferencer runs the entire programme — call for speakers, committee review,
-              decisions, speaker onboarding, agenda, public site — and every line of it is MIT. No
-              per-event licence, no per-submission tier, no percentage of your ticket sales, no
-              demo to sit through. One container, one file, and a copy of the source nobody can take
-              back.
-            </p>
+              <p
+                className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-neutral"
+                style={{ ["--i" as string]: 1 }}
+              >
+                Conferencer runs the entire programme — call for speakers, committee review,
+                decisions, speaker onboarding, agenda, public site — and every line of it is MIT.
+                No per-event licence, no per-submission tier, no percentage of your ticket sales,
+                no demo to sit through. One container, one file, and a copy of the source nobody
+                can take back.
+              </p>
 
-            <div
-              className="reveal mt-8 flex flex-wrap items-center gap-3"
-              style={{ ["--i" as string]: 2 }}
-            >
-              <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
-                {event ? "Open the live demo" : "Create an account"}
-              </LinkButton>
-              <LinkButton href="/sign-in" size="lg" className="nowrap-affordance">
-                Sign in as an organizer
-              </LinkButton>
+              <div
+                className="reveal mt-8 flex flex-wrap items-center gap-3"
+                style={{ ["--i" as string]: 2 }}
+              >
+                <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
+                  {event ? "Open the live demo" : "Create an account"}
+                </LinkButton>
+                <LinkButton href="/sign-in" size="lg" className="nowrap-affordance">
+                  Sign in as an organizer
+                </LinkButton>
+              </div>
+
+              {event ? (
+                <p
+                  className="reveal wordmark mt-6 text-xs leading-relaxed text-muted-foreground"
+                  style={{ ["--i" as string]: 3 }}
+                >
+                  Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
+                </p>
+              ) : (
+                <p
+                  className="reveal mt-6 text-xs text-muted-foreground"
+                  style={{ ["--i" as string]: 3 }}
+                >
+                  No event on this instance yet — run <Code>npm run seed</Code> to load the demo
+                  conference.
+                </p>
+              )}
             </div>
 
-            {event ? (
-              <p
-                className="reveal wordmark mt-6 text-xs leading-relaxed text-muted-foreground"
-                style={{ ["--i" as string]: 3 }}
-              >
-                Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
-              </p>
-            ) : (
-              <p
-                className="reveal mt-6 text-xs text-muted-foreground"
-                style={{ ["--i" as string]: 3 }}
-              >
-                No event on this instance yet — run <Code>npm run seed</Code> to load the demo
-                conference.
-              </p>
-            )}
+            {/* The stack: the board fans out behind, top and right, so the
+                pair reads as one object — the desk the loop is run from. The
+                peek stays clear of the caption line below the front capture. */}
+            <div
+              className="reveal min-w-0 lg:pr-8 lg:pt-6"
+              style={{ ["--i" as string]: 2 }}
+            >
+              <div className="relative">
+                <Shot
+                  src="/screens/agenda.webp"
+                  alt="The agenda board: unscheduled sessions beside a rooms-by-time grid."
+                  priority
+                  width={1200}
+                  height={760}
+                  className="absolute inset-0 hidden translate-x-8 -translate-y-6 lg:block [&>div]:h-full [&_img]:h-full [&_img]:object-cover [&_img]:object-left-top"
+                />
+                <Shot
+                  src="/screens/dashboard.webp"
+                  alt="The organizer dashboard: days until the event, submission counts, submission status and a speaker-readiness table."
+                  priority
+                  width={1440}
+                  height={900}
+                  caption="The organizer dashboard and the agenda board, rendered from this repository."
+                  className="relative"
+                />
+              </div>
+            </div>
           </div>
-
-          <Shot
-            className="reveal"
-            src="/screens/dashboard.webp"
-            alt="The organizer dashboard: days until the event, submission counts, submission status and a speaker-readiness table."
-            priority
-            width={1440}
-            height={900}
-            caption="The organizer dashboard, rendered from this repository."
-          />
         </div>
       </section>
 
@@ -383,8 +426,8 @@ export default function HomePage() {
         bordered={false}
         photo={{ src: "/media/audience.webp", width: 2000, height: 1125 }}
       >
-        <div className="py-10">
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
+        <div className="py-14 sm:py-16">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
             {[
               { label: "Sessions published", value: live.sessions },
               { label: "Speakers listed", value: live.speakers },
@@ -392,14 +435,14 @@ export default function HomePage() {
               { label: "Days until it opens", value: live.countdown },
             ].map((fact) => (
               <div key={fact.label}>
-                <dd className="wordmark tnum text-3xl font-medium tracking-[-0.02em] text-paper sm:text-4xl">
+                <dd className="wordmark tnum text-4xl font-medium tracking-[-0.02em] text-paper sm:text-5xl">
                   {fact.value}
                 </dd>
-                <dt className="mt-1.5 text-sm text-paper/65">{fact.label}</dt>
+                <dt className="mt-2 text-sm text-paper/65">{fact.label}</dt>
               </div>
             ))}
           </dl>
-          <p className="mt-8 max-w-[60ch] text-sm leading-relaxed text-paper/65">
+          <p className="mt-10 max-w-[60ch] border-t border-paper/20 pt-6 text-sm leading-relaxed text-paper/65">
             Read out of the database on this instance at request time
             {event ? (
               <>
@@ -416,24 +459,29 @@ export default function HomePage() {
 
       {/* ------------------------------------------- F4 · the loop --------- */}
       <Band id="loop" band="paper" bordered={false}>
-        <div className="py-20 sm:py-24">
-          <h2 className="display max-w-[18ch] text-2xl text-ink sm:text-3xl">
+        <div className="py-20 sm:py-28">
+          <Eyebrow>The loop</Eyebrow>
+          <h2 className="display mt-3 max-w-[18ch] text-2xl text-ink sm:text-3xl">
             One loop, covered properly.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
             Everything in the product serves the same circuit, and anything that does not sit on it
-            was left out. Note where the loop keeps going after step four: the accepted-speaker half
-            — onboarding, chasing slides, versioned deliverables — is the part free tools hand back
-            to you and paid ones charge for.
+            was left out. Note where the loop keeps going after step four: the accepted-speaker
+            half — onboarding, chasing slides, versioned deliverables — is the part free tools hand
+            back to you and paid ones charge for.
           </p>
 
-          <ol className="mt-12 grid gap-x-10 gap-y-10 border-t border-rule pt-10 sm:grid-cols-2 lg:grid-cols-3">
+          {/* A hairline lattice: gap-px over a rule-coloured track draws the
+              grid lines, and the cells stay paper. The numerals are the only
+              ornament — genuinely ordinal content is the one place a numeral
+              earns its keep. */}
+          <ol className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
             {LOOP.map((step) => (
-              <li key={step.n} className="min-w-0">
-                {/* Numeral above the heading, same column. Genuinely ordinal
-                    content is the one place a numeral earns its keep. */}
-                <p className="wordmark tnum text-xs tracking-[0.14em] text-neutral">{step.n}</p>
-                <h3 className="display mt-2 text-lg text-ink">{step.title}</h3>
+              <li key={step.n} className="min-w-0 bg-paper p-6 sm:p-8">
+                <p className="wordmark tnum text-xs tracking-[0.14em] text-muted-foreground">
+                  {step.n}
+                </p>
+                <h3 className="display mt-4 text-lg text-ink">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral">{step.body}</p>
               </li>
             ))}
@@ -444,20 +492,21 @@ export default function HomePage() {
       {/* ------------------------------ the price ------------------------- */}
       <Band id="price" band="paper-2">
         <div className="py-20 sm:py-28">
-          <h2 className="display max-w-[22ch] text-2xl text-ink sm:text-3xl">
+          <Eyebrow>The price</Eyebrow>
+          <h2 className="display mt-3 max-w-[22ch] text-2xl text-ink sm:text-3xl">
             What the same loop costs everywhere else.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Quoted from each vendor&rsquo;s own pricing page, linked so you can check it. Notice the
-            shapes as much as the numbers: per event, per submission band, per month, or a slice of
-            the registrations you sold.
+            Quoted from each vendor&rsquo;s own pricing page, linked so you can check it. Notice
+            the shapes as much as the numbers: per event, per submission band, per month, or a
+            slice of the registrations you sold.
           </p>
 
-          <dl className="mt-12 border-t border-rule">
+          <dl className="mt-14 border-t border-rule">
             {ELSEWHERE.map((row) => (
               <div
                 key={row.name}
-                className="grid gap-x-8 gap-y-1 border-b border-rule py-5 md:grid-cols-[minmax(0,10rem)_minmax(0,11rem)_minmax(0,1fr)]"
+                className="grid gap-x-8 gap-y-1.5 border-b border-rule py-6 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]"
               >
                 <dt className="display text-[0.9375rem] text-ink">
                   <a
@@ -467,25 +516,26 @@ export default function HomePage() {
                     {row.name}
                   </a>
                 </dt>
-                <dd className="wordmark tnum text-sm text-ink-2">{row.price}</dd>
+                <dd className="wordmark tnum text-[0.9375rem] text-ink-2">{row.price}</dd>
                 <dd className="text-sm leading-relaxed text-neutral">{row.note}</dd>
               </div>
             ))}
-
-            {/* The last row is the argument, so it is set in the page's loudest
-                register rather than given a coloured badge. */}
-            <div className="grid gap-x-8 gap-y-1 border-b-2 border-ink py-6 md:grid-cols-[minmax(0,10rem)_minmax(0,11rem)_minmax(0,1fr)]">
-              <dt className="display text-md text-ink">Conferencer</dt>
-              <dd className="wordmark tnum text-md text-ink">$0, always</dd>
-              <dd className="text-sm leading-relaxed text-ink-2">
-                No plan, no per-event fee, no submission ceiling, no share of your revenue, no
-                account to create. Your only bill is the box it runs on, and a $5 VPS clears it.
-              </dd>
-            </div>
           </dl>
 
+          {/* The last row is the argument, so it leaves the ledger entirely:
+              the page's one inverted card. */}
+          <div className="mt-8 grid gap-x-8 gap-y-2 rounded-card bg-ink p-6 text-paper sm:p-8 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]">
+            <p className="display text-md">Conferencer</p>
+            <p className="wordmark tnum text-md">$0, always</p>
+            <p className="text-sm leading-relaxed text-paper/75">
+              No plan, no per-event fee, no submission ceiling, no share of your revenue, no
+              account to create. Your only bill is the box it runs on, and a $5 VPS clears it.
+            </p>
+          </div>
+
           <p className="mt-6 max-w-[68ch] text-xs leading-relaxed text-muted-foreground">
-            Public pricing pages, read on 11 August 2026; follow the links and check us. Ours is the{" "}
+            Public pricing pages, read on 11 August 2026; follow the links and check us. Ours is
+            the{" "}
             <a
               href="https://github.com/yazinsai/conferencer/blob/main/LICENSE"
               className="underline underline-offset-4 hover:text-ink"
@@ -520,34 +570,38 @@ export default function HomePage() {
         </div>
       </Band>
 
-      {/* ------------------------------ F5 · the workbench tour ------------ */}
+      {/* ------------------------------ F5 · the workbench tour ------------
+          Captures at full measure. The dead half-column the alternating
+          layout left beside every screenshot is gone; each stop is a head
+          row and then the widest honest image the page can show. */}
       <Band id="tour" band="paper">
-        <div className="py-20 sm:py-24">
-          <h2 className="display max-w-[20ch] text-2xl text-ink sm:text-3xl">
+        <div className="py-20 sm:py-28">
+          <Eyebrow>The product</Eyebrow>
+          <h2 className="display mt-3 max-w-[20ch] text-2xl text-ink sm:text-3xl">
             Three screens do most of the work.
           </h2>
 
-          <div className="mt-14 space-y-20">
+          <div className="mt-16 space-y-20 sm:space-y-24">
             <TourStep
+              n="01"
               src="/screens/cfp-builder.webp"
               alt="The call-for-speakers builder, on its question-list step: fields with types, required and locked flags."
               title="The call for speakers"
               body="Thirteen field types, required and locked flags, character limits, and show-when rules that keep a question hidden until an earlier answer calls for it. A track can route a submission into a review round the moment it lands."
-              side="left"
             />
             <TourStep
+              n="02"
               src="/screens/review.webp"
               alt="An evaluation plan: two rounds, reviewer progress, scorecards and blind-round settings."
               title="The committee"
               body="Rounds carry their own reviewer pool and their own scorecard. A blind round hides the author from reviewers while the organizer still sees everything. Distribution respects per-reviewer caps and conflicts of interest."
-              side="right"
             />
             <TourStep
+              n="03"
               src="/screens/agenda.webp"
               alt="The agenda board: unscheduled sessions on the left, a rooms-by-time grid on the right."
               title="The agenda"
               body="Drag a session into a room, or click to place it. Two talks in one room is never right, so it is blocked; a five-minute panel overlap can be deliberate, so it only warns. Publishing shows a diff of what moved."
-              side="left"
             />
           </div>
         </div>
@@ -555,22 +609,20 @@ export default function HomePage() {
 
       {/* ------------------------------ F3 · the spec sheet ---------------- */}
       <Band id="inside" band="paper-2">
-        <div className="py-20 sm:py-24">
-          <h2 className="display text-2xl text-ink sm:text-3xl">What is in the box</h2>
+        <div className="py-20 sm:py-28">
+          <Eyebrow>The spec sheet</Eyebrow>
+          <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">What is in the box</h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Roughly thirty-five thousand lines across a hundred and sixteen pages. The list below is
-            the whole of it, not a highlight reel — and unusually for a feature list, you can go and
-            check it line by line.
+            Roughly thirty-five thousand lines across a hundred and sixteen pages. The list below
+            is the whole of it, not a highlight reel — and unusually for a feature list, you can
+            go and check it line by line.
           </p>
 
-          <dl className="mt-12 max-w-4xl border-t border-rule">
+          <dl className="mt-14 grid grid-cols-1 gap-x-12 border-t border-rule md:grid-cols-2">
             {INSIDE.map(([area, detail]) => (
-              <div
-                key={area}
-                className="grid gap-x-10 gap-y-1 border-b border-rule py-5 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
-              >
+              <div key={area} className="border-b border-rule py-6">
                 <dt className="display text-[0.9375rem] text-ink">{area}</dt>
-                <dd className="text-sm leading-relaxed text-neutral">{detail}</dd>
+                <dd className="mt-2 text-sm leading-relaxed text-neutral">{detail}</dd>
               </div>
             ))}
           </dl>
@@ -579,97 +631,130 @@ export default function HomePage() {
 
       {/* ------------------------------ the published result --------------- */}
       <Band band="paper">
-        <div className="grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
-          <div className="min-w-0">
-            <h2 className="display max-w-[16ch] text-2xl text-ink sm:text-3xl">
-              And then it is just a website.
-            </h2>
-            <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-neutral">
-              The public side is server-rendered and readable logged out: sessions, speakers, the
-              agenda grid, an itinerary, a speaker gallery and a personal schedule that exports to{" "}
-              <Code>.ics</Code>. Only accepted and approved submissions ever appear — acceptance and
-              content approval are separate gates.
-            </p>
-            {event ? (
-              <div className="mt-8 flex flex-wrap gap-3">
-                <LinkButton
-                  href={`/e/${event.slug}/agenda`}
-                  variant="primary"
-                  size="lg"
-                  className="nowrap-affordance"
-                >
-                  See the published agenda
-                </LinkButton>
-                {form ? (
+        <div className="py-20 sm:py-28">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16">
+            <div className="min-w-0">
+              <Eyebrow>The result</Eyebrow>
+              <h2 className="display mt-3 max-w-[16ch] text-2xl text-ink sm:text-3xl">
+                And then it is just a website.
+              </h2>
+              <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-neutral">
+                The public side is server-rendered and readable logged out: sessions, speakers,
+                the agenda grid, an itinerary, a speaker gallery and a personal schedule that
+                exports to <Code>.ics</Code>. Only accepted and approved submissions ever appear —
+                acceptance and content approval are separate gates.
+              </p>
+              {event ? (
+                <div className="mt-8 flex flex-wrap gap-3">
                   <LinkButton
-                    href={`/e/${event.slug}/submit/${form.id}`}
+                    href={`/e/${event.slug}/agenda`}
+                    variant="primary"
                     size="lg"
                     className="nowrap-affordance"
                   >
-                    Try the submission form
+                    See the published agenda
                   </LinkButton>
-                ) : null}
-              </div>
-            ) : null}
+                  {form ? (
+                    <LinkButton
+                      href={`/e/${event.slug}/submit/${form.id}`}
+                      size="lg"
+                      className="nowrap-affordance"
+                    >
+                      Try the submission form
+                    </LinkButton>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+            <Shot
+              src="/screens/public-agenda.webp"
+              alt="The public agenda grid: three days, four rooms, sessions coloured by track."
+              caption="The same programme, published."
+            />
           </div>
-          <Shot
-            src="/screens/public-agenda.webp"
-            alt="The public agenda grid: three days, four rooms, sessions coloured by track."
-            caption="The same programme, published."
-          />
         </div>
       </Band>
 
       {/* ------------------------------ conversational FAQ ----------------- */}
       <Band band="paper-2">
         <div className="py-20 sm:py-24">
-          <h2 className="display text-2xl text-ink sm:text-3xl">Reasonable questions</h2>
-          <div className="mt-10">
+          <Eyebrow>Before you ask</Eyebrow>
+          <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">Reasonable questions</h2>
+          <div className="mt-12">
             <Faq items={FAQ} />
           </div>
         </div>
       </Band>
 
-      {/* ------------------------------ Ft5 · statement footer ------------- */}
-      <footer className="border-t border-rule bg-paper">
-        <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
-          <p className="display max-w-[16ch] text-display-s text-ink">
-            Rent nothing. Own the programme.
-          </p>
-          <p className="mt-5 max-w-[46ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Clone it, run it, fork it, never pay for it. One container, one volume, and a conference
-            you can back up with <Code>cp</Code>.
+      {/* ------------------------------ Ft5 · statement footer -------------
+          The fourth sanctioned photograph (design.md rule 8): an empty hall,
+          because the closing argument is permanence. The scrim contract holds —
+          the gradient lives on the background and the surface flips its text in
+          the same rule. */}
+      <footer
+        data-scrim
+        className="relative isolate overflow-hidden border-t border-rule bg-ink text-paper"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- see Shot in
+            components/marketing/pieces.tsx; a fixed local asset, eager because
+            it is the closing surface. */}
+        <img
+          src="/media/hall.webp"
+          alt=""
+          width={2000}
+          height={1125}
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 -z-10 size-full object-cover"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_92%,transparent)_55%,color-mix(in_oklch,var(--color-ink)_72%,transparent)_100%)]"
+        />
+
+        <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+          <p className="display max-w-[16ch] text-display-s">Rent nothing. Own the programme.</p>
+          <p className="mt-5 max-w-[46ch] text-[0.9375rem] leading-relaxed text-paper/75">
+            Clone it, run it, fork it, never pay for it. One container, one volume, and a
+            conference you can back up with <Code>cp</Code>.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">
-            <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
+            {/* On ink, the primary's own fill disappears, so the pair inverts:
+                paper fill for the verb, a paper hairline for the alternative. */}
+            <Link
+              href={ctaHref}
+              className="nowrap-affordance inline-flex h-11 items-center rounded-pill bg-paper px-6 text-[0.9375rem] font-medium text-ink transition-colors duration-[120ms] ease-out hover:bg-paper-3 active:translate-y-px"
+            >
               {ctaLabel}
-            </LinkButton>
-            <LinkButton
+            </Link>
+            <Link
               href="https://github.com/yazinsai/conferencer"
-              size="lg"
-              className="nowrap-affordance"
+              className="nowrap-affordance inline-flex h-11 items-center rounded-pill border border-paper/30 px-6 text-[0.9375rem] font-medium text-paper transition-colors duration-[120ms] ease-out hover:border-paper/60 active:translate-y-px"
             >
               Read the source
-            </LinkButton>
+            </Link>
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-rule pt-6 text-xs text-muted-foreground">
-            <p className="wordmark text-ink">Conferencer</p>
+          <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-paper/20 pt-6 text-xs text-paper/65">
+            <p className="wordmark text-paper">Conferencer</p>
             <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <Link href="/api-docs" className="nowrap-affordance underline-offset-4 hover:text-ink hover:underline">
+              <Link
+                href="/api-docs"
+                className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
+              >
                 API reference
               </Link>
               <a
                 href="https://github.com/yazinsai/conferencer"
-                className="nowrap-affordance underline-offset-4 hover:text-ink hover:underline"
+                className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
               >
                 Source
               </a>
               {event ? (
                 <Link
                   href={`/e/${event.slug}`}
-                  className="nowrap-affordance underline-offset-4 hover:text-ink hover:underline"
+                  className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
                 >
                   {event.name}
                 </Link>
@@ -683,34 +768,36 @@ export default function HomePage() {
   );
 }
 
-/** One stop on the Workbench tour: a real capture and the claim it backs. */
+/** One stop on the Workbench tour: a head row, then the capture at full
+    measure. The number and the title share a baseline; the body sits in the
+    right column, where a reader's eye already is after the last capture. */
 function TourStep({
+  n,
   src,
   alt,
   title,
   body,
-  side,
 }: {
+  n: string;
   src: string;
   alt: string;
   title: string;
   body: string;
-  side: "left" | "right";
 }) {
-  // The wide track has to follow the image, not the DOM order, or the reversed
-  // row hands the screenshot the narrow column and the caption the wide one.
-  const columns =
-    side === "left"
-      ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)]"
-      : "lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]";
-
   return (
-    <div className={`grid items-center gap-8 lg:gap-14 ${columns}`}>
-      <div className={side === "right" ? "min-w-0 lg:order-2" : "min-w-0"}>
-        <h3 className="display text-xl text-ink">{title}</h3>
-        <p className="mt-3 max-w-[46ch] text-sm leading-relaxed text-neutral">{body}</p>
+    <div>
+      <div className="grid gap-x-10 gap-y-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end">
+        <h3 className="display min-w-0 text-xl text-ink sm:text-2xl">
+          <span className="wordmark tnum mr-4 align-middle text-xs tracking-[0.14em] text-muted-foreground">
+            {n}
+          </span>
+          {title}
+        </h3>
+        <p className="max-w-[52ch] text-sm leading-relaxed text-neutral md:justify-self-end">
+          {body}
+        </p>
       </div>
-      <Shot src={src} alt={alt} className={side === "right" ? "lg:order-1" : undefined} />
+      <Shot src={src} alt={alt} className="mt-8" width={1440} height={900} />
     </div>
   );
 }

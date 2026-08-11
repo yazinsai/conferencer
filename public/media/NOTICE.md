@@ -1,7 +1,8 @@
 # Photography
 
-Two photographs, used in the two places `design.md` § Per-page allowances permits: the public event
-fold and the landing page's proof band. Both are wide shots in which no individual is the subject.
+Three photographs, used in three of the places `design.md` § Per-page allowances permits: the
+public event fold, the landing page's proof band, and the landing page's closing statement band.
+All are wide shots in which no individual is the subject.
 
 Source: [Pixabay](https://pixabay.com), under the
 [Content License](https://pixabay.com/service/license-summary/) — free to use and modify, no
@@ -14,3 +15,4 @@ Centre-cropped to 16:9 and re-encoded as WebP. Regenerate with `npm run media sc
 | --- | --- | --- | --- |
 | `venue.webp` | [6651873](https://pixabay.com/photos/chairs-hall-empty-rows-of-chairs-6651873/) | wal_172619 | 126 KB |
 | `audience.webp` | [83519](https://pixabay.com/photos/meeting-addis-ababa-ethiopia-hall-83519/) | 12019 | 127 KB |
+| `hall.webp` | [80721](https://pixabay.com/photos/cia-langley-virginia-auditorium-80721/) | 12019 | 55 KB |

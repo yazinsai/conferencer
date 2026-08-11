@@ -136,7 +136,7 @@ fallback stays visible in the demo.
 /* ----------------------------------------------------------------- scenes -- */
 
 /**
- * The two photographs the design system allows (design.md § Per-page
+ * The scene photographs the design system allows (design.md § Per-page
  * allowances). Both are wide shots in which no individual is the subject.
  * Pixabay ids are pinned for the same reason the face indices are.
  */
@@ -161,6 +161,17 @@ const SCENES = [
     alt: "A full conference audience seen from the back of the auditorium.",
     width: 2000,
     saturation: 0.6,
+  },
+  {
+    // An empty hall, geometric and unpeopled, for the landing page's closing
+    // statement band — the argument there is permanence ("nobody can switch it
+    // off"), and a room that stays standing whether or not a vendor does is the
+    // photograph of that sentence.
+    name: "hall",
+    id: 80721,
+    alt: "An empty auditorium: rows of seats facing a stage beneath a wall of acoustic discs.",
+    width: 2000,
+    saturation: 0.4,
   },
 ];
 
@@ -207,8 +218,9 @@ async function fetchScenes() {
     join(out, "NOTICE.md"),
     `# Photography
 
-Two photographs, used in the two places \`design.md\` § Per-page allowances permits: the public event
-fold and the landing page's proof band. Both are wide shots in which no individual is the subject.
+Three photographs, used in three of the places \`design.md\` § Per-page allowances permits: the
+public event fold, the landing page's proof band, and the landing page's closing statement band.
+All are wide shots in which no individual is the subject.
 
 Source: [Pixabay](https://pixabay.com), under the
 [Content License](https://pixabay.com/service/license-summary/) — free to use and modify, no
