@@ -156,7 +156,33 @@ async function main() {
   /* ------------------------------------------------------------- public -- */
   section("Public surfaces (logged out)");
   const anon = new Session("anon");
-  await expectContains(anon, "/", ["DevFlow Conf 2027", "Submit a talk"], "landing page");
+
+  // `/` is the product's own landing page; the event site lives at /e/<slug>.
+  // The invariant moved, it did not go away: both must render logged out with
+  // real content, and the landing page must link to the live event so the demo
+  // is never orphaned.
+  const landing = await expectContains(
+    anon,
+    "/",
+    ["Conferencer", "Open the call.", "Ship the agenda.", "Reasonable questions"],
+    "product landing page",
+  );
+  if (landing?.includes(`/e/${SLUG}`)) ok("landing page links to the live event", `/e/${SLUG}`);
+  else fail("landing page links to the live event", `no /e/${SLUG} link in the landing page`);
+  // The figures in the landing page's proof band are read from the database, not
+  // written into the markup. If seeding changes, this catches a stale hardcode.
+  if (landing && /Sessions published/.test(landing) && !/50,000\+|10×|99\.9/.test(landing)) {
+    ok("landing page carries live figures, not invented ones");
+  } else {
+    fail("landing page carries live figures, not invented ones");
+  }
+
+  await expectContains(
+    anon,
+    `/e/${SLUG}`,
+    ["DevFlow Conf 2027", "Submit a talk", "On the programme"],
+    "public event home",
+  );
   await expectContains(
     anon,
     `/e/${SLUG}/sessions`,
@@ -189,7 +215,7 @@ async function main() {
   }
 
   section("Public call for speakers");
-  const home = await anon.get("/");
+  const home = await anon.get(`/e/${SLUG}`);
   const formId = /\/submit\/([A-Za-z0-9]+)/.exec(home.body)?.[1];
   if (formId) ok("public CFP link present", formId);
   else fail("public CFP link present");

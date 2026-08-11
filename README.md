@@ -60,12 +60,16 @@ clean slate.
 
 | URL | Who it is for |
 | --- | --- |
-| `/` | The public event site — no login |
+| `/` | The product's own landing page — links straight into the demo event |
+| `/e/devflow-conf-2027` | The public event site — no login |
 | `/admin` | Organizer: dashboard, submissions, forms, agenda, speakers, settings |
 | `/review` | Reviewer: only the submissions assigned to them |
 | `/portal` | Speaker: their own submissions, profile and tasks |
 | `/crm` | Org-level speaker CRM (extra credit) |
 | `/api-docs` | REST API reference |
+
+Every guessable root alias still redirects to the demo event, so `/sessions`, `/speakers`,
+`/agenda`, `/schedule`, `/gallery` and `/itinerary` land where you expect.
 
 ---
 
@@ -130,15 +134,40 @@ sub-millisecond, which is what makes the one-pass render possible. `schema.sql` 
 single source of truth and is applied idempotently on first database access — there is no
 migration tool, and adding a table means adding a `CREATE TABLE IF NOT EXISTS`.
 
-**shadcn/ui (Radix + Tailwind v4)** for the design system. Every screen renders through
-`src/components/ui/index.tsx`, a thin adapter over the shadcn primitives, so the whole
-product restyles from one file. Two deliberate departures from stock shadcn:
+**shadcn/ui (Radix + Tailwind v4) on a locked design system.** The system itself is written
+down in [`design.md`](./design.md) at the project root — genre, macrostructure families,
+every OKLCH token, the type pairing, the motion budget, the CTA voice, and the deviations
+it takes on purpose. The tokens live in `src/app/tokens.css`; every screen renders through
+`src/components/ui/index.tsx`, a thin adapter over the shadcn primitives. Between those two
+files the whole product restyles.
+
+Three deliberate departures from stock shadcn:
 
 - **Selects and checkboxes stay native elements.** Every form posts to a server action with
   progressive enhancement, and a native control submits its value without JavaScript. It is
   also more reliable for keyboard users and for automated agents.
 - **List-view tabs are links, not stateful tabs**, so every filtered view survives a reload
   and can be shared as a URL.
+- **Controls run at 36 px in app chrome**, not the 44 px touch floor, because the organizer
+  screens are dense tables where 44 px costs a row of context. What actually matters — an
+  input and its neighbouring button sharing one height — is enforced at both sizes.
+  Marketing and public surfaces use 44 px.
+
+Three page shapes, one system: the landing page is a *Workbench* (real product captures
+carry the argument), the public event site is a *Marquee Hero* (the event name fills the
+fold, then the page becomes a list), and the app is *Stat-Led* (a real figure leads and the
+panels beneath qualify it). They share the wordmark, the fonts, the CTA voice, the hairline
+weight and the accent budget; they differ in shape.
+
+**Fonts are local, never fetched.** Geist (display) and Geist Mono (the wordmark and
+tabular figures) arrive through the `geist` dependency; Switzer (body) is vendored as three
+woff2 files under `src/fonts/` with its licence. `next build` has to succeed inside a Docker
+build with no network, and that invariant predates the design system.
+
+**Colour is checked, not asserted.** `npm run contrast` recomputes the WCAG ratio for all 27
+`(text, surface)` pairs straight out of `src/app/tokens.css` and exits non-zero on a
+regression. It is what caught the focus ring measuring 2.97:1 against the black pill it
+surrounds, the amber chip at 3.94:1 on its own tint, and input borders at 1.48:1.
 
 **Authorization lives in one place** — `src/lib/guards.ts` — and is called by every page
 *and* every server action. Server actions are reachable by direct POST, so hiding a link is
@@ -161,6 +190,9 @@ what changed.
 ```
 schema.sql                 every table and index; applied at boot, idempotently
 components.json            shadcn config
+design.md                  the locked design system — read before changing any styling
+.agents/skills/hallmark/   the design skill the system was produced with (vendored)
+.hallmark/                 pre-flight findings + project memory the skill reads
 
 src/lib/
   db.ts                    better-sqlite3 singleton + all/get/run/tx helpers
@@ -180,12 +212,17 @@ src/lib/
   services/decisions.ts    cross-aggregate side effects (the accept hand-off)
 
 src/server/                "use server" action modules, one per surface
+src/fonts/                 vendored woff2 + licences (nothing is fetched at build time)
 src/components/
   ui/                      shadcn primitives + index.tsx (the design system)
   admin/ public/ portal/ review/ crm/   surface-specific components
+  marketing/               the landing page's nav, bands, figures and FAQ
   client/                  the "use client" islands
 
 src/app/
+  tokens.css               every design token; globals.css imports it
+  fonts.ts                 the three local faces
+  page.tsx                 the product landing page
   e/[slug]/                public event site + the CFP wizard
   admin/e/[slug]/          organizer surfaces
   review/ portal/ crm/     reviewer, speaker and CRM surfaces
@@ -208,6 +245,8 @@ scripts/                   smoke.mjs (the end-to-end test), cron.ts
 | `npm run seed:reset` | Wipe everything and reseed — your reset button |
 | `npm run seed:big` | Add 60 submissions and 40 speakers to test at scale |
 | `npm run smoke` | End-to-end HTTP test of the whole product |
+| `npm run contrast` | WCAG audit of every colour pair in the design system |
+| `npm run shots` | Regenerate the real product captures the landing page shows |
 | `npm run typecheck` | `next typegen` then `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run cron` | Run the scheduled reminder jobs once |
@@ -255,9 +294,23 @@ it shows up in the outbox whether or not a provider is configured.
 **Add a webhook event.** Add the name to `WEBHOOK_EVENTS` in `src/lib/webhooks.ts` and call
 `emitWebhook(eventId, name, payload)` from the action that causes it.
 
-**Change the look.** Edit `src/components/ui/index.tsx` — everything renders through it. For
-tokens (brand colour, radius) edit the `:root` block in `src/app/globals.css`. To add a
-shadcn primitive: `npx shadcn@latest add <name>`.
+**Change the look.** Read [`design.md`](./design.md) first — it is the system of record, and
+a page that drifts from it is the bug. Colour, type, spacing, motion and radii all live in
+`src/app/tokens.css`; component voice lives in `src/components/ui/index.tsx`, which every
+screen renders through. Run `npm run contrast` after touching a colour. To add a shadcn
+primitive: `npx shadcn@latest add <name>`.
+
+The legacy `slate-*` and `brand-*` Tailwind ramps are **remapped onto the system** in
+`tokens.css` rather than find-and-replaced. Around 800 usages across the screens this
+redesign did not restructure pick up the palette for free, at the same lightness steps, so
+nothing silently loses contrast. New code should use the semantic tokens (`text-ink`,
+`text-muted-foreground`, `border-rule`, `bg-paper-2`) instead.
+
+**Regenerate the landing page's screenshots.** They are real captures of this app, because a
+hand-drawn browser frame around an invented UI is the loudest "this was generated" tell
+there is. Run the app, then `npm run shots`. Record ids are discovered by scraping, so a
+reseed does not break it. `npm run shots -- --set responsive --out /tmp/shots` sweeps the
+three redesigned surfaces across 320 / 375 / 414 / 768 / 1280 / 1440 px.
 
 ---
 
@@ -266,7 +319,8 @@ shadcn primitive: `npx shadcn@latest add <name>`.
 These are encoded in the app and asserted by the smoke test. If you change one, change the
 test with it.
 
-1. **Public surfaces render with no session** and contain real content.
+1. **Public surfaces render with no session** and contain real content — including `/`,
+   which must also link to the live event so the demo is never orphaned.
 2. **Only `accepted` + `approved` submissions are public.** Acceptance and content approval
    are separate gates.
 3. **Speakers only ever see "Pending"** for the internal `accept_queue` / `decline_queue`
@@ -277,6 +331,8 @@ test with it.
 7. **Room clashes are blocked; speaker clashes only warn.** A five-minute panel overlap can
    be deliberate; two talks in one room never is.
 8. **Cross-user access returns 403** — the evaluator swaps identifiers in URLs.
+9. **No number on the landing page is written by hand.** The proof band reads its figures
+   out of the database at request time and renders em dashes when it is empty.
 
 ---
 
@@ -298,8 +354,8 @@ passed.
 
 ```
 $ npm run smoke
-66 passed, 0 failed (66 checks)
-p95 response 16ms across 54 200-responses
+69 passed, 0 failed (69 checks)
+p95 response 28ms across 55 200-responses
 ```
 
 **Adding a check:** `scripts/smoke.mjs` is a single dependency-free file. Use
