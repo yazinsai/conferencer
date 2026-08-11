@@ -35,73 +35,92 @@ export default async function AdminSearchPage({
       </div>
 
       {!q ? (
-        <EmptyState title="Type something to search" description="Try a talk title or a speaker name." />
+        <EmptyState
+          title="Type something to search"
+          description="Try a talk title or a speaker name."
+        />
       ) : null}
 
       {q ? (
         <div className="space-y-4">
           <Card>
-            <CardHeader title="Submissions" description={`${submissions.length} matches`} />
-            <ul className="divide-y divide-slate-100">
-              {submissions.map((submission) => (
-                <li key={submission.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
-                  <Link
-                    href={`/admin/e/${slug}/submissions/${submission.id}`}
-                    className="text-sm font-medium text-slate-900 hover:text-brand-700"
-                  >
-                    {submission.title}
-                  </Link>
-                  <Chip tone={statusTone(submission.status)}>
-                    {STATUS_LABELS[submission.status]}
-                  </Chip>
-                </li>
-              ))}
+            <CardHeader
+              title="Submissions"
+              description={`${submissions.length} results shown`}
+            />
+            <ul className="divide-y divide-rule">
+              {submissions.map((submission) => {
+                const meta = [submission.speakers, submission.track_name]
+                  .filter(Boolean)
+                  .join(" · ");
+                return (
+                  <li key={submission.id} className="relative">
+                    <Link
+                      href={`/admin/e/${slug}/submissions/${submission.id}`}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 text-ink outline-offset-[-2px] transition-colors duration-[120ms] ease-out hover:bg-paper-2 focus-visible:outline-2 focus-visible:outline-ring"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium">{submission.title}</span>
+                        {meta ? (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">{meta}</span>
+                        ) : null}
+                      </span>
+                      <Chip tone={statusTone(submission.status)} className="pointer-events-none">
+                        {STATUS_LABELS[submission.status]}
+                      </Chip>
+                    </Link>
+                  </li>
+                );
+              })}
               {!submissions.length ? (
-                <li className="px-4 py-4 text-sm text-slate-500">No submissions match.</li>
+                <li className="px-4 py-4 text-sm text-muted-foreground">No submissions match.</li>
               ) : null}
             </ul>
           </Card>
 
           <Card>
-            <CardHeader title="Speakers" description={`${speakers.length} matches`} />
-            <ul className="divide-y divide-slate-100">
-              {speakers.map((speaker) => (
-                <li key={speaker.id} className="px-4 py-2.5">
-                  <Link
-                    href={`/admin/e/${slug}/speakers/${speaker.id}`}
-                    className="text-sm font-medium text-slate-900 hover:text-brand-700"
-                  >
-                    {contactName(speaker)}
-                  </Link>
-                  <span className="ml-2 text-xs text-slate-500">
-                    {[speaker.job_title, speaker.company].filter(Boolean).join(", ")}
-                  </span>
-                </li>
-              ))}
+            <CardHeader title="Speakers" description={`${speakers.length} results shown`} />
+            <ul className="divide-y divide-rule">
+              {speakers.map((speaker) => {
+                const meta = [speaker.job_title, speaker.company].filter(Boolean).join(", ");
+                return (
+                  <li key={speaker.id} className="relative">
+                    <Link
+                      href={`/admin/e/${slug}/speakers/${speaker.id}`}
+                      className="block px-4 py-2.5 text-ink outline-offset-[-2px] transition-colors duration-[120ms] ease-out hover:bg-paper-2 focus-visible:outline-2 focus-visible:outline-ring"
+                    >
+                      <span className="block text-sm font-medium">{contactName(speaker)}</span>
+                      {meta ? (
+                        <span className="mt-0.5 block text-xs text-muted-foreground">{meta}</span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
               {!speakers.length ? (
-                <li className="px-4 py-4 text-sm text-slate-500">No speakers match.</li>
+                <li className="px-4 py-4 text-sm text-muted-foreground">No speakers match.</li>
               ) : null}
             </ul>
           </Card>
 
           <Card>
-            <CardHeader title="Emails" description={`${emails.length} matches`} />
-            <ul className="divide-y divide-slate-100">
+            <CardHeader title="Emails" description={`${emails.length} results shown`} />
+            <ul className="divide-y divide-rule">
               {emails.map((message) => (
-                <li key={message.id} className="px-4 py-2.5 text-sm">
+                <li key={message.id} className="relative">
                   <Link
                     href={`/admin/e/${slug}/emails?message=${message.id}`}
-                    className="font-medium text-slate-900 hover:text-brand-700"
+                    className="block px-4 py-2.5 text-ink outline-offset-[-2px] transition-colors duration-[120ms] ease-out hover:bg-paper-2 focus-visible:outline-2 focus-visible:outline-ring"
                   >
-                    {message.subject}
+                    <span className="block text-sm font-medium">{message.subject}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {message.to_email} · {formatStamp(message.created_at)}
+                    </span>
                   </Link>
-                  <span className="ml-2 text-xs text-slate-500">
-                    {message.to_email} · {formatStamp(message.created_at)}
-                  </span>
                 </li>
               ))}
               {!emails.length ? (
-                <li className="px-4 py-4 text-sm text-slate-500">No emails match.</li>
+                <li className="px-4 py-4 text-sm text-muted-foreground">No emails match.</li>
               ) : null}
             </ul>
           </Card>

@@ -22,14 +22,14 @@ async function ctx(formData: FormData) {
 
 export async function createEmbedAction(formData: FormData) {
   const { slug, event } = await ctx(formData);
-  createEmbed(event.id, {
+  const embed = createEmbed(event.id, {
     name: String(formData.get("name") ?? "Embed"),
     type: String(formData.get("type") ?? "sessions") as Embed["type"],
     format: String(formData.get("format") ?? "styled_html") as Embed["format"],
     config: { accent: event.accent_color },
   });
   revalidatePath(`/admin/e/${slug}/embeds`);
-  redirect(`/admin/e/${slug}/embeds?created=1`);
+  redirect(`/admin/e/${slug}/embeds?open=${embed.id}&created=1`);
 }
 
 export async function updateEmbedAction(formData: FormData) {
@@ -49,6 +49,7 @@ export async function updateEmbedAction(formData: FormData) {
     },
   });
   revalidatePath(`/admin/e/${slug}/embeds`);
+  redirect(`/admin/e/${slug}/embeds?open=${embed.id}&saved=1`);
 }
 
 export async function deleteEmbedAction(formData: FormData) {
@@ -61,6 +62,10 @@ export async function deleteEmbedAction(formData: FormData) {
 export async function rotateEmbedTokenAction(formData: FormData) {
   const { slug, event } = await ctx(formData);
   const embed = getEmbed(String(formData.get("embed_id")));
-  if (embed && embed.event_id === event.id) rotateToken(embed.id);
+  if (embed && embed.event_id === event.id) {
+    rotateToken(embed.id);
+    revalidatePath(`/admin/e/${slug}/embeds`);
+    redirect(`/admin/e/${slug}/embeds?open=${embed.id}&rotated=1`);
+  }
   revalidatePath(`/admin/e/${slug}/embeds`);
 }

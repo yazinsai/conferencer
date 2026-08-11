@@ -14,9 +14,39 @@ import {
   Td,
   Th,
 } from "@/components/ui";
-import { formatStamp } from "@/lib/datetime";
+import { formatShortDate, formatTime } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
+
+const TEMPLATE_NAMES = Object.fromEntries(TEMPLATE_SEEDS.map((t) => [t.key, t.name]));
+
+function templateLabel(key: string | null): string {
+  if (!key) return "Custom";
+  return TEMPLATE_NAMES[key] ?? key;
+}
+
+function sentParts(iso: string | null | undefined) {
+  if (!iso) return { date: "—", time: "" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { date: String(iso), time: "" };
+  const naive = d.toISOString().slice(0, 16);
+  return {
+    date: `${formatShortDate(naive)}, ${d.getUTCFullYear()}`,
+    time: formatTime(naive),
+  };
+}
+
+function emailsHref(
+  slug: string,
+  opts: { q?: string; template?: string; message?: string | null },
+) {
+  const params = new URLSearchParams();
+  if (opts.q) params.set("q", opts.q);
+  if (opts.template) params.set("template", opts.template);
+  if (opts.message) params.set("message", opts.message);
+  const qs = params.toString();
+  return qs ? `/admin/e/${slug}/emails?${qs}` : `/admin/e/${slug}/emails`;
+}
 
 export default async function EmailsPage({
   params,
@@ -27,12 +57,15 @@ export default async function EmailsPage({
   const { event } = await requireOrganizer(slug);
   const str = (key: string) => (typeof sp[key] === "string" ? (sp[key] as string) : "");
 
+  const q = str("q");
+  const template = str("template");
   const messages = listMessages(event.id, {
-    q: str("q"),
-    templateKey: str("template"),
+    q,
+    templateKey: template,
   });
   const open = str("message");
   const detail = open ? messages.find((m) => m.id === open) : null;
+  const detailSent = detail ? sentParts(detail.created_at) : null;
 
   return (
     <div>
@@ -72,87 +105,168 @@ export default async function EmailsPage({
           allLabel="Any template"
           options={TEMPLATE_SEEDS.map((t) => ({ value: t.key, label: t.name }))}
         />
-        {str("q") || str("template") ? (
+        {q || template ? (
           <LinkButton href={`/admin/e/${slug}/emails`} size="sm">
             Clear
           </LinkButton>
         ) : null}
-        <span className="text-sm text-slate-500" role="status">
+        <span className="text-sm text-muted-foreground" role="status">
           {messages.length} messages
         </span>
       </div>
 
-      {detail ? (
-        <Card className="mb-4">
-          <CardHeader
-            title={detail.subject}
-            description={`To ${detail.to_name ?? ""} <${detail.to_email}> · ${formatStamp(
-              detail.created_at,
-            )}`}
-            actions={
-              <LinkButton href={`/admin/e/${slug}/emails`} size="sm">
-                Close
-              </LinkButton>
-            }
-          />
-          <div
-            className="prose-cf p-5 text-sm text-slate-700"
-            dangerouslySetInnerHTML={{ __html: detail.body_html }}
-          />
-        </Card>
-      ) : null}
+      <div
+        className={
+          detail
+            ? "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]"
+            : undefined
+        }
+      >
+        <div className="min-w-0">
+          <Table>
+            <thead>
+              <tr>
+                <Th className="min-w-[12rem]">Subject</Th>
+                <Th className="min-w-[10rem]">Recipient</Th>
+                <Th className="w-[8.5rem]">Template</Th>
+                <Th className="w-[5.5rem]">Status</Th>
+                <Th className="w-[4.5rem]">
+                  <span className="sr-only">Open</span>
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {messages.map((message) => {
+                const selected = message.id === open;
+                const sent = sentParts(message.created_at);
+                const label = templateLabel(message.template_key);
+                return (
+                  <tr
+                    key={message.id}
+                    className={selected ? "bg-paper-3" : undefined}
+                  >
+                    <Td className="min-w-0">
+                      <p className="text-sm font-medium text-ink break-words">
+                        {message.subject}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        <span>{sent.date}</span>
+                        {sent.time ? (
+                          <>
+                            {" · "}
+                            <span className="wordmark tnum">{sent.time}</span>
+                          </>
+                        ) : null}
+                      </p>
+                    </Td>
+                    <Td className="min-w-0 text-sm">
+                      {message.to_name ? (
+                        <span className="font-medium text-ink-2">{message.to_name}</span>
+                      ) : null}
+                      <span
+                        className={
+                          message.to_name
+                            ? "mt-0.5 block text-xs text-neutral break-all"
+                            : "text-neutral break-all"
+                        }
+                      >
+                        {message.to_email}
+                      </span>
+                    </Td>
+                    <Td className="text-xs text-neutral">
+                      <span className="block break-words">{label}</span>
+                      {message.template_key && TEMPLATE_NAMES[message.template_key] ? (
+                        <span className="mt-0.5 block font-mono text-[0.6875rem] text-muted-foreground">
+                          {message.template_key}
+                        </span>
+                      ) : null}
+                    </Td>
+                    <Td>
+                      <Chip
+                        tone={
+                          message.status === "sent"
+                            ? "green"
+                            : message.status === "failed"
+                              ? "red"
+                              : "slate"
+                        }
+                      >
+                        {message.status}
+                      </Chip>
+                    </Td>
+                    <Td className="text-right">
+                      <Link
+                        href={emailsHref(slug, {
+                          q,
+                          template,
+                          message: selected ? null : message.id,
+                        })}
+                        className="text-xs font-medium text-signal underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        aria-label={
+                          selected
+                            ? `Close body of ${message.subject}`
+                            : `View body of ${message.subject}`
+                        }
+                      >
+                        {selected ? "Close" : "View →"}
+                      </Link>
+                    </Td>
+                  </tr>
+                );
+              })}
+              {!messages.length ? (
+                <tr>
+                  <Td colSpan={5} className="py-8 text-center text-muted-foreground">
+                    No messages yet.
+                  </Td>
+                </tr>
+              ) : null}
+            </tbody>
+          </Table>
+        </div>
 
-      <Table>
-        <thead>
-          <tr>
-            <Th>Sent</Th>
-            <Th>Recipient</Th>
-            <Th>Subject</Th>
-            <Th>Template</Th>
-            <Th>Status</Th>
-            <Th />
-          </tr>
-        </thead>
-        <tbody>
-          {messages.map((message) => (
-            <tr key={message.id}>
-              <Td className="whitespace-nowrap text-xs">{formatStamp(message.created_at)}</Td>
-              <Td className="text-sm">
-                {message.to_name ? (
-                  <span className="font-medium text-slate-800">{message.to_name}</span>
-                ) : null}
-                <span className="block text-xs text-slate-500">{message.to_email}</span>
-              </Td>
-              <Td className="text-sm">{message.subject}</Td>
-              <Td className="text-xs">{message.template_key ?? "custom"}</Td>
-              <Td>
-                <Chip
-                  tone={
-                    message.status === "sent" ? "green" : message.status === "failed" ? "red" : "slate"
-                  }
+        {detail && detailSent ? (
+          <Card className="min-w-0 lg:sticky lg:top-[calc(var(--nav-height)+0.75rem)]">
+            <CardHeader
+              title={detail.subject}
+              description={
+                <span className="block">
+                  To{" "}
+                  {detail.to_name ? (
+                    <>
+                      <span className="text-ink-2">{detail.to_name}</span>{" "}
+                    </>
+                  ) : null}
+                  <span className="text-neutral">&lt;{detail.to_email}&gt;</span>
+                  <span className="mt-0.5 block">
+                    {detailSent.date}
+                    {detailSent.time ? (
+                      <>
+                        {" · "}
+                        <span className="wordmark tnum">{detailSent.time}</span>
+                      </>
+                    ) : null}
+                    {" · "}
+                    {templateLabel(detail.template_key)}
+                  </span>
+                </span>
+              }
+              actions={
+                <LinkButton
+                  href={emailsHref(slug, { q, template, message: null })}
+                  size="sm"
                 >
-                  {message.status}
-                </Chip>
-              </Td>
-              <Td>
-                <Link
-                  href={`/admin/e/${slug}/emails?message=${message.id}`}
-                  className="text-xs font-medium text-brand-700 hover:underline"
-                >
-                  View body
-                </Link>
-              </Td>
-            </tr>
-          ))}
-          {!messages.length ? (
-            <tr>
-              <Td colSpan={6} className="py-8 text-center text-slate-500">
-                No messages yet.
-              </Td>
-            </tr>
-          ) : null}
-        </tbody>
-      </Table>
+                  Close
+                </LinkButton>
+              }
+            />
+            <div
+              className="prose-cf max-h-[min(70vh,36rem)] overflow-auto p-5 text-sm text-ink-2"
+              dangerouslySetInnerHTML={{ __html: detail.body_html }}
+            />
+          </Card>
+        ) : null}
+      </div>
     </div>
   );
 }

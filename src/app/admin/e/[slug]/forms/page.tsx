@@ -11,8 +11,6 @@ import {
 } from "@/server/form-actions";
 import {
   Button,
-  Card,
-  CardHeader,
   Chip,
   Input,
   LinkButton,
@@ -70,36 +68,36 @@ export default async function FormsPage({
         ]}
       />
 
-      <Card className="mb-6">
-        <CardHeader title="New form" description="Creates a form with the locked essentials already in place." />
-        <form action={createFormAction} className="flex flex-wrap items-end gap-3 p-4">
-          <input type="hidden" name="slug" value={slug} />
-          <div>
-            <label htmlFor="form-name" className="block text-xs font-medium text-slate-600">
-              Internal name
-            </label>
-            <Input
-              id="form-name"
-              name="name"
-              placeholder="2027 Call for Speakers"
-              className="w-72"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="form-collects" className="block text-xs font-medium text-slate-600">
-              Collects
-            </label>
-            <Select id="form-collects" name="collects" defaultValue="abstracts" className="w-48">
-              <option value="abstracts">Abstracts</option>
-              <option value="sessions">Sessions</option>
-            </Select>
-          </div>
-          <Button type="submit" variant="primary">
-            Create form
-          </Button>
-        </form>
-      </Card>
+      <form
+        action={createFormAction}
+        className="mb-5 flex flex-wrap items-end gap-x-3 gap-y-2 rounded-card border border-rule bg-paper-2 px-3 py-2.5"
+      >
+        <input type="hidden" name="slug" value={slug} />
+        <div className="min-w-0">
+          <label htmlFor="form-name" className="block text-xs font-medium text-muted-foreground">
+            Internal name
+          </label>
+          <Input
+            id="form-name"
+            name="name"
+            placeholder="2027 Call for Speakers"
+            className="w-64 bg-paper"
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="form-collects" className="block text-xs font-medium text-muted-foreground">
+            Collects
+          </label>
+          <Select id="form-collects" name="collects" defaultValue="abstracts" className="w-40 bg-paper">
+            <option value="abstracts">Abstracts</option>
+            <option value="sessions">Sessions</option>
+          </Select>
+        </div>
+        <Button type="submit" variant="primary" size="sm">
+          Create form
+        </Button>
+      </form>
 
       <Table>
         <thead>
@@ -111,7 +109,7 @@ export default async function FormsPage({
             <Th>Drafts</Th>
             <Th>Closes</Th>
             <Th>Public link</Th>
-            <Th />
+            <Th>Actions</Th>
           </tr>
         </thead>
         <tbody>
@@ -133,34 +131,34 @@ export default async function FormsPage({
                 <Td>
                   <Link
                     href={`${base}/${form.id}?step=1`}
-                    className="font-medium text-slate-900 hover:text-brand-700"
+                    className="font-medium text-ink hover:underline"
                   >
                     {form.name}
                   </Link>
-                  <p className="text-xs text-slate-500">{form.title}</p>
+                  <p className="text-xs text-muted-foreground">{form.title}</p>
                 </Td>
                 <Td>
-                  <form action={setFormStatusAction} className="flex items-center gap-1">
+                  <form action={setFormStatusAction} className="flex items-center gap-2">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="id" value={form.id} />
                     <input type="hidden" name="status" value={open ? "closed" : "open"} />
                     <Chip tone={open ? "green" : "slate"}>{open ? "Open" : "Closed"}</Chip>
-                    <Button type="submit" size="sm" variant="ghost">
-                      {open ? "Close" : "Open"}
+                    <Button type="submit" size="sm" variant="secondary">
+                      {open ? "Close form" : "Reopen form"}
                     </Button>
                   </form>
                 </Td>
                 <Td className="capitalize">{form.collects}</Td>
-                <Td>{submissions}</Td>
-                <Td>{drafts}</Td>
-                <Td className="text-xs">
+                <Td className="tnum">{submissions}</Td>
+                <Td className="tnum">{drafts}</Td>
+                <Td className="text-xs text-muted-foreground">
                   {form.closes_at ? formatDate(form.closes_at) : "No close date"}
                 </Td>
                 <Td>
                   <div className="flex items-center gap-2">
                     <a
                       href={publicUrl}
-                      className="text-xs font-medium text-brand-700 hover:underline"
+                      className="text-xs font-medium text-neutral underline underline-offset-2 hover:text-ink"
                     >
                       View form
                     </a>
@@ -168,7 +166,7 @@ export default async function FormsPage({
                   </div>
                 </Td>
                 <Td>
-                  <div className="flex gap-1">
+                  <div className="flex items-center gap-1 border-l border-rule pl-3">
                     <form action={duplicateFormAction}>
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="id" value={form.id} />
@@ -181,7 +179,7 @@ export default async function FormsPage({
                       <input type="hidden" name="id" value={form.id} />
                       <ConfirmSubmit
                         message={`Delete "${form.name}"? Submissions stay, but the form is gone.`}
-                        variant="ghost"
+                        variant="danger"
                       >
                         Delete
                       </ConfirmSubmit>
@@ -193,7 +191,7 @@ export default async function FormsPage({
           })}
           {!forms.length ? (
             <tr>
-              <Td colSpan={8} className="py-8 text-center text-slate-500">
+              <Td colSpan={8} className="py-8 text-center text-muted-foreground">
                 No forms in this view.{" "}
                 <LinkButton href={base} size="sm">
                   Show all

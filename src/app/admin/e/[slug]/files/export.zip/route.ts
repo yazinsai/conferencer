@@ -10,10 +10,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const url = new URL(request.url);
   const ids = url.searchParams.getAll("ids").flatMap((value) => value.split(",")).filter(Boolean);
   const group = url.searchParams.get("group") ?? "session";
+  const scope = url.searchParams.get("scope");
 
-  const rows = ids.length
-    ? ids.map((id) => getUpload(id)).filter((u) => u && u.event_id === event.id)
-    : listUploads(event.id, { latestOnly: true });
+  // Selection-scoped exports must not silently fall back to "all latest".
+  const rows =
+    scope === "selected"
+      ? ids.map((id) => getUpload(id)).filter((u) => u && u.event_id === event.id)
+      : ids.length
+        ? ids.map((id) => getUpload(id)).filter((u) => u && u.event_id === event.id)
+        : listUploads(event.id, { latestOnly: true });
 
   const entries: ZipEntry[] = [];
   for (const upload of rows) {

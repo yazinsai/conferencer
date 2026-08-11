@@ -60,21 +60,21 @@ export default async function SpeakerDetail({
           </Link>
         }
         title={
-          <span className="flex items-center gap-3">
+          <span className="flex flex-wrap items-center gap-3">
             <Avatar src={contact.headshot_url} name={contactName(contact)} size={40} />
-            {contactName(contact)}
+            <span className="min-w-0">{contactName(contact)}</span>
+            <Chip tone={speakerStatusTone(eventContact.speaker_status)}>
+              {eventContact.speaker_status}
+            </Chip>
           </span>
         }
         description={[contact.job_title, contact.company].filter(Boolean).join(", ")}
         actions={
           <>
-            <Chip tone={speakerStatusTone(eventContact.speaker_status)}>
-              {eventContact.speaker_status}
-            </Chip>
             <form action={invitePortalAction}>
               <input type="hidden" name="slug" value={slug} />
               <input type="hidden" name="contact_id" value={contact.id} />
-              <Button type="submit" size="sm">
+              <Button type="submit" size="sm" variant="primary">
                 Send portal invite
               </Button>
             </form>
@@ -111,11 +111,11 @@ export default async function SpeakerDetail({
           {history.length ? (
             <Card className="mt-4">
               <CardHeader title="Change history" />
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-rule">
                 {history.slice(0, 10).map((entry) => (
                   <li key={entry.id} className="px-4 py-2 text-sm">
-                    <p className="text-slate-700">{entry.summary ?? entry.action}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-ink-2">{entry.summary ?? entry.action}</p>
+                    <p className="text-xs text-muted-foreground">
                       {entry.actor_name} · {formatStamp(entry.created_at)}
                     </p>
                   </li>
@@ -145,7 +145,7 @@ export default async function SpeakerDetail({
                   <Td>
                     <Link
                       href={`/admin/e/${slug}/submissions/${session.id}`}
-                      className="font-medium text-slate-900 hover:text-brand-700"
+                      className="font-medium text-ink hover:text-signal"
                     >
                       {session.title}
                     </Link>
@@ -157,7 +157,7 @@ export default async function SpeakerDetail({
                   </Td>
                   <Td className="text-sm">{session.track_name ?? "—"}</Td>
                   <Td className="text-sm">{session.format_name ?? "—"}</Td>
-                  <Td className="text-xs">
+                  <Td className="text-xs text-muted-foreground">
                     {session.starts_at
                       ? `${formatRange(session.starts_at, session.ends_at)}${
                           session.room_name ? ` · ${session.room_name}` : ""
@@ -168,7 +168,7 @@ export default async function SpeakerDetail({
               ))}
               {!sessions.length ? (
                 <tr>
-                  <Td colSpan={5} className="py-6 text-center text-slate-500">
+                  <Td colSpan={5} className="py-6 text-center text-muted-foreground">
                     No sessions yet.
                   </Td>
                 </tr>
@@ -206,8 +206,8 @@ export default async function SpeakerDetail({
               {assignments.map((assignment) => (
                 <tr key={assignment.id}>
                   <Td className="font-medium">{assignment.task_name}</Td>
-                  <Td className="text-xs">{assignment.task_type}</Td>
-                  <Td className="text-xs">
+                  <Td className="text-xs text-muted-foreground">{assignment.task_type}</Td>
+                  <Td className="text-xs wordmark tnum text-muted-foreground">
                     {effectiveDue(assignment) ? formatDate(effectiveDue(assignment)) : "—"}
                   </Td>
                   <Td>
@@ -227,12 +227,12 @@ export default async function SpeakerDetail({
                           : "Outstanding"}
                     </Chip>
                   </Td>
-                  <Td className="text-xs">{assignment.upload_count || "—"}</Td>
+                  <Td className="text-xs wordmark tnum">{assignment.upload_count || "—"}</Td>
                 </tr>
               ))}
               {!assignments.length ? (
                 <tr>
-                  <Td colSpan={5} className="py-6 text-center text-slate-500">
+                  <Td colSpan={5} className="py-6 text-center text-muted-foreground">
                     No tasks assigned.
                   </Td>
                 </tr>
@@ -261,15 +261,19 @@ export default async function SpeakerDetail({
               {uploads.map((upload) => (
                 <tr key={upload.id}>
                   <Td className="font-medium">{upload.filename}</Td>
-                  <Td className="text-xs">{upload.kind}</Td>
-                  <Td className="text-xs">{upload.task_name ?? "—"}</Td>
-                  <Td className="text-xs">{humanSize(upload.size)}</Td>
-                  <Td className="text-xs">v{upload.version}</Td>
-                  <Td className="text-xs">{formatStamp(upload.created_at)}</Td>
+                  <Td className="text-xs text-muted-foreground">{upload.kind}</Td>
+                  <Td className="text-xs text-muted-foreground">{upload.task_name ?? "—"}</Td>
+                  <Td className="text-xs wordmark tnum text-muted-foreground">
+                    {humanSize(upload.size)}
+                  </Td>
+                  <Td className="text-xs wordmark tnum">v{upload.version}</Td>
+                  <Td className="text-xs wordmark tnum text-muted-foreground">
+                    {formatStamp(upload.created_at)}
+                  </Td>
                   <Td>
                     <a
                       href={`/f/${upload.id}?download=1`}
-                      className="text-sm font-medium text-brand-700 hover:underline"
+                      className="text-sm font-medium text-signal hover:underline"
                     >
                       Download
                     </a>
@@ -278,7 +282,7 @@ export default async function SpeakerDetail({
               ))}
               {!uploads.length ? (
                 <tr>
-                  <Td colSpan={7} className="py-6 text-center text-slate-500">
+                  <Td colSpan={7} className="py-6 text-center text-muted-foreground">
                     Nothing uploaded yet.
                   </Td>
                 </tr>
@@ -291,24 +295,24 @@ export default async function SpeakerDetail({
       {tab === "comms" ? (
         <Card>
           <CardHeader title="Communications history" description="Every message sent to this speaker." />
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-rule">
             {messages.map((message) => (
               <li key={message.id} className="px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Link
                     href={`/admin/e/${slug}/emails?message=${message.id}`}
-                    className="text-sm font-medium text-slate-900 hover:text-brand-700"
+                    className="text-sm font-medium text-ink hover:text-signal"
                   >
                     {message.subject}
                   </Link>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted-foreground">
                     {message.template_key ?? "custom"} · {formatStamp(message.created_at)}
                   </span>
                 </div>
               </li>
             ))}
             {!messages.length ? (
-              <li className="px-4 py-6 text-sm text-slate-500">No messages yet.</li>
+              <li className="px-4 py-6 text-sm text-muted-foreground">No messages yet.</li>
             ) : null}
           </ul>
         </Card>

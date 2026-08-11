@@ -87,44 +87,51 @@ export default async function DashboardPage({
     .filter((row) => row.assigned > row.complete);
 
   const countdown = daysUntil(event.starts_at);
-  // The icon names the *kind* of thing needing attention, which a severity dot
-  // could not; the tone still carries urgency.
+  // Urgency first: overdue and decision-blocking, then quieter follow-ups.
+  // The icon names the *kind* of thing needing attention; only actionable
+  // exceptions keep semantic colour (design.md accent budget).
   const nudges = [
-    needSlot > 0 && {
-      text: `${needSlot} accepted ${needSlot === 1 ? "session still needs" : "sessions still need"} a time slot on the agenda`,
-      href: `${base}/agenda`,
-      tone: "amber" as const,
-      icon: "agenda" as const,
+    overdueSpeakers > 0 && {
+      text: `${overdueSpeakers} speakers have overdue onboarding tasks`,
+      href: `${base}/tasks/deliverables?overdue=1`,
+      tone: "red" as const,
+      icon: "clock" as const,
+      urgent: true,
     },
     awaitingDecision > 0 && {
       text: `${awaitingDecision} submissions are awaiting a decision`,
       href: `${base}/submissions?status=pending`,
       tone: "blue" as const,
       icon: "decision" as const,
+      urgent: true,
+    },
+    needSlot > 0 && {
+      text: `${needSlot} accepted ${needSlot === 1 ? "session still needs" : "sessions still need"} a time slot on the agenda`,
+      href: `${base}/agenda`,
+      tone: "amber" as const,
+      icon: "agenda" as const,
+      urgent: false,
     },
     missingProfile > 0 && {
       text: `${missingProfile} accepted speakers are missing a bio or headshot`,
       href: `${base}/speakers`,
       tone: "amber" as const,
       icon: "person" as const,
-    },
-    overdueSpeakers > 0 && {
-      text: `${overdueSpeakers} speakers have overdue onboarding tasks`,
-      href: `${base}/tasks/deliverables?overdue=1`,
-      tone: "red" as const,
-      icon: "clock" as const,
+      urgent: false,
     },
     laggingReviewers.length > 0 && {
       text: `${laggingReviewers.length} reviewers have not finished their assigned reviews`,
       href: `${base}/evaluation`,
       tone: "violet" as const,
       icon: "evaluation" as const,
+      urgent: false,
     },
   ].filter(Boolean) as Array<{
     text: string;
     href: string;
     tone: "amber" | "blue" | "red" | "violet";
     icon: IconName;
+    urgent: boolean;
   }>;
 
   // Stat-Led hero: a real figure, never standing alone — the words beside it say
@@ -216,6 +223,49 @@ export default async function DashboardPage({
         </div>
       </section>
 
+      {nudges.length ? (
+        <section className="mt-8" aria-label="Action queue">
+          <h2 className="wordmark mb-1 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
+            Also check
+          </h2>
+          <ul className="grid border-t border-rule md:grid-cols-2 md:gap-x-8">
+            {nudges.map((nudge) => (
+              <li key={nudge.href + nudge.text} className="border-b border-rule">
+                <Link
+                  href={nudge.href}
+                  className="group flex items-center justify-between gap-4 py-3 text-sm transition-colors duration-[120ms] ease-out"
+                >
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <Icon
+                      name={nudge.icon}
+                      size={17}
+                      className={cx(
+                        nudge.urgent && nudge.tone === "red" && "text-destructive",
+                        nudge.urgent && nudge.tone === "blue" && "text-signal",
+                        !nudge.urgent && "text-muted-foreground",
+                      )}
+                    />
+                    <span
+                      className={cx(
+                        "group-hover:text-ink",
+                        nudge.urgent ? "font-medium text-ink" : "text-neutral",
+                      )}
+                    >
+                      {nudge.text}
+                    </span>
+                  </span>
+                  <Icon
+                    name="arrowRight"
+                    size={15}
+                    className="text-muted-foreground transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5 group-hover:text-ink"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="mt-10">
         <h2 className="wordmark mb-3 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
           Submission status
@@ -242,42 +292,6 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      {nudges.length ? (
-        <section className="mt-10">
-          <h2 className="wordmark mb-1 text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
-            Also check
-          </h2>
-          <ul className="grid border-t border-rule md:grid-cols-2 md:gap-x-8">
-            {nudges.map((nudge) => (
-              <li key={nudge.href + nudge.text} className="border-b border-rule">
-                <Link
-                  href={nudge.href}
-                  className="group flex items-center justify-between gap-4 py-3 text-sm transition-colors duration-[120ms] ease-out"
-                >
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <Icon
-                      name={nudge.icon}
-                      size={17}
-                      className={cx(
-                        nudge.tone === "red" && "text-destructive",
-                        nudge.tone === "amber" && "text-warn",
-                        (nudge.tone === "blue" || nudge.tone === "violet") && "text-signal",
-                      )}
-                    />
-                    <span className="text-neutral group-hover:text-ink">{nudge.text}</span>
-                  </span>
-                  <Icon
-                    name="arrowRight"
-                    size={15}
-                    className="text-muted-foreground transition-transform duration-[120ms] ease-out group-hover:translate-x-0.5 group-hover:text-ink"
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       <Suspense fallback={<DashboardPanelsSkeleton />}>
         <DashboardPanelsSlot
           slug={slug}
@@ -288,11 +302,11 @@ export default async function DashboardPage({
         />
       </Suspense>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-3">
+      {/* items-start: keep sparse Recent activity from stretching to match readiness */}
+      <div className="mt-8 grid items-start gap-5 lg:grid-cols-3">
         <Suspense fallback={<SpeakerReadinessSkeleton />}>
           <SpeakerReadiness eventId={event.id} base={base} />
         </Suspense>
-
         <Suspense fallback={<RecentActivitySkeleton />}>
           <RecentActivity eventId={event.id} />
         </Suspense>

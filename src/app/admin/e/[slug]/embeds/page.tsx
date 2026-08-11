@@ -34,6 +34,7 @@ export default async function EmbedsPage({
   const embeds = listEmbeds(event.id);
   const tracks = listLookup("tracks", event.id);
   const formats = listLookup("formats", event.id);
+  const openId = typeof sp.open === "string" ? sp.open : "";
 
   return (
     <div className="max-w-4xl">
@@ -44,6 +45,47 @@ export default async function EmbedsPage({
       />
 
       {sp.created ? <Notice tone="success" className="mb-4">Embed created.</Notice> : null}
+      {sp.saved ? <Notice tone="success" className="mb-4">Embed saved.</Notice> : null}
+      {sp.rotated ? (
+        <Notice tone="success" className="mb-4">
+          Embed URL rotated. Update any live snippets to the new token.
+        </Notice>
+      ) : null}
+
+      <details className="mb-5 rounded-card border border-rule bg-paper shadow-[var(--shadow-card)]">
+        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-ink marker:content-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
+          Create embed
+        </summary>
+        <form action={createEmbedAction} className="grid gap-3 border-t border-rule p-4 sm:grid-cols-4">
+          <input type="hidden" name="slug" value={slug} />
+          <Field label="Name" name="name" required>
+            <Input id="new-name" name="name" placeholder="Website session list" required />
+          </Field>
+          <Field label="Widget" name="type">
+            <Select id="new-type" name="type" defaultValue="sessions">
+              {EMBED_TYPES.map((entry) => (
+                <option key={entry.value} value={entry.value}>
+                  {entry.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Format" name="format">
+            <Select id="new-format" name="format" defaultValue="styled_html">
+              {EMBED_FORMATS.map((entry) => (
+                <option key={entry.value} value={entry.value}>
+                  {entry.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <div className="flex items-end">
+            <Button type="submit" variant="primary">
+              Create embed
+            </Button>
+          </div>
+        </form>
+      </details>
 
       <Card className="mb-5">
         <CardHeader title="Public pages" description="These are live right now — no embedding needed." />
@@ -57,7 +99,10 @@ export default async function EmbedsPage({
             { href: `/e/${event.slug}/my-schedule`, label: "Personal schedule" },
           ].map((entry) => (
             <li key={entry.href} className="flex items-center justify-between gap-2 text-sm">
-              <a href={entry.href} className="font-medium text-brand-700 hover:underline">
+              <a
+                href={entry.href}
+                className="font-medium text-ink underline decoration-rule-2 underline-offset-2 hover:decoration-ink"
+              >
                 {entry.label}
               </a>
               <CopyButton value={entry.href} label="Copy URL" />
@@ -66,7 +111,7 @@ export default async function EmbedsPage({
         </ul>
       </Card>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {embeds.map((embed) => {
           const config = readJson<{ track?: string; format?: string; accent?: string }>(
             embed.config,
@@ -74,46 +119,39 @@ export default async function EmbedsPage({
           );
           const base = `/e/${event.slug}/embed/${embed.token}`;
           const snippet = `<script src="${base}?format=styled_html" async></script>`;
+          const typeLabel =
+            EMBED_TYPES.find((entry) => entry.value === embed.type)?.label ?? embed.type;
+          const formatLabel =
+            EMBED_FORMATS.find((entry) => entry.value === embed.format)?.label ?? embed.format;
           return (
-            <Card key={embed.id}>
-              <CardHeader
-                title={embed.name}
-                description={
-                  <>
-                    <Chip tone="slate">{embed.type}</Chip>{" "}
-                    <Chip tone="blue">{embed.format}</Chip>
-                  </>
-                }
-                actions={
-                  <>
-                    <form action={rotateEmbedTokenAction}>
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="embed_id" value={embed.id} />
-                      <Button type="submit" size="sm">
-                        Refresh cache / rotate URL
-                      </Button>
-                    </form>
-                    <form action={deleteEmbedAction}>
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="embed_id" value={embed.id} />
-                      <ConfirmSubmit message={`Delete the embed "${embed.name}"?`} variant="ghost">
-                        Delete
-                      </ConfirmSubmit>
-                    </form>
-                  </>
-                }
-              />
-              <div className="space-y-3 p-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <details
+              key={embed.id}
+              className="rounded-card border border-rule bg-paper shadow-[var(--shadow-card)]"
+              open={openId === embed.id}
+            >
+              <summary className="cursor-pointer list-none px-4 py-3 marker:content-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
+                <span className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="min-w-0">
+                    <span className="block font-medium text-ink">{embed.name}</span>
+                    <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Chip tone="slate">{typeLabel}</Chip>
+                      <Chip tone="slate">{formatLabel}</Chip>
+                    </span>
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">Configure</span>
+                </span>
+              </summary>
+              <div className="space-y-3 border-t border-rule p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Script tag (works on any site, no framework needed)
                   </p>
-                  <div className="mt-1 flex items-start gap-2">
-                    <code className="block flex-1 overflow-x-auto rounded bg-slate-900 px-3 py-2 font-mono text-xs text-slate-100">
-                      {snippet}
-                    </code>
-                    <CopyButton value={snippet} label="Copy snippet" />
-                  </div>
+                  <CopyButton value={snippet} label="Copy snippet" />
+                </div>
+                <div>
+                  <code className="block overflow-x-auto rounded-input bg-ink px-3 py-2 font-mono text-xs text-paper">
+                    {snippet}
+                  </code>
                 </div>
 
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -125,7 +163,10 @@ export default async function EmbedsPage({
                     { label: "iCal", href: `${base}.ics` },
                   ].map((entry) => (
                     <div key={entry.label} className="flex items-center justify-between gap-2 text-sm">
-                      <a href={entry.href} className="font-medium text-brand-700 hover:underline">
+                      <a
+                        href={entry.href}
+                        className="font-medium text-ink underline decoration-rule-2 underline-offset-2 hover:decoration-ink"
+                      >
                         {entry.label}
                       </a>
                       <CopyButton value={entry.href} label="Copy URL" />
@@ -133,7 +174,10 @@ export default async function EmbedsPage({
                   ))}
                 </div>
 
-                <form action={updateEmbedAction} className="grid gap-3 border-t border-slate-200 pt-3 sm:grid-cols-4">
+                <form
+                  action={updateEmbedAction}
+                  className="grid gap-3 border-t border-rule pt-3 sm:grid-cols-4"
+                >
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="embed_id" value={embed.id} />
                   <Field label="Name" name={`name-${embed.id}`}>
@@ -177,7 +221,11 @@ export default async function EmbedsPage({
                     </Select>
                   </Field>
                   <Field label="Only this format" name={`sf-${embed.id}`}>
-                    <Select id={`sf-${embed.id}`} name="session_format" defaultValue={config.format ?? ""}>
+                    <Select
+                      id={`sf-${embed.id}`}
+                      name="session_format"
+                      defaultValue={config.format ?? ""}
+                    >
                       <option value="">All formats</option>
                       {formats.map((entry) => (
                         <option key={entry.id} value={entry.id}>
@@ -186,50 +234,48 @@ export default async function EmbedsPage({
                       ))}
                     </Select>
                   </Field>
-                  <div className="flex items-end sm:col-span-2">
+                  <div className="flex flex-wrap items-end gap-2 sm:col-span-2">
                     <Button type="submit" variant="primary">
                       Save embed
                     </Button>
                   </div>
                 </form>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-3">
+                  <p className="text-xs text-muted-foreground">
+                    Rotating the URL invalidates every live snippet that still uses the current
+                    token.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <form action={rotateEmbedTokenAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="embed_id" value={embed.id} />
+                      <ConfirmSubmit
+                        message={`Rotate the URL for "${embed.name}"? Current snippets will stop working until they are updated.`}
+                        variant="danger"
+                      >
+                        Rotate URL (breaks current snippets)
+                      </ConfirmSubmit>
+                    </form>
+                    <form action={deleteEmbedAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="embed_id" value={embed.id} />
+                      <ConfirmSubmit message={`Delete the embed "${embed.name}"?`} variant="danger">
+                        Delete
+                      </ConfirmSubmit>
+                    </form>
+                  </div>
+                </div>
               </div>
-            </Card>
+            </details>
           );
         })}
+        {!embeds.length ? (
+          <Card className="p-8 text-center text-sm text-muted-foreground">
+            No embeds yet. Create one above.
+          </Card>
+        ) : null}
       </div>
-
-      <Card className="mt-5">
-        <CardHeader title="New embed" />
-        <form action={createEmbedAction} className="grid gap-3 p-4 sm:grid-cols-4">
-          <input type="hidden" name="slug" value={slug} />
-          <Field label="Name" name="name" required>
-            <Input id="new-name" name="name" placeholder="Website session list" required />
-          </Field>
-          <Field label="Widget" name="type">
-            <Select id="new-type" name="type" defaultValue="sessions">
-              {EMBED_TYPES.map((entry) => (
-                <option key={entry.value} value={entry.value}>
-                  {entry.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Format" name="format">
-            <Select id="new-format" name="format" defaultValue="styled_html">
-              {EMBED_FORMATS.map((entry) => (
-                <option key={entry.value} value={entry.value}>
-                  {entry.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div className="flex items-end">
-            <Button type="submit" variant="primary">
-              Create embed
-            </Button>
-          </div>
-        </form>
-      </Card>
     </div>
   );
 }

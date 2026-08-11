@@ -30,3 +30,13 @@ export const DEFAULT_COLUMNS = [
   "approval",
   "notified",
 ];
+
+/** Programme-focused defaults for the Sessions list (status stays optional via Columns). */
+export const SESSION_DEFAULT_COLUMNS = [
+  "title",
+  "speakers",
+  "track",
+  "format",
+  "schedule",
+  "files",
+];

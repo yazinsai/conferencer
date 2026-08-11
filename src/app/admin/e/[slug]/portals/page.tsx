@@ -42,6 +42,8 @@ export default async function PortalsPage({
     "SELECT * FROM portals WHERE event_id = ? ORDER BY is_default DESC LIMIT 1",
     event.id,
   );
+  const accent = portal?.accent_color ?? event.accent_color;
+  const usingEventDefault = !portal?.accent_color;
 
   return (
     <div className="max-w-3xl">
@@ -54,46 +56,74 @@ export default async function PortalsPage({
 
       <Card>
         <CardHeader title={portal?.name ?? "Speaker Portal"} description="Default portal" />
-        <form action={savePortalAction} className="space-y-4 p-4">
+        <form action={savePortalAction} className="space-y-6 p-4">
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="portal_id" value={portal?.id ?? ""} />
 
-          <Field label="Portal name" name="name">
-            <Input id="name" name="name" defaultValue={portal?.name ?? "Speaker Portal"} />
-          </Field>
-          <Field label="Welcome message" name="welcome_message">
-            <Textarea
-              id="welcome_message"
-              name="welcome_message"
-              rows={4}
-              defaultValue={portal?.welcome_message ?? ""}
-            />
-          </Field>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Accent colour" name="accent_color">
-              <Input
-                id="accent_color"
-                name="accent_color"
-                type="color"
-                defaultValue={portal?.accent_color ?? event.accent_color}
-                className="h-10 w-24 p-1"
-              />
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Basics</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Identity and the first message speakers see after signing in.
+              </p>
+            </div>
+            <Field label="Portal name" name="name">
+              <Input id="name" name="name" defaultValue={portal?.name ?? "Speaker Portal"} />
             </Field>
             <Field
-              label="Final deadline (days before the event)"
-              name="final_deadline_days"
+              label="Welcome message (HTML)"
+              name="welcome_message"
+              hint="Basic HTML is rendered on the portal. Keep markup simple — paragraphs and links are safest."
             >
-              <Input
-                id="final_deadline_days"
-                name="final_deadline_days"
-                type="number"
-                defaultValue={portal?.final_deadline_days ?? ""}
+              <Textarea
+                id="welcome_message"
+                name="welcome_message"
+                rows={4}
+                defaultValue={portal?.welcome_message ?? ""}
               />
             </Field>
-          </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Field label="Accent colour" name="accent_color">
+                  <div className="flex items-center gap-3">
+                    <Input
+                      id="accent_color"
+                      name="accent_color"
+                      type="color"
+                      defaultValue={accent}
+                      className="h-10 w-24 p-1"
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      <p className="font-mono text-ink">{accent}</p>
+                      {usingEventDefault ? <p>Event default</p> : <p>Portal override</p>}
+                    </div>
+                  </div>
+                </Field>
+              </div>
+              <Field
+                label="Final deadline (days before the event)"
+                name="final_deadline_days"
+                hint="Leave blank for no portal-wide deadline. Speakers then only see per-task due dates."
+              >
+                <Input
+                  id="final_deadline_days"
+                  name="final_deadline_days"
+                  type="number"
+                  defaultValue={portal?.final_deadline_days ?? ""}
+                />
+              </Field>
+            </div>
+          </section>
 
-          <fieldset className="rounded-md border border-slate-200 p-3">
-            <legend className="px-1 text-sm font-medium text-slate-700">Sections</legend>
+          <hr className="border-rule" />
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Visibility &amp; permissions</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Which sections appear, and what speakers may change themselves.
+              </p>
+            </div>
             {[
               {
                 name: "show_tasks_always",
@@ -126,10 +156,17 @@ export default async function PortalsPage({
                 {toggle.label}
               </label>
             ))}
-          </fieldset>
+          </section>
 
-          <fieldset className="rounded-md border border-slate-200 p-3">
-            <legend className="px-1 text-sm font-medium text-slate-700">Section headings</legend>
+          <hr className="border-rule" />
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Labels</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Custom headings for the three portal sections.
+              </p>
+            </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <Field label="Invited sessions" name="heading_invited">
                 <Input
@@ -153,7 +190,7 @@ export default async function PortalsPage({
                 />
               </Field>
             </div>
-          </fieldset>
+          </section>
 
           <Button type="submit" variant="primary">
             Save portal settings

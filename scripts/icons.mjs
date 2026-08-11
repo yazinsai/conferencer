@@ -31,11 +31,13 @@ const MANIFEST = {
   /* chrome ------------------------------------------------------------- */
   search: "magnifier-linear",
   chevronDown: "alt-arrow-down-linear",
+  chevronUp: "alt-arrow-up-linear",
   chevronRight: "alt-arrow-right-linear",
   arrowRight: "arrow-right-linear",
   close: "close-circle-linear",
   check: "check-circle-linear",
   plus: "add-circle-linear",
+  lock: "lock-linear",
 
   /* status — the one place the bold register is allowed ----------------- */
   success: "check-circle-bold",
@@ -72,6 +74,7 @@ const MANIFEST = {
   decision: "clipboard-check-linear",
   star: "star-linear",
   starFilled: "star-bold",
+  edit: "pen-2-linear",
 };
 
 const solar = require("@iconify-json/solar/icons.json");

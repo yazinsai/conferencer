@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardHeader,
+  Field,
   Input,
   LinkButton,
   Notice,
@@ -26,6 +27,11 @@ type ApiToken = {
   last_used_at: string | null;
 };
 
+function fingerprint(token: string): string {
+  if (token.length <= 10) return token;
+  return `${token.slice(0, 4)}…${token.slice(-4)}`;
+}
+
 export default async function ApiTokensPage({ params }: PageProps<"/admin/e/[slug]/settings/api">) {
   const { slug } = await params;
   const { event } = await requireOrganizer(slug);
@@ -39,27 +45,27 @@ export default async function ApiTokensPage({ params }: PageProps<"/admin/e/[slu
       <PageHeader
         title="API tokens"
         description="Bearer tokens for the REST API at /api/v1, scoped to this event."
+        breadcrumb={<a href={`/admin/e/${slug}/settings`}>Settings</a>}
         actions={
           <>
-            <LinkButton href="/api/v1/openapi.json" size="sm">
+            <LinkButton href="/api/v1/openapi.json" size="sm" variant="primary">
               OpenAPI spec
             </LinkButton>
-            <LinkButton href="/api-docs" size="sm">
+            <LinkButton href="/api-docs" size="sm" variant="ghost">
               API reference
             </LinkButton>
-            <LinkButton href={`/admin/e/${slug}/settings`}>Back to settings</LinkButton>
           </>
         }
       />
 
       <Notice tone="info" className="mb-4">
         <p className="font-medium">Using the API</p>
-        <pre className="mt-1 overflow-x-auto text-xs">
+        <pre className="mt-1 overflow-x-auto rounded-md border border-rule bg-paper-3 p-3 font-mono text-xs text-ink-2">
           {`curl -H "Authorization: Bearer <token>" \\\n  ${"$"}{APP_URL}/api/v1/submissions?limit=25`}
         </pre>
       </Notice>
 
-      <Card>
+      <Card className="mb-5">
         <CardHeader title="Tokens" description={`${tokens.length} active`} />
         <Table className="rounded-none border-0">
           <thead>
@@ -74,24 +80,44 @@ export default async function ApiTokensPage({ params }: PageProps<"/admin/e/[slu
           <tbody>
             {tokens.map((row) => (
               <tr key={row.id}>
-                <Td className="font-medium">{row.name}</Td>
+                <Td className="font-medium text-ink">{row.name}</Td>
                 <Td>
-                  <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">
-                    {row.token}
-                  </code>
-                  <span className="ml-2 inline-block align-middle">
-                    <CopyButton value={row.token} label="Copy" />
-                  </span>
+                  <div className="flex max-w-xs items-center gap-2">
+                    <code
+                      className="block min-w-0 flex-1 truncate rounded-md border border-rule bg-paper-3 px-1.5 py-0.5 font-mono text-xs text-ink-2"
+                      title="Token fingerprint"
+                    >
+                      {fingerprint(row.token)}
+                    </code>
+                    {/* Server-rendered fallback so the full credential remains selectable without clipboard JS. */}
+                    <input
+                      type="text"
+                      readOnly
+                      value={row.token}
+                      aria-label={`Full token for ${row.name}`}
+                      className="sr-only"
+                      tabIndex={-1}
+                    />
+                    <CopyButton
+                      value={row.token}
+                      label="Copy"
+                      raw
+                      className="shrink-0"
+                      aria-label={`Copy token ${row.name}`}
+                    />
+                  </div>
                 </Td>
-                <Td className="text-xs">{formatStamp(row.created_at)}</Td>
-                <Td className="text-xs">
+                <Td className="wordmark tnum text-xs text-muted-foreground">
+                  {formatStamp(row.created_at)}
+                </Td>
+                <Td className="wordmark tnum text-xs text-muted-foreground">
                   {row.last_used_at ? formatStamp(row.last_used_at) : "never"}
                 </Td>
                 <Td>
                   <form action={deleteApiTokenAction}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="id" value={row.id} />
-                    <ConfirmSubmit message={`Revoke "${row.name}"?`} variant="ghost">
+                    <ConfirmSubmit message={`Revoke "${row.name}"?`} variant="danger">
                       Revoke
                     </ConfirmSubmit>
                   </form>
@@ -100,23 +126,33 @@ export default async function ApiTokensPage({ params }: PageProps<"/admin/e/[slu
             ))}
             {!tokens.length ? (
               <tr>
-                <Td colSpan={5} className="py-6 text-center text-slate-500">
+                <Td colSpan={5} className="py-6 text-center text-muted-foreground">
                   No tokens yet.
                 </Td>
               </tr>
             ) : null}
           </tbody>
         </Table>
-        <form
-          action={createApiTokenAction}
-          className="flex flex-wrap items-end gap-2 border-t border-slate-200 p-4"
-        >
+      </Card>
+
+      <Card>
+        <CardHeader title="Create a token" />
+        <form action={createApiTokenAction} className="flex flex-wrap items-end gap-3 p-4">
           <input type="hidden" name="slug" value={slug} />
-          <div>
-            <label htmlFor="token-name" className="block text-xs font-medium text-slate-600">
-              Create a token
-            </label>
-            <Input id="token-name" name="name" placeholder="Website integration" className="w-64" />
+          <div className="min-w-[16rem] flex-1">
+            <Field
+              label="Token name"
+              name="name"
+              hint="Used to identify this integration."
+            >
+              <Input
+                id="name"
+                name="name"
+                placeholder="Website integration"
+                className="w-full max-w-sm"
+                required
+              />
+            </Field>
           </div>
           <Button type="submit" variant="primary">
             Create token
