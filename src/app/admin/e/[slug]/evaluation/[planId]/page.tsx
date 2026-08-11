@@ -14,6 +14,7 @@ import {
   results,
   reviewerProgress,
   reviewsForSubmission,
+  SCORECARD_TYPE_LABELS,
 } from "@/lib/repo/evaluations";
 import { listSubmissions } from "@/lib/repo/submissions";
 import {
@@ -97,7 +98,7 @@ export default async function PlanPage({
           </Link>
         }
         title={plan.name}
-        description={`${rounds.length} rounds · ${progress.complete}/${progress.assigned} reviews complete`}
+        description={`${rounds.length} round${rounds.length === 1 ? "" : "s"}`}
         actions={
           <>
             <Chip tone={plan.is_open ? "green" : "slate"}>{plan.is_open ? "Open" : "Closed"}</Chip>
@@ -107,6 +108,22 @@ export default async function PlanPage({
           </>
         }
       />
+
+      <section className="mb-5 max-w-md">
+        <p className="flex items-baseline gap-2">
+          <span className="wordmark tnum display text-3xl text-ink">{progress.complete}</span>
+          <span className="text-sm text-muted-foreground">
+            of {progress.assigned} reviews complete
+          </span>
+        </p>
+        {progress.assigned > 0 ? (
+          <div className="mt-2">
+            <Progress value={progress.complete} max={progress.assigned} />
+          </div>
+        ) : (
+          <p className="mt-1 text-xs text-muted-foreground">No assignments yet.</p>
+        )}
+      </section>
 
       {sp.saved ? <Notice tone="success" className="mb-4">Saved.</Notice> : null}
       {sp.assigned ? <Notice tone="success" className="mb-4">Assignments updated.</Notice> : null}
@@ -180,17 +197,17 @@ export default async function PlanPage({
                     </p>
                     <ul className="mt-1 space-y-1 text-sm">
                       {card.map((question) => (
-                        <li key={question.id} className="flex items-center gap-2">
-                          <span className="text-slate-800">{question.label}</span>
-                          <Chip tone="slate">{question.type}</Chip>
-                          {question.weight !== 1 ? (
-                            <Chip tone="amber">weight {question.weight}</Chip>
-                          ) : null}
-                          {question.is_required ? <Chip tone="red">required</Chip> : null}
+                        <li key={question.id} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-medium text-ink">{question.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {SCORECARD_TYPE_LABELS[question.type] ?? question.type}
+                            {question.weight !== 1 ? ` · Weight ${question.weight}` : ""}
+                          </span>
+                          {question.is_required ? <Chip tone="red">Required</Chip> : null}
                         </li>
                       ))}
                       {!card.length ? (
-                        <li className="text-sm text-slate-500">No criteria yet.</li>
+                        <li className="text-sm text-muted-foreground">No criteria yet.</li>
                       ) : null}
                     </ul>
                     <p className="mt-2 text-xs text-slate-500">
@@ -265,14 +282,12 @@ export default async function PlanPage({
               <Field label="Name" name="name" required>
                 <Input id="name" name="name" placeholder="Final Review" required />
               </Field>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Opens" name="opens_at">
-                  <Input id="opens_at" name="opens_at" type="datetime-local" />
-                </Field>
-                <Field label="Closes" name="closes_at">
-                  <Input id="closes_at" name="closes_at" type="datetime-local" />
-                </Field>
-              </div>
+              <Field label="Opens" name="opens_at">
+                <Input id="opens_at" name="opens_at" type="datetime-local" className="w-full" />
+              </Field>
+              <Field label="Closes" name="closes_at">
+                <Input id="closes_at" name="closes_at" type="datetime-local" className="w-full" />
+              </Field>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="anonymize" /> Anonymize this round
               </label>

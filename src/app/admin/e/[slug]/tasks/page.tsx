@@ -8,6 +8,10 @@ import {
   saveTaskAction,
 } from "@/server/task-actions";
 import {
+  AssignAudienceFields,
+  TaskTypeFields,
+} from "@/components/admin/task-form-fields";
+import {
   Button,
   Card,
   CardHeader,
@@ -18,6 +22,7 @@ import {
   LinkButton,
   Notice,
   PageHeader,
+  Progress,
   Select,
   Table,
   Td,
@@ -51,6 +56,15 @@ export default async function TasksPage({
     counts.set(assignment.task_id, entry);
   }
 
+  const formSchemaDefault = readJson<FormFieldSpec[]>(editing?.form_schema, [])
+    .map(
+      (field) =>
+        `${field.label} | ${field.type ?? "text"}${field.required ? " | required" : ""}${
+          field.options?.length ? ` | ${field.options.join(";")}` : ""
+        }`,
+    )
+    .join("\n");
+
   return (
     <div>
       <PageHeader
@@ -83,9 +97,7 @@ export default async function TasksPage({
               <thead>
                 <tr>
                   <Th>Task</Th>
-                  <Th>Type</Th>
-                  <Th>Target</Th>
-                  <Th>Assigned</Th>
+                  <Th>Completion</Th>
                   <Th />
                 </tr>
               </thead>
@@ -95,9 +107,13 @@ export default async function TasksPage({
                   return (
                     <tr key={task.id}>
                       <Td>
-                        <span className="font-medium text-slate-900">{task.name}</span>
+                        <span className="font-medium text-ink">{task.name}</span>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {task.type.replace("_", " ")} · {task.target}
+                          {task.is_default ? " · default on accept" : ""}
+                        </p>
                         {task.description ? (
-                          <p className="text-xs text-slate-500">{task.description}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{task.description}</p>
                         ) : null}
                         {task.is_default ? (
                           <Chip tone="blue" className="mt-1">
@@ -105,12 +121,13 @@ export default async function TasksPage({
                           </Chip>
                         ) : null}
                       </Td>
-                      <Td>
-                        <Chip tone="slate">{task.type.replace("_", " ")}</Chip>
-                      </Td>
-                      <Td className="text-xs">{task.target}</Td>
-                      <Td className="text-xs">
-                        {count.done}/{count.total}
+                      <Td className="min-w-40">
+                        <p className="text-xs text-ink">
+                          {count.done} of {count.total} complete
+                        </p>
+                        <div className="mt-1">
+                          <Progress value={count.done} max={Math.max(count.total, 1)} />
+                        </div>
                       </Td>
                       <Td>
                         <div className="flex gap-1">
@@ -122,7 +139,7 @@ export default async function TasksPage({
                             <input type="hidden" name="task_id" value={task.id} />
                             <ConfirmSubmit
                               message={`Delete "${task.name}" and every assignment of it?`}
-                              variant="ghost"
+                              variant="danger"
                             >
                               Delete
                             </ConfirmSubmit>
@@ -134,7 +151,7 @@ export default async function TasksPage({
                 })}
                 {!tasks.length ? (
                   <tr>
-                    <Td colSpan={5} className="py-6 text-center text-slate-500">
+                    <Td colSpan={3} className="py-6 text-center text-muted-foreground">
                       No tasks yet.
                     </Td>
                   </tr>
@@ -150,7 +167,7 @@ export default async function TasksPage({
             />
             <form action={assignTaskAction} className="space-y-3 p-4">
               <input type="hidden" name="slug" value={slug} />
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Task" name="task_id" required>
                   <Select id="task_id" name="task_id" required>
                     {tasks.map((task) => (
@@ -163,24 +180,14 @@ export default async function TasksPage({
                 <Field label="Due date" name="due_at">
                   <Input id="due_at" name="due_at" type="date" />
                 </Field>
-                <Field label="Audience" name="audience">
-                  <Select id="audience" name="audience" defaultValue="accepted">
-                    <option value="accepted">Speakers on accepted sessions</option>
-                    <option value="all">Every speaker on the roster</option>
-                    <option value="selected">Only the people I tick</option>
-                  </Select>
-                </Field>
               </div>
-              <fieldset className="max-h-56 overflow-y-auto rounded-md border border-slate-200 p-3">
-                <legend className="px-1 text-xs font-medium text-slate-600">Speakers</legend>
-                {roster.map((row) => (
-                  <label key={row.id} className="flex items-center gap-2 py-0.5 text-sm">
-                    <input type="checkbox" name="contact_ids" value={row.id} />
-                    {contactName(row)}{" "}
-                    <span className="text-xs text-slate-400">{row.email}</span>
-                  </label>
-                ))}
-              </fieldset>
+              <AssignAudienceFields
+                roster={roster.map((row) => ({
+                  id: row.id,
+                  name: contactName(row),
+                  email: row.email,
+                }))}
+              />
               <div className="flex flex-wrap gap-4">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name="is_required" defaultChecked /> Required
@@ -212,60 +219,18 @@ export default async function TasksPage({
                 defaultValue={editing?.description ?? ""}
               />
             </Field>
-            <Field label="Type" name="type">
-              <Select id="type" name="type" defaultValue={editing?.type ?? "action"}>
-                <option value="action">Action — mark complete</option>
-                <option value="file_request">File request — upload a file</option>
-                <option value="form">Form — answer questions</option>
-              </Select>
-            </Field>
+            <TaskTypeFields
+              defaultType={editing?.type ?? "action"}
+              linkUrl={editing?.link_url ?? ""}
+              acceptedTypes={editing?.accepted_types ?? ""}
+              maxSizeMb={editing?.max_size_mb ?? 20}
+              formSchema={formSchemaDefault}
+            />
             <Field label="Target" name="target">
               <Select id="target" name="target" defaultValue={editing?.target ?? "contact"}>
                 <option value="contact">The speaker</option>
                 <option value="submission">Their session</option>
               </Select>
-            </Field>
-            <Field label="Link" name="link_url" hint="Optional resource to open.">
-              <Input id="link_url" name="link_url" defaultValue={editing?.link_url ?? ""} />
-            </Field>
-            <Field
-              label="Accepted file types"
-              name="accepted_types"
-              hint="Comma separated, e.g. .pdf,.pptx — shown to the speaker before they pick a file."
-            >
-              <Input
-                id="accepted_types"
-                name="accepted_types"
-                defaultValue={editing?.accepted_types ?? ""}
-              />
-            </Field>
-            <Field label="Max size (MB)" name="max_size_mb">
-              <Input
-                id="max_size_mb"
-                name="max_size_mb"
-                type="number"
-                defaultValue={editing?.max_size_mb ?? 20}
-              />
-            </Field>
-            <Field
-              label="Form questions"
-              name="form_schema"
-              hint="One per line: Label | type | required | option;option"
-            >
-              <Textarea
-                id="form_schema"
-                name="form_schema"
-                rows={4}
-                defaultValue={readJson<FormFieldSpec[]>(editing?.form_schema, [])
-                  .map(
-                    (field) =>
-                      `${field.label} | ${field.type ?? "text"}${
-                        field.required ? " | required" : ""
-                      }${field.options?.length ? ` | ${field.options.join(";")}` : ""}`,
-                  )
-                  .join("\n")}
-                placeholder={"Arrival date | date | required\nHotel needed | dropdown | required | Yes;No"}
-              />
             </Field>
             <div className="flex gap-2">
               <Button type="submit" variant="primary">

@@ -11,7 +11,7 @@ import {
   listTasks,
 } from "@/lib/repo/tasks";
 import { extendDueAction, remindOutstandingAction } from "@/server/task-actions";
-import { FilterSelect } from "@/components/client/basics";
+import { ConfirmSubmit, FilterSelect } from "@/components/client/basics";
 import {
   Avatar,
   Button,
@@ -65,6 +65,16 @@ export default async function DeliverablesPage({
   const total = assignments.length;
   const done = assignments.filter((a) => isComplete(a.status)).length;
   const overdue = assignments.filter((a) => isOverdue(a)).length;
+  const outstanding = assignments.filter((a) => !isComplete(a.status));
+  const uniqueRecipients = new Set(outstanding.map((a) => a.contact_id)).size;
+  const filterScope = [
+    taskFilter ? `task “${tasks.find((t) => t.id === taskFilter)?.name ?? "selected"}”` : null,
+    statusFilter ? `status “${statusFilter}”` : null,
+    trackFilter ? `track “${tracks.find((t) => t.id === trackFilter)?.name ?? "selected"}”` : null,
+    overdueOnly ? "overdue only" : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div>
@@ -91,24 +101,24 @@ export default async function DeliverablesPage({
 
       <div className="mb-4 grid gap-3 sm:grid-cols-4">
         <Card className="p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Assignments</p>
-          <p className="text-xl font-semibold text-slate-900">{total}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Assignments</p>
+          <p className="tnum text-xl font-semibold text-ink">{total}</p>
         </Card>
         <Card className="p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Complete</p>
-          <p className="text-xl font-semibold text-emerald-700">{done}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Complete</p>
+          <p className="tnum text-xl font-semibold text-positive">{done}</p>
         </Card>
         <Card className="p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Outstanding</p>
-          <p className="text-xl font-semibold text-slate-900">{total - done}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Outstanding</p>
+          <p className="tnum text-xl font-semibold text-ink">{total - done}</p>
         </Card>
         <Card className="p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Overdue</p>
-          <p className="text-xl font-semibold text-red-700">{overdue}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Overdue</p>
+          <p className="tnum text-xl font-semibold text-destructive">{overdue}</p>
         </Card>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-end gap-3">
         <FilterSelect
           param="task"
           label="Task"
@@ -142,33 +152,62 @@ export default async function DeliverablesPage({
           </LinkButton>
         ) : null}
 
-        <form action={remindOutstandingAction} className="ml-auto">
+        <form action={remindOutstandingAction} className="ml-auto space-y-1 text-right">
           <input type="hidden" name="slug" value={slug} />
-          {assignments
-            .filter((a) => !isComplete(a.status))
-            .map((a) => (
-              <input key={a.id} type="hidden" name="assignment_ids" value={a.id} />
-            ))}
-          <Button type="submit" variant="primary" size="sm">
-            Send reminder to everyone outstanding
-          </Button>
+          {outstanding.map((a) => (
+            <input key={a.id} type="hidden" name="assignment_ids" value={a.id} />
+          ))}
+          <p className="text-xs text-muted-foreground">
+            {uniqueRecipients === 0
+              ? "No outstanding recipients in the current filters."
+              : `Will email ${uniqueRecipients} speaker${uniqueRecipients === 1 ? "" : "s"}${
+                  filterScope ? ` (${filterScope})` : " matching the current filters"
+                }.`}
+          </p>
+          {uniqueRecipients === 0 ? (
+            <Button type="submit" variant="primary" size="sm" disabled>
+              Send reminder to everyone outstanding
+            </Button>
+          ) : (
+            <ConfirmSubmit
+              message={`Send reminder emails to ${uniqueRecipients} speaker${
+                uniqueRecipients === 1 ? "" : "s"
+              } with outstanding work${filterScope ? ` under ${filterScope}` : ""}?`}
+              variant="primary"
+              size="sm"
+            >
+              Send reminder to everyone outstanding
+            </ConfirmSubmit>
+          )}
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <div
+        className="overflow-auto rounded-card border border-rule bg-paper"
+        role="region"
+        aria-label="Deliverables matrix"
+        tabIndex={0}
+      >
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
-              <Th className="sticky left-0 bg-slate-50">Speaker</Th>
+              <Th className="sticky left-0 top-0 z-30 border-b border-r border-rule bg-paper-2 shadow-[2px_0_0_0_var(--color-rule)]">
+                Speaker
+              </Th>
               {shownTasks.map((task) => (
-                <Th key={task.id} className="min-w-40">
+                <Th
+                  key={task.id}
+                  className="sticky top-0 z-20 min-w-40 border-b border-rule bg-paper-2 shadow-[0_2px_0_0_var(--color-rule)]"
+                >
                   {task.name}
-                  <span className="block text-[10px] font-normal normal-case text-slate-400">
+                  <span className="block text-[10px] font-normal normal-case text-muted-foreground">
                     {task.type.replace("_", " ")}
                   </span>
                 </Th>
               ))}
-              <Th>Progress</Th>
+              <Th className="sticky top-0 z-20 border-b border-rule bg-paper-2 shadow-[0_2px_0_0_var(--color-rule)]">
+                Progress
+              </Th>
             </tr>
           </thead>
           <tbody>
@@ -177,13 +216,13 @@ export default async function DeliverablesPage({
               const rowDone = row.filter((a) => a && isComplete(a.status)).length;
               const rowTotal = row.filter(Boolean).length;
               return (
-                <tr key={speaker.id}>
-                  <Td className="sticky left-0 bg-white">
+                <tr key={speaker.id} className="group/row">
+                  <Td className="sticky left-0 z-10 border-r border-rule bg-paper shadow-[2px_0_0_0_var(--color-rule)] group-hover/row:bg-paper-2">
                     <div className="flex items-center gap-2">
                       <Avatar src={speaker.headshot_url} name={contactName(speaker)} size={26} />
                       <Link
                         href={`/admin/e/${slug}/speakers/${speaker.id}`}
-                        className="font-medium text-slate-800 hover:text-brand-700"
+                        className="font-medium text-ink hover:underline"
                       >
                         {contactName(speaker)}
                       </Link>
@@ -193,33 +232,40 @@ export default async function DeliverablesPage({
                     const assignment = byKey.get(`${speaker.id}:${task.id}`);
                     if (!assignment) {
                       return (
-                        <Td key={task.id} className="text-center text-xs text-slate-300">
+                        <Td key={task.id} className="text-center text-xs text-muted-foreground">
                           not assigned
                         </Td>
                       );
                     }
                     const complete = isComplete(assignment.status);
+                    const overdueCell = isOverdue(assignment);
                     return (
-                      <Td key={task.id}>
+                      <Td key={task.id} className="align-top focus-within:bg-paper-2">
                         <Chip
-                          tone={complete ? "green" : isOverdue(assignment) ? "red" : "slate"}
+                          tone={complete ? "green" : overdueCell ? "red" : "slate"}
                         >
                           {complete
                             ? assignment.upload_count
                               ? `Uploaded (${assignment.upload_count})`
                               : "Complete"
-                            : isOverdue(assignment)
+                            : overdueCell
                               ? "Overdue"
                               : "Outstanding"}
                         </Chip>
-                        <span className="mt-1 block text-[11px] text-slate-500">
+                        <span className="mt-1 block text-[11px] text-muted-foreground">
                           {effectiveDue(assignment)
                             ? `due ${formatDate(effectiveDue(assignment))}`
                             : "no due date"}
                         </span>
                         <details className="mt-1">
-                          <summary className="cursor-pointer text-[11px] text-brand-700">
-                            extend
+                          <summary
+                            className={
+                              overdueCell
+                                ? "cursor-pointer text-[11px] font-medium text-ink underline decoration-rule-2 underline-offset-2"
+                                : "cursor-pointer text-[11px] text-muted-foreground underline decoration-transparent underline-offset-2 hover:text-ink hover:decoration-rule-2 focus-visible:text-ink focus-visible:decoration-rule-2 group-focus-within/row:text-ink group-hover/row:text-ink"
+                            }
+                          >
+                            Extend deadline
                           </summary>
                           <form action={extendDueAction} className="mt-1 flex items-center gap-1">
                             <input type="hidden" name="slug" value={slug} />
@@ -241,7 +287,7 @@ export default async function DeliverablesPage({
                   })}
                   <Td className="w-32">
                     <Progress value={rowDone} max={Math.max(rowTotal, 1)} />
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-muted-foreground">
                       {rowDone}/{rowTotal}
                     </span>
                   </Td>
@@ -250,7 +296,7 @@ export default async function DeliverablesPage({
             })}
             {!speakers.length ? (
               <tr>
-                <Td colSpan={shownTasks.length + 2} className="py-8 text-center text-slate-500">
+                <Td colSpan={shownTasks.length + 2} className="py-8 text-center text-muted-foreground">
                   Nothing matches those filters.
                 </Td>
               </tr>

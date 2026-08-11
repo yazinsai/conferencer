@@ -119,22 +119,38 @@ export default async function AgendaPage({
             <form action={autoScheduleAction}>
               <input type="hidden" name="slug" value={slug} />
               <input type="hidden" name="days" value={days.join(",")} />
-              <Button type="submit" size="sm">
+              <Button type="submit" size="sm" variant="ghost">
                 Auto-schedule unplaced
               </Button>
             </form>
             <form action={sendCalendarInvitesAction}>
               <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm">
+              <Button type="submit" size="sm" variant="ghost">
                 Send calendar invites
               </Button>
             </form>
-            <form action={publishAgendaAction}>
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm" variant="primary">
-                Publish agenda
-              </Button>
-            </form>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-right text-xs text-muted-foreground">
+                {pending.length ? (
+                  <p>
+                    {pending.length} unpublished change{pending.length === 1 ? "" : "s"}
+                  </p>
+                ) : (
+                  <p>Working schedule matches publish</p>
+                )}
+                <p>
+                  {published
+                    ? `Last published ${formatStamp(published.created_at)}`
+                    : "Never published"}
+                </p>
+              </div>
+              <form action={publishAgendaAction}>
+                <input type="hidden" name="slug" value={slug} />
+                <Button type="submit" size="sm" variant="primary">
+                  Publish agenda
+                </Button>
+              </form>
+            </div>
           </>
         }
       />
@@ -420,13 +436,7 @@ export default async function AgendaPage({
               </ul>
             </details>
           ) : null}
-          <div className="mt-3 flex gap-2">
-            <form action={publishAgendaAction}>
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" variant="primary">
-                Publish agenda
-              </Button>
-            </form>
+          <div className="mt-3">
             <LinkButton href={`/e/${event.slug}/agenda`}>View public agenda</LinkButton>
           </div>
         </div>
