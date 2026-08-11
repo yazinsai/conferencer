@@ -7,6 +7,7 @@ import { publicSessionsForSpeaker } from "@/lib/repo/submissions";
 import { Avatar, Card, Chip } from "@/components/ui";
 import { formatRange } from "@/lib/datetime";
 import { stripHtml } from "@/lib/fields";
+import { PublicPage } from "@/components/public/pieces";
 
 export const dynamic = "force-dynamic";
 
@@ -34,10 +35,10 @@ export default async function SpeakerDetailPage({ params }: PageProps<"/e/[slug]
   ].filter((l) => l.href);
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <PublicPage width="prose">
       <Link
         href={`/e/${event.slug}/speakers`}
-        className="text-sm font-medium text-brand-700 hover:underline"
+        className="text-sm font-medium text-signal hover:underline"
       >
         ← Back to speakers
       </Link>
@@ -49,14 +50,14 @@ export default async function SpeakerDetailPage({ params }: PageProps<"/e/[slug]
           size={112}
         />
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="display text-2xl text-ink sm:text-3xl">
             {contact.first_name} {contact.last_name}
           </h1>
-          <p className="mt-0.5 text-slate-600">
+          <p className="mt-0.5 text-neutral">
             {[contact.job_title, contact.company].filter(Boolean).join(", ")}
           </p>
           {contact.pronouns ? (
-            <p className="mt-1 text-xs text-slate-500">{contact.pronouns}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{contact.pronouns}</p>
           ) : null}
           {links.length ? (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -64,7 +65,7 @@ export default async function SpeakerDetailPage({ params }: PageProps<"/e/[slug]
                 <a
                   key={link.label}
                   href={link.href as string}
-                  className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-md border border-rule-2 px-2.5 py-1 text-xs font-medium text-neutral hover:bg-paper-2"
                   rel="noreferrer noopener"
                   target="_blank"
                 >
@@ -77,25 +78,25 @@ export default async function SpeakerDetailPage({ params }: PageProps<"/e/[slug]
       </div>
 
       {contact.biography ? (
-        <div className="prose-cf mt-6 text-slate-700">
+        <div className="prose-cf mt-6 text-neutral">
           <p>{stripHtml(contact.biography)}</p>
         </div>
       ) : null}
 
       <Card className="mt-6 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">
+        <h2 className="text-sm font-semibold text-ink">
           Sessions ({sessions.length})
         </h2>
         <ul className="mt-3 space-y-3">
           {sessions.map((session) => (
-            <li key={session.id} className="border-l-2 border-slate-200 pl-3">
+            <li key={session.id} className="border-l-2 border-rule pl-3">
               <Link
                 href={`/e/${event.slug}/sessions/${session.id}`}
-                className="font-medium text-slate-900 hover:text-brand-700"
+                className="font-medium text-ink hover:text-signal"
               >
                 {session.title}
               </Link>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {session.pub_starts_at
                   ? formatRange(session.pub_starts_at, session.pub_ends_at)
                   : "Time to be announced"}
@@ -110,6 +111,6 @@ export default async function SpeakerDetailPage({ params }: PageProps<"/e/[slug]
           ))}
         </ul>
       </Card>
-    </div>
+    </PublicPage>
   );
 }

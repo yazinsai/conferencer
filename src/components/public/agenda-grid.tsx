@@ -47,7 +47,7 @@ export function AgendaGrid({
 
   if (!blocks.length) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-sm text-slate-500">
+      <div className="rounded-lg border border-dashed border-rule-2 bg-paper px-6 py-10 text-center text-sm text-muted-foreground">
         {emptyLabel}
       </div>
     );
@@ -61,15 +61,15 @@ export function AgendaGrid({
   for (let m = startMin; m <= endMin; m += 60) hours.push(m);
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-card border border-rule bg-paper">
       <div className="min-w-[720px]">
         <div
-          className="grid border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          className="grid border-b border-rule bg-paper-2 wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground"
           style={{ gridTemplateColumns: `72px repeat(${rooms.length}, minmax(150px, 1fr))` }}
         >
           <div className="px-2 py-2">Time</div>
           {rooms.map((room) => (
-            <div key={room.id} className="border-l border-slate-200 px-2 py-2 text-slate-700">
+            <div key={room.id} className="border-l border-rule px-2 py-2 text-neutral">
               {room.name}
             </div>
           ))}
@@ -81,11 +81,11 @@ export function AgendaGrid({
             height,
           }}
         >
-          <div className="relative border-r border-slate-200">
+          <div className="relative border-r border-rule">
             {hours.map((m) => (
               <div
                 key={m}
-                className="absolute left-0 w-full pr-2 text-right font-mono text-[11px] text-slate-400"
+                className="absolute left-0 w-full pr-2 text-right font-mono text-[11px] text-muted-foreground"
                 style={{ top: (m - startMin) * scale - 6 }}
               >
                 {formatTime(`2000-01-01T${String(Math.floor(m / 60)).padStart(2, "0")}:00`)}
@@ -93,11 +93,11 @@ export function AgendaGrid({
             ))}
           </div>
           {rooms.map((room) => (
-            <div key={room.id} className="relative border-l border-slate-200">
+            <div key={room.id} className="relative border-l border-rule">
               {hours.map((m) => (
                 <div
                   key={m}
-                  className="absolute left-0 w-full border-t border-slate-100"
+                  className="absolute left-0 w-full border-t border-rule"
                   style={{ top: (m - startMin) * scale }}
                 />
               ))}
@@ -124,10 +124,10 @@ export function AgendaGrid({
                   );
                   const body = (
                     <>
-                      <p className="truncate text-xs font-semibold text-slate-900">
+                      <p className="truncate text-xs font-semibold text-ink">
                         {block.title}
                       </p>
-                      <p className="truncate text-[11px] text-slate-500">
+                      <p className="truncate text-[11px] text-muted-foreground">
                         {formatTime(block.startsAt)}
                         {block.endsAt ? ` – ${formatTime(block.endsAt)}` : ""}
                       </p>
@@ -137,17 +137,17 @@ export function AgendaGrid({
                         </p>
                       ) : null}
                       {block.speakers ? (
-                        <p className="truncate text-[11px] text-slate-500">{block.speakers}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{block.speakers}</p>
                       ) : null}
                     </>
                   );
                   const style = {
                     top: (s - startMin) * scale + 2,
                     height: (e - s) * scale - 4,
-                    borderLeftColor: block.trackColor ?? "#94a3b8",
+                    borderLeftColor: block.trackColor ?? "var(--color-rule-2)",
                   };
                   const className = cx(
-                    "absolute left-1 right-1 overflow-hidden rounded-md border border-slate-200 border-l-4 bg-white p-1.5 shadow-sm",
+                    "absolute left-1 right-1 overflow-hidden rounded-lg border border-rule border-l-[3px] bg-paper p-1.5 shadow-[var(--shadow-card)]",
                     block.conflict && "ring-2 ring-red-400",
                   );
                   return block.href ? (

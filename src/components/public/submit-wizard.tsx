@@ -274,19 +274,19 @@ export function SubmitWizard(props: WizardProps) {
 
   if (done) {
     return (
-      <section aria-live="polite" className="rounded-lg border border-emerald-200 bg-white p-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+      <section aria-live="polite" className="rounded-lg border border-rule bg-paper p-8">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.14em] text-positive">
           Submission received
         </p>
         <div
-          className="prose-cf mt-3 text-slate-800"
+          className="prose-cf mt-3 text-ink"
           dangerouslySetInnerHTML={{
             __html:
               props.successMessage ??
               "<p><strong>Thank you — your submission has been received.</strong></p>",
           }}
         />
-        <p className="mt-4 text-sm text-slate-600">
+        <p className="mt-4 text-sm text-neutral">
           A confirmation email has been sent to{" "}
           <strong>{signedIn?.email ?? "your address"}</strong>.
           {props.autoRedirect
@@ -316,8 +316,8 @@ export function SubmitWizard(props: WizardProps) {
                 index === stepIndex
                   ? "text-white"
                   : index < stepIndex
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-200 text-slate-500",
+                    ? "bg-positive-soft text-positive"
+                    : "bg-rule text-muted-foreground",
               )}
               style={index === stepIndex ? { backgroundColor: props.accent } : undefined}
             >
@@ -326,12 +326,12 @@ export function SubmitWizard(props: WizardProps) {
             <span
               className={cx(
                 "text-sm",
-                index === stepIndex ? "font-semibold text-slate-900" : "text-slate-500",
+                index === stepIndex ? "font-semibold text-ink" : "text-muted-foreground",
               )}
             >
               {STEP_LABELS[s]}
             </span>
-            {index < steps.length - 1 ? <span className="text-slate-300">›</span> : null}
+            {index < steps.length - 1 ? <span className="text-rule-2">›</span> : null}
           </li>
         ))}
       </ol>
@@ -343,7 +343,7 @@ export function SubmitWizard(props: WizardProps) {
             "mb-4 rounded-md border px-3 py-2 text-sm",
             banner.tone === "error"
               ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-800",
+              : "border-positive/25 bg-positive-soft text-positive",
           )}
         >
           {banner.text}
@@ -351,19 +351,19 @@ export function SubmitWizard(props: WizardProps) {
       ) : null}
 
       {draftSaved ? (
-        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <div className="mb-4 rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-sm text-warn">
           <strong>Draft saved.</strong> This proposal is saved as a draft and is not submitted yet.
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
+      <div className="rounded-card border border-rule bg-paper p-6">
         {step === 0 ? (
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-ink">
               {props.pageHeading ?? `Submit to ${props.eventName}`}
             </h2>
             <div
-              className="prose-cf mt-3 text-sm text-slate-700"
+              className="prose-cf mt-3 text-sm text-neutral"
               dangerouslySetInnerHTML={{ __html: props.welcomeMessage ?? "" }}
             />
           </section>
@@ -371,39 +371,39 @@ export function SubmitWizard(props: WizardProps) {
 
         {step === 1 ? (
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">Your account</h2>
+            <h2 className="text-lg font-semibold text-ink">Your account</h2>
             {signedIn ? (
-              <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+              <div className="mt-3 rounded-md border border-positive/25 bg-positive-soft px-3 py-2 text-sm text-positive">
                 Signed in as <strong>{signedIn.email}</strong>. Continue to your submission.
               </div>
             ) : (
               <>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-neutral">
                   You need an account so you can edit your submission and track its status. No email
                   confirmation is required.
                 </p>
                 <div className="mt-4 grid gap-6 md:grid-cols-2">
                   <form
                     action={handleAccount}
-                    className="rounded-md border border-slate-200 p-4"
+                    className="rounded-md border border-rule p-4"
                   >
                     <input type="hidden" name="mode" value="signup" />
-                    <h3 className="text-sm font-semibold text-slate-900">Create an account</h3>
+                    <h3 className="text-sm font-semibold text-ink">Create an account</h3>
                     <div className="mt-3 grid grid-cols-2 gap-2">
-                      <label className="block text-xs font-medium text-slate-600">
+                      <label className="block text-xs font-medium text-neutral">
                         First name
                         <input name="first_name" className={inputClass} required />
                       </label>
-                      <label className="block text-xs font-medium text-slate-600">
+                      <label className="block text-xs font-medium text-neutral">
                         Last name
                         <input name="last_name" className={inputClass} required />
                       </label>
                     </div>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                    <label className="mt-2 block text-xs font-medium text-neutral">
                       Email
                       <input name="email" type="email" className={inputClass} required />
                     </label>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                    <label className="mt-2 block text-xs font-medium text-neutral">
                       Password
                       <input
                         name="password"
@@ -422,14 +422,14 @@ export function SubmitWizard(props: WizardProps) {
                     </button>
                   </form>
 
-                  <form action={handleAccount} className="rounded-md border border-slate-200 p-4">
+                  <form action={handleAccount} className="rounded-md border border-rule p-4">
                     <input type="hidden" name="mode" value="signin" />
-                    <h3 className="text-sm font-semibold text-slate-900">I already have one</h3>
-                    <label className="mt-3 block text-xs font-medium text-slate-600">
+                    <h3 className="text-sm font-semibold text-ink">I already have one</h3>
+                    <label className="mt-3 block text-xs font-medium text-neutral">
                       Email
                       <input name="email" type="email" className={inputClass} required />
                     </label>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                    <label className="mt-2 block text-xs font-medium text-neutral">
                       Password
                       <input name="password" type="password" className={inputClass} required />
                     </label>
@@ -449,17 +449,17 @@ export function SubmitWizard(props: WizardProps) {
 
         {step === 2 ? (
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-ink">
               {props.sectionSubmission.heading ?? "Your submission"}
             </h2>
             {props.sectionSubmission.description ? (
               <div
-                className="prose-cf mt-2 text-sm text-slate-600"
+                className="prose-cf mt-2 text-sm text-neutral"
                 dangerouslySetInnerHTML={{ __html: props.sectionSubmission.description }}
               />
             ) : null}
             {props.limitReached ? (
-              <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              <div className="mt-3 rounded-md border border-warn/25 bg-warn-soft px-3 py-2 text-sm text-warn">
                 You have reached the limit of {props.submissionLimit} submissions for this call.
               </div>
             ) : null}
@@ -480,7 +480,7 @@ export function SubmitWizard(props: WizardProps) {
               <p
                 className={cx(
                   "mt-4 text-xs",
-                  combinedUsed > props.combinedLimit.max ? "text-red-600" : "text-slate-500",
+                  combinedUsed > props.combinedLimit.max ? "text-destructive" : "text-muted-foreground",
                 )}
               >
                 {props.combinedLimit.label}: {combinedUsed} / {props.combinedLimit.max} characters
@@ -491,12 +491,12 @@ export function SubmitWizard(props: WizardProps) {
 
         {step === 3 ? (
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-ink">
               {props.sectionParticipant.heading ?? "Speakers"}
             </h2>
             {props.sectionParticipant.description ? (
               <div
-                className="prose-cf mt-2 text-sm text-slate-600"
+                className="prose-cf mt-2 text-sm text-neutral"
                 dangerouslySetInnerHTML={{ __html: props.sectionParticipant.description }}
               />
             ) : null}
@@ -504,14 +504,14 @@ export function SubmitWizard(props: WizardProps) {
               {participants.map((participant, index) => (
                 <fieldset
                   key={index}
-                  className="rounded-md border border-slate-200 p-4"
+                  className="rounded-md border border-rule p-4"
                 >
-                  <legend className="flex items-center gap-2 px-1 text-sm font-medium text-slate-700">
+                  <legend className="flex items-center gap-2 px-1 text-sm font-medium text-neutral">
                     Speaker {index + 1}
                     {index > 0 ? (
                       <button
                         type="button"
-                        className="text-xs font-normal text-red-600 hover:underline"
+                        className="text-xs font-normal text-destructive hover:underline"
                         onClick={() =>
                           setParticipants((prev) => prev.filter((_, i) => i !== index))
                         }
@@ -521,7 +521,7 @@ export function SubmitWizard(props: WizardProps) {
                     ) : null}
                   </legend>
                   {props.roleConfigs.length > 1 ? (
-                    <label className="mb-3 block text-xs font-medium text-slate-600">
+                    <label className="mb-3 block text-xs font-medium text-neutral">
                       Role
                       <select
                         className={inputClass}
@@ -598,22 +598,22 @@ export function SubmitWizard(props: WizardProps) {
 
         {step === 4 ? (
           <section>
-            <h2 className="text-lg font-semibold text-slate-900">Review and submit</h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <h2 className="text-lg font-semibold text-ink">Review and submit</h2>
+            <p className="mt-1 text-sm text-neutral">
               Check every answer before you submit. You can edit your submission from your portal
               while the call is open.
             </p>
-            <dl className="mt-4 divide-y divide-slate-100 rounded-md border border-slate-200">
+            <dl className="mt-4 divide-y divide-rule rounded-md border border-rule">
               {props.submissionQuestions
                 .filter((q) => visible.has(q.id))
                 .map((question) => (
                   <div key={question.id} className="grid gap-1 px-4 py-3 sm:grid-cols-3">
-                    <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       {question.label}
                     </dt>
-                    <dd className="text-sm text-slate-800 sm:col-span-2">
+                    <dd className="text-sm text-ink sm:col-span-2">
                       {formatValue(answers[question.id]) || (
-                        <span className="text-slate-400">Not answered</span>
+                        <span className="text-muted-foreground">Not answered</span>
                       )}
                     </dd>
                   </div>
@@ -621,22 +621,22 @@ export function SubmitWizard(props: WizardProps) {
             </dl>
             {props.collectParticipants ? (
               <div className="mt-4">
-                <h3 className="text-sm font-semibold text-slate-900">Speakers</h3>
+                <h3 className="text-sm font-semibold text-ink">Speakers</h3>
                 <ul className="mt-2 space-y-2">
                   {participants.map((participant, index) => (
                     <li
                       key={index}
-                      className="rounded-md border border-slate-200 px-3 py-2 text-sm"
+                      className="rounded-md border border-rule px-3 py-2 text-sm"
                     >
-                      <p className="font-medium text-slate-800">
+                      <p className="font-medium text-ink">
                         {[participant.values.first_name, participant.values.last_name]
                           .filter(Boolean)
                           .join(" ") || "Unnamed"}{" "}
-                        <span className="text-xs font-normal text-slate-500">
+                        <span className="text-xs font-normal text-muted-foreground">
                           ({participant.role})
                         </span>
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {[participant.values.job_title, participant.values.company]
                           .filter(Boolean)
                           .join(", ")}
@@ -650,7 +650,7 @@ export function SubmitWizard(props: WizardProps) {
           </section>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4">
+        <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-rule pt-4">
           {stepIndex > 0 ? (
             <button type="button" onClick={goBack} className={buttonClass("secondary", "md")}>
               Back
@@ -731,12 +731,12 @@ function QuestionInput({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+      <label htmlFor={id} className="block text-sm font-medium text-neutral">
         {question.label}
-        {question.required ? <span className="ml-0.5 text-red-600">*</span> : null}
+        {question.required ? <span className="ml-0.5 text-destructive">*</span> : null}
       </label>
       {question.helpText ? (
-        <p className="mb-1 text-xs text-slate-500">{question.helpText}</p>
+        <p className="mb-1 text-xs text-muted-foreground">{question.helpText}</p>
       ) : null}
 
       {question.type === "textarea" || question.type === "wysiwyg" ? (
@@ -765,7 +765,7 @@ function QuestionInput({
           ))}
         </select>
       ) : question.type === "multiselect" ? (
-        <div className="flex flex-wrap gap-3 rounded-md border border-slate-300 p-2">
+        <div className="flex flex-wrap gap-3 rounded-md border border-rule-2 p-2">
           {question.options.map((option) => {
             const selected = Array.isArray(current) && current.includes(option.value);
             return (
@@ -811,7 +811,7 @@ function QuestionInput({
 
       <div className="mt-1 flex items-center justify-between gap-2">
         {error ? (
-          <p role="alert" className="text-xs font-medium text-red-600">
+          <p role="alert" className="text-xs font-medium text-destructive">
             {error}
           </p>
         ) : (
@@ -821,7 +821,7 @@ function QuestionInput({
           <span
             className={cx(
               "text-xs",
-              length > question.maxLength ? "text-red-600" : "text-slate-400",
+              length > question.maxLength ? "text-destructive" : "text-muted-foreground",
             )}
           >
             {length} / {question.maxLength}

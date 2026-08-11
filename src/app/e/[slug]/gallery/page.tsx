@@ -6,6 +6,7 @@ import { SearchBox, ShowMore } from "@/components/client/basics";
 import { Avatar, Chip, EmptyState, LinkButton } from "@/components/ui";
 import { formatRange } from "@/lib/datetime";
 import { stripHtml } from "@/lib/fields";
+import { PublicPage } from "@/components/public/pieces";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +34,10 @@ export default async function GalleryPage({
   const backHref = `/e/${event.slug}/gallery${q ? `?q=${encodeURIComponent(q)}` : ""}`;
 
   return (
-    <div>
+    <PublicPage>
       <div className="mb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Speaker gallery</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="display text-2xl text-ink sm:text-3xl">Speaker gallery</h1>
+        <p className="mt-1 text-sm text-neutral">
           The faces of {event.name}. Click a speaker for their bio and sessions.
         </p>
       </div>
@@ -49,8 +50,8 @@ export default async function GalleryPage({
           className="w-full sm:w-72"
         />
         {q ? <LinkButton href={`/e/${event.slug}/gallery`} size="sm">Clear</LinkButton> : null}
-        <p className="text-sm text-slate-500" role="status">
-          Showing <strong className="text-slate-800">{speakers.length}</strong> of {total} speakers
+        <p className="text-sm text-muted-foreground" role="status">
+          Showing <strong className="text-ink">{speakers.length}</strong> of {total} speakers
         </p>
       </div>
 
@@ -59,7 +60,7 @@ export default async function GalleryPage({
           role="dialog"
           aria-modal="false"
           aria-label={`${open.first_name} ${open.last_name}`}
-          className="mb-6 rounded-lg border border-brand-200 bg-white p-5 shadow-sm"
+          className="mb-6 rounded-card border border-rule-2 bg-paper p-5 shadow-[var(--shadow-card)]"
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex flex-wrap gap-4">
@@ -69,20 +70,20 @@ export default async function GalleryPage({
                 size={112}
               />
               <div className="max-w-xl">
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-xl font-semibold text-ink">
                   {open.first_name} {open.last_name}
                 </h2>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-neutral">
                   {[open.job_title, open.company].filter(Boolean).join(", ") || "Speaker"}
                 </p>
                 {open.biography ? (
                   <ShowMore
                     text={stripHtml(open.biography)}
                     limit={240}
-                    className="mt-3 text-sm text-slate-700"
+                    className="mt-3 text-sm text-neutral"
                   />
                 ) : null}
-                <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                <h3 className="mt-4 text-sm font-semibold text-ink">
                   Sessions ({openSessions.length})
                 </h3>
                 <ul className="mt-2 space-y-2">
@@ -90,11 +91,11 @@ export default async function GalleryPage({
                     <li key={session.id} className="text-sm">
                       <Link
                         href={`/e/${event.slug}/sessions/${session.id}`}
-                        className="font-medium text-slate-900 hover:text-brand-700"
+                        className="font-medium text-ink hover:text-signal"
                       >
                         {session.title}
                       </Link>
-                      <span className="block text-slate-500">
+                      <span className="block text-muted-foreground">
                         {session.pub_starts_at
                           ? formatRange(session.pub_starts_at, session.pub_ends_at)
                           : "Time to be announced"}
@@ -112,7 +113,7 @@ export default async function GalleryPage({
             </div>
             <Link
               href={backHref}
-              className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="rounded-md border border-rule-2 px-2.5 py-1.5 text-xs font-medium text-neutral hover:bg-paper-2"
             >
               Close
             </Link>
@@ -126,7 +127,7 @@ export default async function GalleryPage({
             <li key={speaker.id}>
               <Link
                 href={`/e/${event.slug}/gallery?${q ? `q=${encodeURIComponent(q)}&` : ""}speaker=${speaker.id}`}
-                className="group block rounded-lg border border-slate-200 bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+                className="group block rounded-card border border-rule bg-paper p-4 text-center shadow-sm transition-shadow hover:shadow-md"
               >
                 <Avatar
                   src={speaker.headshot_url}
@@ -134,14 +135,14 @@ export default async function GalleryPage({
                   size={104}
                   className="mx-auto"
                 />
-                <p className="mt-3 font-semibold text-slate-900 group-hover:text-brand-700">
+                <p className="mt-3 font-semibold text-ink group-hover:text-signal">
                   {speaker.first_name} {speaker.last_name}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-600">
-                  {speaker.job_title || <span className="text-slate-400">Speaker</span>}
+                <p className="mt-0.5 text-xs text-neutral">
+                  {speaker.job_title || <span className="text-muted-foreground">Speaker</span>}
                 </p>
                 {speaker.company ? (
-                  <p className="text-xs text-slate-500">{speaker.company}</p>
+                  <p className="text-xs text-muted-foreground">{speaker.company}</p>
                 ) : null}
               </Link>
             </li>
@@ -154,6 +155,6 @@ export default async function GalleryPage({
           action={<LinkButton href={`/e/${event.slug}/gallery`}>Clear search</LinkButton>}
         />
       )}
-    </div>
+    </PublicPage>
   );
 }

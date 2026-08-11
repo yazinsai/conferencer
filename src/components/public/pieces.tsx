@@ -6,19 +6,67 @@ import { formatDate, formatRange, formatTime } from "@/lib/datetime";
 import type { PublicSession, SpeakerBrief } from "@/lib/repo/submissions";
 import { stripHtml } from "@/lib/fields";
 
+/**
+ * The measure for a public sub-page. The layout's <main> is deliberately
+ * unpadded so the event home can run a full-bleed Marquee fold; every other
+ * public page opts into this container instead.
+ */
+export function PublicPage({
+  children,
+  className,
+  width = "wide",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  width?: "wide" | "prose";
+}) {
+  return (
+    <div
+      className={cx(
+        "mx-auto w-full px-4 py-10 sm:px-6",
+        width === "wide" ? "max-w-6xl" : "max-w-3xl",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** A public page's h1 plus its one-line orientation. */
+export function PublicHeading({
+  title,
+  meta,
+  action,
+}: {
+  title: React.ReactNode;
+  meta?: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      <div className="min-w-0">
+        <h1 className="display text-2xl text-ink sm:text-3xl">{title}</h1>
+        {meta ? <p className="mt-2 text-sm text-neutral">{meta}</p> : null}
+      </div>
+      {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
+    </div>
+  );
+}
+
 export function SpeakerLine({ speakers }: { speakers: SpeakerBrief[] }) {
   if (!speakers.length) return null;
   return (
     <ul className="mt-3 space-y-1.5">
       {speakers.map((s) => (
         <li key={s.contact_id} className="flex items-center gap-2 text-sm">
-          <Avatar src={s.headshot_url} name={`${s.first_name} ${s.last_name}`} size={28} />
-          <span className="text-slate-800">
-            <span className="font-medium">
+          <Avatar src={s.headshot_url} name={`${s.first_name} ${s.last_name}`} size={26} />
+          <span className="min-w-0 text-neutral">
+            <span className="font-medium text-ink">
               {s.first_name} {s.last_name}
             </span>
             {s.job_title || s.company ? (
-              <span className="text-slate-500">
+              <span className="text-muted-foreground">
                 {" — "}
                 {[s.job_title, s.company].filter(Boolean).join(", ")}
               </span>
@@ -35,7 +83,7 @@ export function SessionMeta({ session }: { session: PublicSession }) {
     ? formatRange(session.pub_starts_at, session.pub_ends_at)
     : "Time to be announced";
   return (
-    <p className="mt-1 text-sm text-slate-500">
+    <p className="wordmark tnum mt-1.5 text-xs text-muted-foreground">
       <span>{when}</span>
       {session.room_name ? <span> · {session.room_name}</span> : null}
     </p>
@@ -68,10 +116,10 @@ export function SessionCard({
   action?: React.ReactNode;
 }) {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow">
+    <article className="group rounded-card border border-rule bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow] duration-[180ms] ease-out hover:border-rule-2 hover:shadow-[var(--shadow-raised)]">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-base font-semibold leading-snug text-slate-900">
-          <Link href={href} className="hover:text-brand-700">
+        <h3 className="display min-w-0 text-base leading-snug text-ink">
+          <Link href={href} className="underline-offset-4 hover:underline">
             {session.title}
           </Link>
         </h3>
@@ -82,7 +130,7 @@ export function SessionCard({
         <ShowMore
           text={stripHtml(session.description)}
           limit={200}
-          className="mt-2 text-sm text-slate-600"
+          className="mt-2.5 text-sm leading-relaxed text-neutral"
         />
       ) : null}
       <SpeakerLine speakers={speakers} />
@@ -101,7 +149,7 @@ export function DayTabs({
   hrefFor: (day: string) => string;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap gap-1" role="tablist" aria-label="Event days">
+    <div className="mb-6 flex flex-wrap gap-1.5" role="tablist" aria-label="Event days">
       {days.map((day, index) => {
         const active = day === current;
         return (
@@ -111,14 +159,20 @@ export function DayTabs({
             role="tab"
             aria-selected={active}
             className={cx(
-              "rounded-md border px-3 py-2 text-sm font-medium",
+              "nowrap-affordance rounded-pill border px-3.5 py-2 text-sm font-medium",
+              "transition-colors duration-[120ms] ease-out",
               active
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+                ? "border-ink bg-ink text-paper"
+                : "border-rule-2 bg-paper text-neutral hover:bg-paper-2 hover:text-ink",
             )}
           >
             {`Day ${index + 1}`}
-            <span className={cx("ml-1.5 text-xs", active ? "text-slate-300" : "text-slate-500")}>
+            <span
+              className={cx(
+                "wordmark tnum ml-1.5 text-xs",
+                active ? "text-paper/70" : "text-muted-foreground",
+              )}
+            >
               {formatDate(day)}
             </span>
           </Link>
@@ -129,5 +183,5 @@ export function DayTabs({
 }
 
 export function TimeLabel({ value }: { value?: string | null }) {
-  return <span className="font-mono text-xs text-slate-500">{formatTime(value)}</span>;
+  return <span className="wordmark tnum text-xs text-muted-foreground">{formatTime(value)}</span>;
 }

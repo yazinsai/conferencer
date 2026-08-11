@@ -16,6 +16,7 @@ import {
 import { SubmitWizard, type WizardQuestion } from "@/components/public/submit-wizard";
 import { Card, LinkButton, Notice } from "@/components/ui";
 import { formatDateTime, formatEventDates } from "@/lib/datetime";
+import { PublicPage } from "@/components/public/pieces";
 
 export const dynamic = "force-dynamic";
 
@@ -141,24 +142,24 @@ export default async function PublicFormPage({
   const participantSection = sectionOfKind(form.id, "participant");
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <PublicPage width="prose">
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
           {event.name} · {formatEventDates(event.starts_at, event.ends_at)}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
           {form.page_heading ?? form.title}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-neutral">
           {form.closes_at ? (
             <span>
-              <strong className="text-slate-800">Submissions close:</strong>{" "}
+              <strong className="text-ink">Submissions close:</strong>{" "}
               {formatDateTime(form.closes_at, { weekday: true })}
             </span>
           ) : null}
           {form.submission_limit ? (
             <span>
-              <strong className="text-slate-800">Limit:</strong> {form.submission_limit} submissions
+              <strong className="text-ink">Limit:</strong> {form.submission_limit} submissions
               per person
             </span>
           ) : null}
@@ -171,10 +172,10 @@ export default async function PublicFormPage({
           <p className="text-xs font-semibold uppercase tracking-widest text-red-700">
             Submissions closed
           </p>
-          <h2 className="mt-2 text-xl font-semibold text-slate-900">
+          <h2 className="mt-2 text-xl font-semibold text-ink">
             {closedReason ?? "This call for speakers is closed."}
           </h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-neutral">
             {form.closes_at
               ? `The deadline was ${formatDateTime(form.closes_at, { weekday: true })}.`
               : ""}{" "}
@@ -244,7 +245,7 @@ export default async function PublicFormPage({
           />
         </>
       )}
-    </div>
+    </PublicPage>
   );
 }
 
