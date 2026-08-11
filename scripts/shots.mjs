@@ -219,6 +219,16 @@ async function capture(chrome, shot, cookie) {
       });
     }
 
+    // The dev server paints its own floating indicator over the bottom-left
+    // corner; it is not part of the product and must not appear in a capture.
+    await page.send("Page.addScriptToEvaluateOnNewDocument", {
+      source: `
+        const hide = document.createElement("style");
+        hide.textContent = "nextjs-portal,[data-nextjs-toast],#__next-build-watcher{display:none !important}";
+        document.addEventListener("DOMContentLoaded", () => document.head.append(hide));
+      `,
+    });
+
     const loaded = page.once("Page.loadEventFired");
     await page.send("Page.navigate", { url: `${BASE}${shot.path}` });
     await Promise.race([loaded, sleep(15000)]);

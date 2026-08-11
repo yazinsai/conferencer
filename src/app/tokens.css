@@ -27,16 +27,16 @@
      as a control, and WCAG 1.4.11 wants 3:1 for that. */
   --color-field: oklch(63% 0.013 265);
 
-  /* -------------------------------------------------------------------- ink -- */
-  --color-muted: oklch(53% 0.012 265);
+  /* -------------------------------------------------------------------- ink -- *
+   * Four steps. The lightest one is shadcn's `--muted-foreground` rather than a
+   * fourth name of our own: shadcn owns `muted` and `accent` in the colour
+   * namespace (they are *surfaces* there, not text), so the system maps onto
+   * those names instead of fighting them. Hallmark's `--color-muted` is
+   * shadcn's `muted-foreground`; Hallmark's `--color-accent` is shadcn's
+   * `primary`. design.md § Exports records the mapping.                        */
   --color-neutral: oklch(44% 0.012 265);
   --color-ink-2: oklch(32% 0.01 265);
   --color-ink: oklch(17% 0.008 265);
-
-  /* The accent IS ink. The studied DNA has no chromatic accent — its CTAs are
-     black pills on white, and that restraint is the whole look. */
-  --color-accent: oklch(17% 0.008 265);
-  --color-accent-ink: oklch(99% 0 0);
 
   /* The one chromatic colour in the system: focus rings, the active sidebar item,
      links inside app chrome. Never a fill. Never above 5% of a viewport. */
@@ -91,13 +91,13 @@
   --color-slate-100: oklch(96.4% 0.003 265);
   --color-slate-200: oklch(92.5% 0.004 265);
   --color-slate-300: oklch(87% 0.005 265);
-  --color-slate-400: oklch(70% 0.011 265);
-  --color-slate-500: oklch(60% 0.012 265);
-  --color-slate-600: oklch(53% 0.012 265);
-  --color-slate-700: oklch(44% 0.012 265);
-  --color-slate-800: oklch(32% 0.01 265);
-  --color-slate-900: oklch(17% 0.008 265);
-  --color-slate-950: oklch(12% 0.008 265);
+  --color-slate-400: oklch(70.4% 0.013 265);
+  --color-slate-500: oklch(55.4% 0.013 265);
+  --color-slate-600: oklch(46% 0.013 265);
+  --color-slate-700: oklch(37.2% 0.012 265);
+  --color-slate-800: oklch(27.9% 0.011 265);
+  --color-slate-900: oklch(19% 0.009 265);
+  --color-slate-950: oklch(12.9% 0.008 265);
 
   /* ---------------------------------------------------- legacy brand ramp --- *
    * `brand-<n>` was the product's indigo. It becomes the signal ramp, so the
@@ -170,7 +170,12 @@
   --secondary: oklch(96.4% 0.003 265);
   --secondary-foreground: oklch(32% 0.01 265);
   --muted: oklch(96.4% 0.003 265);
+  /* Hallmark's `--color-muted` lives here — the lightest readable ink, 4.76:1
+     even on a table head. shadcn already reads this name everywhere. */
   --muted-foreground: oklch(53% 0.012 265);
+  /* Hallmark's `--color-accent` / `--color-accent-ink`: the ink pill and its label. */
+  --accent-fill: oklch(17% 0.008 265);
+  --accent-ink: oklch(99% 0 0);
   --accent: oklch(96.4% 0.003 265);
   --accent-foreground: oklch(17% 0.008 265);
   --destructive: oklch(53% 0.21 27);

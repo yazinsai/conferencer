@@ -166,7 +166,7 @@ h6 {
 /* Contenteditable rich-text editor placeholder. */
 [contenteditable][data-placeholder]:empty::before {
   content: attr(data-placeholder);
-  color: var(--color-muted);
+  color: var(--muted-foreground);
 }
 
 /* Agenda grid drag affordances. */

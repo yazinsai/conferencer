@@ -58,9 +58,7 @@ function hex([r, g, b]) {
 /* -------------------------------------------------------------- tokens -- */
 
 const TOKENS = new Map();
-for (const [, name, body] of CSS.matchAll(
-  /(--color-[a-z0-9-]+):\s*oklch\(([^)]+)\)/gi,
-)) {
+for (const [, name, body] of CSS.matchAll(/(--[a-z0-9-]+):\s*oklch\(([^)]+)\)/gi)) {
   const parts = body.trim().split(/\s+/);
   const L = parseFloat(parts[0]) / (parts[0].includes("%") ? 100 : 1);
   const C = parseFloat(parts[1] ?? "0");
@@ -68,9 +66,22 @@ for (const [, name, body] of CSS.matchAll(
   if (!TOKENS.has(name)) TOKENS.set(name, oklchToLinearRgb(L, C, H));
 }
 
+/**
+ * shadcn owns `muted` and `accent` in the colour namespace, where they mean
+ * *surfaces*. Hallmark's roles of the same name map onto shadcn variables
+ * instead of fighting them, so the audit resolves the Hallmark name to whatever
+ * the token file actually declares. design.md § Exports records the mapping.
+ */
+const ALIASES = {
+  muted: "--muted-foreground",
+  accent: "--accent-fill",
+  "accent-ink": "--accent-ink",
+};
+
 const rgb = (name) => {
-  const value = TOKENS.get(`--color-${name}`);
-  if (!value) throw new Error(`unknown token --color-${name}`);
+  const key = ALIASES[name] ?? `--color-${name}`;
+  const value = TOKENS.get(key);
+  if (!value) throw new Error(`unknown token ${key}`);
   return value;
 };
 
