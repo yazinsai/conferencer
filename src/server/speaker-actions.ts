@@ -119,8 +119,13 @@ export async function saveSpeakerAction(formData: FormData) {
 
 export async function setSpeakerStatusAction(formData: FormData) {
   const { slug, event } = await ctx(formData);
-  const contactId = String(formData.get("contact_id"));
-  setSpeakerStatus(event.id, contactId, String(formData.get("speaker_status")));
+  const status = String(formData.get("speaker_status"));
+  const contactIds = formData.getAll("contact_ids").map(String).filter(Boolean);
+  const single = formData.get("contact_id");
+  if (single) contactIds.push(String(single));
+  for (const contactId of contactIds) {
+    setSpeakerStatus(event.id, contactId, status);
+  }
   revalidatePath(`/admin/e/${slug}`, "layout");
 }
 

@@ -1,7 +1,7 @@
 import { requireOrganizer } from "@/lib/guards";
 import { listLookup } from "@/lib/repo/events";
 import { LookupEditor } from "@/components/admin/lookup-editor";
-import { LinkButton, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,6 @@ export default async function Page({ params }: PageProps<"/admin/e/[slug]/settin
         title="Tracks"
         description="Tracks are selectable in the form builder and the agenda the moment you add them."
         breadcrumb={<a href={`/admin/e/${slug}/settings`}>Settings</a>}
-        actions={<LinkButton href={`/admin/e/${slug}/settings`}>Back to settings</LinkButton>}
       />
       <LookupEditor
         slug={slug}
@@ -22,7 +21,7 @@ export default async function Page({ params }: PageProps<"/admin/e/[slug]/settin
         title="Tracks"
         description="Tracks are selectable in the form builder and the agenda the moment you add them."
         rows={listLookup("tracks", event.id)}
-
+        cardHeader="Manage tracks"
       />
     </div>
   );

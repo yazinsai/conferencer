@@ -3,6 +3,7 @@ import {
   Card,
   CardHeader,
   Chip,
+  Icon,
   Input,
   Select,
   Textarea,
@@ -36,33 +37,30 @@ export function QuestionList({
     <Card>
       <CardHeader
         title={kind === "submission" ? "Questions about the submission" : "Questions about each participant"}
-        description="Drag order with the arrows, mark questions required, or give one a show-when rule."
+        description="Use the arrows to reorder, mark questions required, or give one a show-when rule."
       />
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-rule">
         {questions.map((question, index) => {
           const condition = parseCondition(question.condition);
           const controller = condition
             ? questions.find((q) => q.id === condition.question_id)
             : null;
           const options = parseOptions(question.options);
+          const typeLabel = FIELD_TYPE_LABELS[question.type] ?? question.type;
           return (
             <li key={question.id} className="px-4 py-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="cursor-grab select-none text-slate-300" aria-hidden title="Drag to reorder">
-                      ⠿
-                    </span>
-                    <span className="font-medium text-slate-900">{question.label}</span>
-                    <Chip tone="slate">{FIELD_TYPE_LABELS[question.type] ?? question.type}</Chip>
+                    <span className="font-medium text-ink">{question.label}</span>
                     {question.is_required ? <Chip tone="red">Required</Chip> : null}
                     {question.is_locked ? (
                       <Chip tone="amber" title="System-required — cannot be removed or made optional">
-                        🔒 Locked
+                        <span className="inline-flex items-center gap-1">
+                          <Icon name="lock" size={12} />
+                          Locked
+                        </span>
                       </Chip>
-                    ) : null}
-                    {question.max_length ? (
-                      <Chip tone="slate">{question.max_length} chars</Chip>
                     ) : null}
                     {condition ? (
                       <Chip tone="violet">
@@ -71,11 +69,15 @@ export function QuestionList({
                       </Chip>
                     ) : null}
                   </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {typeLabel}
+                    {question.max_length ? ` · ${question.max_length} chars` : ""}
+                  </p>
                   {question.help_text ? (
-                    <p className="mt-1 text-xs text-slate-500">{question.help_text}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{question.help_text}</p>
                   ) : null}
                   {options.length ? (
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Options: {options.map((o) => o.label).join(" · ")}
                     </p>
                   ) : null}
@@ -90,23 +92,23 @@ export function QuestionList({
                       <Button
                         type="submit"
                         size="sm"
-                        variant="ghost"
+                        variant="secondary"
                         aria-label={direction === -1 ? "Move up" : "Move down"}
                         disabled={direction === -1 ? index === 0 : index === questions.length - 1}
                       >
-                        {direction === -1 ? "↑" : "↓"}
+                        <Icon name={direction === -1 ? "chevronUp" : "chevronDown"} size={16} />
                       </Button>
                     </form>
                   ))}
                   <details className="relative">
-                    <summary className="cursor-pointer list-none rounded px-2 py-1 text-slate-500 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                    <summary className="cursor-pointer list-none rounded-input px-2 py-1 text-muted-foreground hover:bg-paper-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
                       ⋯
                     </summary>
-                    <div className="absolute right-0 z-30 mt-1 w-80 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
+                    <div className="absolute right-0 z-30 mt-1 w-80 rounded-card border border-rule bg-paper p-3 shadow-[var(--shadow-raised)]">
                       <form action={updateQuestionAction} className="space-y-2">
                         <input type="hidden" name="slug" value={slug} />
                         <input type="hidden" name="question_id" value={question.id} />
-                        <label className="block text-xs font-medium text-slate-600">
+                        <label className="block text-xs font-medium text-ink-2">
                           Label override
                           <Input
                             name="label_override"
@@ -114,7 +116,7 @@ export function QuestionList({
                             placeholder={question.label}
                           />
                         </label>
-                        <label className="block text-xs font-medium text-slate-600">
+                        <label className="block text-xs font-medium text-ink-2">
                           Help text
                           <Textarea name="help_text" rows={2} defaultValue={question.help_text ?? ""} />
                         </label>
@@ -127,12 +129,12 @@ export function QuestionList({
                           />
                           Required
                           {question.is_locked ? (
-                            <span className="text-xs text-slate-400">(locked)</span>
+                            <span className="text-xs text-muted-foreground">(locked)</span>
                           ) : null}
                         </label>
 
-                        <fieldset className="rounded-md border border-slate-200 p-2">
-                          <legend className="px-1 text-xs font-medium text-slate-600">
+                        <fieldset className="rounded-input border border-rule p-2">
+                          <legend className="px-1 text-xs font-medium text-ink-2">
                             Show this question when…
                           </legend>
                           <Select
@@ -171,7 +173,7 @@ export function QuestionList({
                               aria-label="Value"
                             />
                           </div>
-                          <p className="mt-1 text-[11px] text-slate-400">
+                          <p className="mt-1 text-[11px] text-muted-foreground">
                             Separate several values with a pipe: A|B
                           </p>
                         </fieldset>
@@ -181,7 +183,7 @@ export function QuestionList({
                         </Button>
                       </form>
 
-                      <div className="mt-2 flex gap-2 border-t border-slate-200 pt-2">
+                      <div className="mt-2 flex gap-2 border-t border-rule pt-2">
                         <form action={duplicateQuestionAction}>
                           <input type="hidden" name="slug" value={slug} />
                           <input type="hidden" name="question_id" value={question.id} />
@@ -195,13 +197,13 @@ export function QuestionList({
                             <input type="hidden" name="question_id" value={question.id} />
                             <ConfirmSubmit
                               message={`Remove "${question.label}" from this form?`}
-                              variant="ghost"
+                              variant="danger"
                             >
                               Remove
                             </ConfirmSubmit>
                           </form>
                         ) : (
-                          <span className="px-2 py-1 text-xs text-slate-400">
+                          <span className="px-2 py-1 text-xs text-muted-foreground">
                             Locked questions cannot be removed
                           </span>
                         )}
@@ -214,43 +216,50 @@ export function QuestionList({
           );
         })}
         {!questions.length ? (
-          <li className="px-4 py-6 text-sm text-slate-500">No questions yet — add one below.</li>
+          <li className="px-4 py-6 text-sm text-muted-foreground">No questions yet — add one below.</li>
         ) : null}
       </ul>
 
-      <form action={addQuestionAction} className="border-t border-slate-200 p-4">
+      <form action={addQuestionAction} className="border-t border-rule p-4">
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="id" value={formId} />
         <input type="hidden" name="kind" value={kind} />
-        <p className="mb-2 text-sm font-medium text-slate-800">Add a question</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-xs font-medium text-slate-600">
-            From the field library
-            <Select name="field_id" defaultValue="">
-              <option value="">Choose an existing field…</option>
-              {library.map((field) => (
-                <option key={field.id} value={field.id}>
-                  {field.label} ({FIELD_TYPE_LABELS[field.type] ?? field.type})
-                </option>
-              ))}
-              <option value="__new__">➕ Create a new field…</option>
-            </Select>
-          </label>
-          <label className="flex items-end gap-2 text-sm">
-            <input type="checkbox" name="is_required" className="mb-2.5" /> Required
-          </label>
-        </div>
+        <p className="mb-2 text-sm font-medium text-ink">Add a question</p>
+        <fieldset className="rounded-input border border-rule bg-paper-2 p-3">
+          <legend className="px-1 text-xs font-medium text-ink-2">From the field library</legend>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="block min-w-[14rem] flex-1 text-xs font-medium text-muted-foreground">
+              Existing field
+              <Select name="field_id" defaultValue="" className="bg-paper">
+                <option value="">Choose an existing field…</option>
+                {library.map((field) => (
+                  <option key={field.id} value={field.id}>
+                    {field.label} ({FIELD_TYPE_LABELS[field.type] ?? field.type})
+                  </option>
+                ))}
+                <option value="__new__">Create a new field…</option>
+              </Select>
+            </label>
+            <label className="flex items-center gap-2 pb-2 text-sm text-ink">
+              <input type="checkbox" name="is_required" /> Required
+            </label>
+          </div>
+        </fieldset>
 
-        <details className="mt-3 rounded-md border border-slate-200 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-slate-700">
-            …or create a new field inline
+        <Button type="submit" variant="primary" className="mt-3">
+          Add question
+        </Button>
+
+        <details className="mt-3 rounded-input border border-rule bg-paper px-3 py-2">
+          <summary className="cursor-pointer text-sm text-neutral underline decoration-rule-2 underline-offset-2 marker:content-none [&::-webkit-details-marker]:hidden">
+            Create a new field instead
           </summary>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-ink-2">
               Label
               <Input name="new_label" placeholder="Key takeaway" />
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-ink-2">
               Type
               <Select name="new_type" defaultValue="text">
                 {FIELD_TYPES.map((type) => (
@@ -260,28 +269,24 @@ export function QuestionList({
                 ))}
               </Select>
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-ink-2">
               Character limit
               <Input name="new_max_length" type="number" min={1} />
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-ink-2">
               Options (one per line)
               <Textarea name="new_options" rows={3} placeholder={"Beginner\nIntermediate\nAdvanced"} />
             </label>
-            <label className="block text-xs font-medium text-slate-600 sm:col-span-2">
+            <label className="block text-xs font-medium text-ink-2 sm:col-span-2">
               Help text
               <Input name="new_help" />
             </label>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Leave the library dropdown empty (or pick “Create a new field”) and this field is created
             and added in one step.
           </p>
         </details>
-
-        <Button type="submit" variant="primary" className="mt-3">
-          Add question
-        </Button>
       </form>
     </Card>
   );

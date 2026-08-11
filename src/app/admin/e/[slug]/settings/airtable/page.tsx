@@ -7,7 +7,6 @@ import {
   CardHeader,
   Chip,
   FormError,
-  LinkButton,
   Notice,
   PageHeader,
 } from "@/components/ui";
@@ -29,7 +28,7 @@ export default async function AirtablePage({
       <PageHeader
         title="Airtable sync"
         description="Optional two-way mirror of submissions and speakers. Off unless you configure it — Conferencer never depends on Airtable."
-        actions={<LinkButton href={`/admin/e/${slug}/settings`}>Back to settings</LinkButton>}
+        breadcrumb={<a href={`/admin/e/${slug}/settings`}>Settings</a>}
       />
 
       {error ? <div className="mb-4"><FormError>{error}</FormError></div> : null}
@@ -54,43 +53,65 @@ export default async function AirtablePage({
             </Chip>
           }
         />
-        <div className="space-y-3 p-4 text-sm text-slate-700">
-          {status.enabled ? (
-            <p>
-              Base <code className="font-mono text-xs">{status.baseId}</code> · tables{" "}
-              <code className="font-mono text-xs">{status.submissionsTable}</code> and{" "}
-              <code className="font-mono text-xs">{status.speakersTable}</code>.
+        <div className="space-y-4 p-4 text-sm text-neutral">
+          <div>
+            <p className="text-base font-medium text-ink">
+              {status.enabled ? "Airtable sync is on." : "Airtable sync is off."}
             </p>
-          ) : (
+            {status.enabled ? (
+              <p className="mt-1">
+                Base <code className="wordmark text-xs text-ink-2">{status.baseId}</code> · tables{" "}
+                <code className="wordmark text-xs text-ink-2">{status.submissionsTable}</code> and{" "}
+                <code className="wordmark text-xs text-ink-2">{status.speakersTable}</code>.
+              </p>
+            ) : (
+              <p className="mt-1">
+                Set these environment variables and restart the app to enable the mirror. Configuration
+                is not changed from this screen.
+              </p>
+            )}
+          </div>
+
+          {!status.enabled ? (
             <>
-              <p>Set these environment variables and restart to enable the mirror:</p>
-              <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 font-mono text-xs text-slate-100">
+              <pre className="overflow-x-auto rounded-card border border-rule bg-paper-3 p-3 font-mono text-xs text-ink-2">
 {`AIRTABLE_API_KEY=pat_xxx
 AIRTABLE_BASE_ID=app_xxx
 # optional table names, defaults shown
 AIRTABLE_SUBMISSIONS_TABLE=Submissions
 AIRTABLE_SPEAKERS_TABLE=Speakers`}
               </pre>
-              <p className="text-xs text-slate-500">
-                Create the two tables with a <code>ConferencerId</code> text column — it is how
-                records are matched on both sides.
+              <p className="text-xs text-muted-foreground">
+                Create the two tables with a <code className="wordmark">ConferencerId</code> text
+                column — it is how records are matched on both sides.
               </p>
             </>
-          )}
+          ) : null}
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            <form action={pushAirtableAction}>
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" variant="primary" disabled={!status.enabled}>
-                Push to Airtable
-              </Button>
-            </form>
-            <form action={pullAirtableAction}>
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" disabled={!status.enabled}>
-                Pull from Airtable
-              </Button>
-            </form>
+          <div className="border-t border-rule pt-4">
+            <p className="mb-3 text-sm text-neutral">
+              <span className="font-medium text-ink">Push</span> sends Conferencer submissions and
+              speakers to Airtable. <span className="font-medium text-ink">Pull</span> brings Airtable
+              changes back into Conferencer. Matching uses the ConferencerId column on both sides.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <form action={pushAirtableAction}>
+                <input type="hidden" name="slug" value={slug} />
+                <Button
+                  type="submit"
+                  variant={status.enabled ? "primary" : "secondary"}
+                  disabled={!status.enabled}
+                >
+                  Push to Airtable
+                </Button>
+              </form>
+              <form action={pullAirtableAction}>
+                <input type="hidden" name="slug" value={slug} />
+                <Button type="submit" variant="secondary" disabled={!status.enabled}>
+                  Pull from Airtable
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
       </Card>

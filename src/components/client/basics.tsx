@@ -34,6 +34,7 @@ export function ConfirmSubmit({
   size = "sm",
   name,
   value,
+  "aria-label": ariaLabel,
 }: {
   message: string;
   children: ReactNode;
@@ -42,6 +43,7 @@ export function ConfirmSubmit({
   size?: Size;
   name?: string;
   value?: string;
+  "aria-label"?: string;
 }) {
   const [open, setOpen] = useState(false);
   const hidden = useRef<HTMLButtonElement | null>(null);
@@ -53,7 +55,11 @@ export function ConfirmSubmit({
       <button ref={hidden} type="submit" name={name} value={value} className="hidden" />
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
-          <button type="button" className={cx(buttonClass(variant, size), className)}>
+          <button
+            type="button"
+            aria-label={ariaLabel}
+            className={cx(buttonClass(variant, size), className)}
+          >
             {children}
           </button>
         </AlertDialogTrigger>
@@ -82,25 +88,32 @@ export function CopyButton({
   label = "Copy link",
   className,
   size = "sm",
+  /** Copy the value as-is (tokens, secrets, snippets) instead of resolving a site-relative URL. */
+  raw = false,
+  "aria-label": ariaLabel,
 }: {
   value: string;
   label?: string;
   className?: string;
   size?: "sm" | "md";
+  raw?: boolean;
+  "aria-label"?: string;
 }) {
   return (
     <button
       type="button"
+      aria-label={ariaLabel}
       className={cx(buttonClass("secondary", size), className)}
       onClick={async () => {
-        const absolute = value.startsWith("http")
-          ? value
-          : `${window.location.origin}${value}`;
+        const text =
+          raw || value.startsWith("http") ? value : `${window.location.origin}${value}`;
         try {
-          await navigator.clipboard.writeText(absolute);
-          toast.success("Copied to your clipboard", { description: absolute });
+          await navigator.clipboard.writeText(text);
+          toast.success("Copied to your clipboard", {
+            description: raw && text.length > 48 ? `${text.slice(0, 12)}…${text.slice(-4)}` : text,
+          });
         } catch {
-          window.prompt("Copy this link", absolute);
+          window.prompt(raw ? "Copy this value" : "Copy this link", text);
         }
       }}
     >
