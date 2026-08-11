@@ -8,7 +8,7 @@ import { landingFor } from "@/lib/guards";
 import { defaultForm, formIsOpen } from "@/lib/repo/forms";
 import { PublicNav } from "@/components/public/nav";
 import { EventNavShell } from "@/components/client/event-nav";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, cx } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -71,18 +71,18 @@ export default async function PublicEventLayout({
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         {user ? (
-          <Link href={landingFor(user)} className={`${buttonClass("ghost", "sm")} nowrap-affordance`}>
+          <Link href={landingFor(user)} className={cx(buttonClass("ghost", "sm"), "nowrap-affordance")}>
             My account
           </Link>
         ) : (
-          <Link href="/sign-in" className={`${buttonClass("ghost", "sm")} nowrap-affordance hidden sm:inline-flex`}>
+          <Link href="/sign-in" className={cx(buttonClass("ghost", "sm"), "nowrap-affordance hidden sm:inline-flex")}>
             Sign in
           </Link>
         )}
         {form ? (
           <Link
             href={`/e/${event.slug}/submit/${form.id}`}
-            className={`${buttonClass("primary", "sm")} nowrap-affordance`}
+            className={cx(buttonClass("primary", "sm"), "nowrap-affordance")}
           >
             {open ? "Submit a talk" : "Call for speakers"}
           </Link>

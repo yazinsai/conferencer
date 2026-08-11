@@ -315,9 +315,7 @@ export default function HomePage() {
               <li key={step.n} className="min-w-0">
                 {/* Numeral above the heading, same column. Genuinely ordinal
                     content is the one place a numeral earns its keep. */}
-                <p className="wordmark tnum text-xs tracking-[0.14em] text-muted-foreground">
-                  {step.n}
-                </p>
+                <p className="wordmark tnum text-xs tracking-[0.14em] text-neutral">{step.n}</p>
                 <h3 className="display mt-2 text-lg text-ink">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral">{step.body}</p>
               </li>
@@ -368,14 +366,14 @@ export default function HomePage() {
             the whole of it, not a highlight reel.
           </p>
 
-          <dl className="mt-12 border-t border-rule">
+          <dl className="mt-12 max-w-4xl border-t border-rule">
             {INSIDE.map(([area, detail]) => (
               <div
                 key={area}
-                className="grid gap-x-10 gap-y-1 border-b border-rule py-5 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]"
+                className="grid gap-x-10 gap-y-1 border-b border-rule py-5 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
               >
                 <dt className="display text-[0.9375rem] text-ink">{area}</dt>
-                <dd className="max-w-[70ch] text-sm leading-relaxed text-neutral">{detail}</dd>
+                <dd className="text-sm leading-relaxed text-neutral">{detail}</dd>
               </div>
             ))}
           </dl>

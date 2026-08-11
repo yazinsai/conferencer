@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SearchIcon } from "lucide-react";
 
-import { buttonClass } from "@/components/ui";
+import { buttonClass, cx } from "@/components/ui";
 import { requireOrganizer, roleSet } from "@/lib/guards";
 import { fullName } from "@/lib/auth";
 import { AccountMenu, Sidebar, SidebarSheet, type NavGroup } from "@/components/admin/shell";
@@ -110,13 +110,13 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
             <div className="flex items-center gap-1">
               <Link
                 href="/portal"
-                className={`${buttonClass("ghost", "sm")} nowrap-affordance hidden lg:inline-flex`}
+                className={cx(buttonClass("ghost", "sm"), "nowrap-affordance hidden lg:inline-flex")}
               >
                 Speaker portal
               </Link>
               <Link
                 href={`/e/${event.slug}`}
-                className={`${buttonClass("secondary", "sm")} nowrap-affordance hidden sm:inline-flex`}
+                className={cx(buttonClass("secondary", "sm"), "nowrap-affordance hidden sm:inline-flex")}
               >
                 Public site
               </Link>
