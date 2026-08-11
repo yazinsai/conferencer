@@ -1,4 +1,5 @@
 import { forbidden, notFound, redirect, unauthorized } from "next/navigation";
+import { cache } from "react";
 
 import { currentUser, hasRole, type Membership, type User } from "./auth";
 import { get } from "./db";
@@ -25,14 +26,17 @@ export async function requireUser(returnTo?: string): Promise<User> {
   return user;
 }
 
-export function roleSet(userId: string, eventId: string): Set<Membership["role"]> {
+export const roleSet = cache(function roleSet(
+  userId: string,
+  eventId: string,
+): Set<Membership["role"]> {
   const rows = get<{ roles: string }>(
     `SELECT GROUP_CONCAT(role) AS roles FROM event_memberships WHERE user_id = ? AND event_id = ?`,
     userId,
     eventId,
   );
   return new Set((rows?.roles ?? "").split(",").filter(Boolean) as Membership["role"][]);
-}
+});
 
 export function eventBySlugOr404(slug: string): Event {
   const event = getEventBySlug(slug);

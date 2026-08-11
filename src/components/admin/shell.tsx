@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 import { buttonClass, cx } from "@/components/ui";
@@ -24,6 +24,12 @@ export type NavGroup = {
     badge?: number;
   }>;
 };
+
+/** Fixed-size pending hint; CSS delays visibility so fast navs don't flash. */
+function NavPending() {
+  const { pending } = useLinkStatus();
+  return <span aria-hidden className={cx("nav-hint", pending && "is-pending")} />;
+}
 
 /**
  * N3 side-rail — the app family's nav archetype (see design.md § Macrostructure
@@ -86,6 +92,7 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
                           className={active ? "text-ink" : "text-muted-foreground"}
                         />
                         <span className="truncate">{item.label}</span>
+                        <NavPending />
                       </span>
                       {item.badge ? (
                         <span
@@ -163,6 +170,7 @@ export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventN
                           className={active ? "text-ink" : "text-muted-foreground"}
                         />
                         <span className="truncate">{item.label}</span>
+                        <NavPending />
                       </span>
                       {item.badge ? (
                         <span className="tnum rounded-pill bg-paper-3 px-1.5 text-[0.6875rem] text-muted-foreground">

@@ -149,6 +149,7 @@ export default async function SpeakersPage({
         </Notice>
       ) : null}
 
+      {/* Filters own their own <form> (SearchBox); keep them outside the bulk form. */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchBox
           param="q"

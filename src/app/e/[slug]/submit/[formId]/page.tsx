@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { eventBySlugOr404 } from "@/lib/guards";
-import { getLookup } from "@/lib/repo/events";
+import { getLookup, listLookup } from "@/lib/repo/events";
 import { currentUser, fullName } from "@/lib/auth";
 import { readJson } from "@/lib/db";
 import { formClosedReason, formIsOpen, getForm, listQuestions, listRoleConfigs, sectionOfKind } from "@/lib/repo/forms";
@@ -11,6 +11,7 @@ import { portalContact } from "@/lib/repo/contacts";
 import {
   countSubmissionsBySubmitter,
   getSubmission,
+  latestDraftForSubmitter,
   listParticipants,
 } from "@/lib/repo/submissions";
 import { SubmitWizard, type WizardQuestion } from "@/components/public/submit-wizard";
@@ -43,6 +44,18 @@ export default async function PublicFormPage({
   const closedReason = formClosedReason(form);
 
   const editId = typeof sp.submission === "string" ? sp.submission : null;
+  const forceNew = sp.new === "1" || sp.new === "true";
+
+  // Resume the latest draft when returning to the bare form URL (R-PUB-6).
+  // `?new=1` opts out so "Submit another" can start blank when multiple drafts
+  // are allowed; single-draft forms still resume the existing draft.
+  if (!editId && contact && open && (!forceNew || !form.allow_multiple_drafts)) {
+    const draft = latestDraftForSubmitter(event.id, contact.id, form.id);
+    if (draft) {
+      redirect(`/e/${event.slug}/submit/${form.id}?submission=${draft.id}`);
+    }
+  }
+
   const existing = editId ? getSubmission(editId) : undefined;
   const canEditExisting =
     existing &&
@@ -141,9 +154,13 @@ export default async function PublicFormPage({
   const submissionSection = sectionOfKind(form.id, "submission");
   const participantSection = sectionOfKind(form.id, "participant");
 
+  const trackColors = Object.fromEntries(
+    listLookup("tracks", event.id).map((track) => [track.name, track.color]),
+  );
+
   return (
-    <PublicPage width="prose">
-      <div className="mb-6">
+    <PublicPage width={open ? "wide" : "prose"}>
+      <div className="mb-6 max-w-3xl">
         <p className="wordmark text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
           {event.name} · {formatEventDates(event.starts_at, event.ends_at)}
         </p>
@@ -192,7 +209,7 @@ export default async function PublicFormPage({
       ) : (
         <>
           {canEditExisting ? (
-            <Notice tone="info" className="mb-4">
+            <Notice tone="info" className="mb-4 max-w-3xl">
               You are editing <strong>{existing?.title}</strong>.{" "}
               <Link href="/portal/submissions" className="underline">
                 Back to my submissions
@@ -234,9 +251,13 @@ export default async function PublicFormPage({
                   }
                 : null
             }
+            trackColors={trackColors}
             signedIn={user ? { email: user.email, name: fullName(user) } : null}
             initial={{
               submissionId: canEditExisting ? (existing?.id ?? null) : null,
+              isDraft: Boolean(
+                canEditExisting && existing && (existing.status === "draft" || existing.is_draft),
+              ),
               answers: initialAnswers,
               participants: initialParticipants,
             }}

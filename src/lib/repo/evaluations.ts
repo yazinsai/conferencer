@@ -2,6 +2,16 @@ import { all, get, run } from "../db";
 import { id } from "../ids";
 import { nowIso, isPast, isFuture } from "../datetime";
 import { parseOptions } from "../fields";
+import {
+  SCORECARD_TYPES,
+  SCORECARD_TYPE_LABELS,
+  scaleRange,
+  isScored,
+  type ScorecardQuestion,
+} from "../scorecard";
+
+export { SCORECARD_TYPES, SCORECARD_TYPE_LABELS, scaleRange, isScored };
+export type { ScorecardQuestion };
 
 export type EvaluationPlan = {
   id: string;
@@ -37,19 +47,6 @@ export type EvaluationRound = {
   created_at: string;
 };
 
-export type ScorecardQuestion = {
-  id: string;
-  round_id: string;
-  type: string;
-  label: string;
-  options: string;
-  weight: number;
-  min: number | null;
-  max: number | null;
-  is_required: number;
-  sort_order: number;
-};
-
 export type Assignment = {
   id: string;
   round_id: string;
@@ -73,51 +70,6 @@ export type Review = {
   submitted_at: string | null;
   updated_at: string;
 };
-
-export const SCORECARD_TYPES = [
-  "scale_1_3",
-  "scale_1_5",
-  "scale_1_10",
-  "numeric",
-  "dropdown",
-  "free_text",
-  "file",
-  "separator",
-] as const;
-
-export const SCORECARD_TYPE_LABELS: Record<string, string> = {
-  scale_1_3: "1–3 scale",
-  scale_1_5: "1–5 scale",
-  scale_1_10: "1–10 scale",
-  numeric: "Numeric (min/max)",
-  dropdown: "Dropdown with points",
-  free_text: "Free text",
-  file: "File upload",
-  separator: "Section separator",
-};
-
-export function scaleRange(question: ScorecardQuestion): { min: number; max: number } | null {
-  switch (question.type) {
-    case "scale_1_3":
-      return { min: 1, max: 3 };
-    case "scale_1_5":
-      return { min: 1, max: 5 };
-    case "scale_1_10":
-      return { min: 1, max: 10 };
-    case "numeric":
-      return { min: question.min ?? 0, max: question.max ?? 10 };
-    default:
-      return null;
-  }
-}
-
-export function isScored(question: ScorecardQuestion): boolean {
-  return (
-    question.type.startsWith("scale_") ||
-    question.type === "numeric" ||
-    question.type === "dropdown"
-  );
-}
 
 /* ----------------------------------------------------------------- plans -- */
 

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { all, get, run } from "./db";
 import { id, token } from "./ids";
@@ -114,7 +115,11 @@ export function addMembership(
   );
 }
 
-export function hasRole(userId: string, eventId: string, role: Membership["role"]): boolean {
+export const hasRole = cache(function hasRole(
+  userId: string,
+  eventId: string,
+  role: Membership["role"],
+): boolean {
   return Boolean(
     get(
       "SELECT id FROM event_memberships WHERE user_id = ? AND event_id = ? AND role = ?",
@@ -123,7 +128,7 @@ export function hasRole(userId: string, eventId: string, role: Membership["role"
       role,
     ),
   );
-}
+});
 
 /* -------------------------------------------------------------- sessions -- */
 
@@ -179,7 +184,7 @@ export async function destroySession(): Promise<void> {
 }
 
 /** Current signed-in user, or null. Safe to call from any server context. */
-export async function currentUser(): Promise<User | null> {
+export const currentUser = cache(async function currentUser(): Promise<User | null> {
   let store;
   try {
     store = await cookies();
@@ -198,7 +203,7 @@ export async function currentUser(): Promise<User | null> {
     return null;
   }
   return getUser(row.user_id) ?? null;
-}
+});
 
 /* --------------------------------------------------------------- invites -- */
 

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { requireOrganizer } from "@/lib/guards";
@@ -9,6 +10,11 @@ import { listAssignments } from "@/lib/repo/tasks";
 import { statusCounts } from "@/lib/repo/submissions";
 import { recentActivity } from "@/lib/repo/audit";
 import { DashboardPanels } from "@/components/admin/dashboard-panels";
+import {
+  DashboardPanelsSkeleton,
+  RecentActivitySkeleton,
+  SpeakerReadinessSkeleton,
+} from "@/components/admin/loading-skeletons";
 import {
   Card,
   CardHeader,
@@ -127,31 +133,6 @@ export default async function DashboardPage({
     icon: IconName;
     urgent: boolean;
   }>;
-
-  const readiness = all<{
-    contact_id: string;
-    name: string;
-    total: number;
-    done: number;
-    overdue: number;
-  }>(
-    `SELECT c.id AS contact_id, c.first_name || ' ' || c.last_name AS name,
-            COUNT(ta.id) AS total,
-            SUM(CASE WHEN ta.status IN ('complete','approved') THEN 1 ELSE 0 END) AS done,
-            SUM(CASE WHEN ta.status NOT IN ('complete','approved')
-                      AND COALESCE(ta.extended_due_at, ta.due_at) < ? THEN 1 ELSE 0 END) AS overdue
-       FROM task_assignments ta
-       JOIN contacts c ON c.id = ta.contact_id
-      WHERE ta.event_id = ?
-      GROUP BY c.id
-      ORDER BY (CAST(SUM(CASE WHEN ta.status IN ('complete','approved') THEN 1 ELSE 0 END) AS REAL) /
-                MAX(COUNT(ta.id),1)) ASC
-      LIMIT 8`,
-    localToday(),
-    event.id,
-  );
-
-  const activity = recentActivity(event.id, 6);
 
   // Stat-Led hero: a real figure, never standing alone — the words beside it say
   // what the number means (see design.md § Macrostructure families).
@@ -311,86 +292,139 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      <DashboardPanels
-        slug={slug}
-        eventId={event.id}
-        tab={panel}
-        eventStart={event.starts_at}
-        eventEnd={event.ends_at}
-      />
+      <Suspense fallback={<DashboardPanelsSkeleton />}>
+        <DashboardPanelsSlot
+          slug={slug}
+          eventId={event.id}
+          tab={panel}
+          eventStart={event.starts_at}
+          eventEnd={event.ends_at}
+        />
+      </Suspense>
 
+      {/* items-start: keep sparse Recent activity from stretching to match readiness */}
       <div className="mt-8 grid items-start gap-5 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader
-            title="Speaker readiness"
-            description="Onboarding completion, least complete first"
-            actions={
-              <LinkButton href={`${base}/tasks/deliverables`} size="sm">
-                Deliverables
-              </LinkButton>
-            }
-          />
-          {readiness.length ? (
-            <Table className="rounded-none border-0">
-              <thead>
-                <tr>
-                  <Th>Speaker</Th>
-                  <Th>Complete</Th>
-                  <Th>Progress</Th>
-                  <Th>Overdue</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {readiness.map((row) => (
-                  <tr key={row.contact_id}>
-                    <Td>
-                      <Link
-                        href={`${base}/speakers/${row.contact_id}`}
-                        className="font-medium text-ink hover:text-signal"
-                      >
-                        {row.name}
-                      </Link>
-                    </Td>
-                    <Td className="wordmark tnum text-ink-2">
-                      {row.done}/{row.total}
-                    </Td>
-                    <Td className="w-40">
-                      <Progress value={row.done} max={Math.max(row.total, 1)} />
-                    </Td>
-                    <Td>
-                      {row.overdue ? (
-                        <Chip tone="red">{row.overdue} overdue</Chip>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p className="px-4 py-6 text-sm text-muted-foreground">No onboarding tasks assigned yet.</p>
-          )}
-        </Card>
-
-        <Card>
-          <CardHeader title="Recent activity" />
-          <ul className="divide-y divide-rule">
-            {activity.length ? (
-              activity.map((entry) => (
-                <li key={entry.id} className="px-4 py-3 text-sm">
-                  <p className="text-neutral">{entry.summary ?? entry.action}</p>
-                  <p className="wordmark mt-0.5 text-xs text-muted-foreground">
-                    {entry.actor_name} · {relativeStamp(entry.created_at)}
-                  </p>
-                </li>
-              ))
-            ) : (
-              <li className="px-4 py-6 text-sm text-muted-foreground">Nothing yet.</li>
-            )}
-          </ul>
-        </Card>
+        <Suspense fallback={<SpeakerReadinessSkeleton />}>
+          <SpeakerReadiness eventId={event.id} base={base} />
+        </Suspense>
+        <Suspense fallback={<RecentActivitySkeleton />}>
+          <RecentActivity eventId={event.id} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+async function DashboardPanelsSlot(props: {
+  slug: string;
+  eventId: string;
+  tab: string;
+  eventStart: string | null;
+  eventEnd: string | null;
+}) {
+  return <DashboardPanels {...props} />;
+}
+
+async function SpeakerReadiness({ eventId, base }: { eventId: string; base: string }) {
+  const readiness = all<{
+    contact_id: string;
+    name: string;
+    total: number;
+    done: number;
+    overdue: number;
+  }>(
+    `SELECT c.id AS contact_id, c.first_name || ' ' || c.last_name AS name,
+            COUNT(ta.id) AS total,
+            SUM(CASE WHEN ta.status IN ('complete','approved') THEN 1 ELSE 0 END) AS done,
+            SUM(CASE WHEN ta.status NOT IN ('complete','approved')
+                      AND COALESCE(ta.extended_due_at, ta.due_at) < ? THEN 1 ELSE 0 END) AS overdue
+       FROM task_assignments ta
+       JOIN contacts c ON c.id = ta.contact_id
+      WHERE ta.event_id = ?
+      GROUP BY c.id
+      ORDER BY (CAST(SUM(CASE WHEN ta.status IN ('complete','approved') THEN 1 ELSE 0 END) AS REAL) /
+                MAX(COUNT(ta.id),1)) ASC
+      LIMIT 8`,
+    localToday(),
+    eventId,
+  );
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader
+        title="Speaker readiness"
+        description="Onboarding completion, least complete first"
+        actions={
+          <LinkButton href={`${base}/tasks/deliverables`} size="sm">
+            Deliverables
+          </LinkButton>
+        }
+      />
+      {readiness.length ? (
+        <Table className="rounded-none border-0">
+          <thead>
+            <tr>
+              <Th>Speaker</Th>
+              <Th>Complete</Th>
+              <Th>Progress</Th>
+              <Th>Overdue</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {readiness.map((row) => (
+              <tr key={row.contact_id}>
+                <Td>
+                  <Link
+                    href={`${base}/speakers/${row.contact_id}`}
+                    className="font-medium text-ink hover:text-signal"
+                  >
+                    {row.name}
+                  </Link>
+                </Td>
+                <Td className="wordmark tnum text-ink-2">
+                  {row.done}/{row.total}
+                </Td>
+                <Td className="w-40">
+                  <Progress value={row.done} max={Math.max(row.total, 1)} />
+                </Td>
+                <Td>
+                  {row.overdue ? (
+                    <Chip tone="red">{row.overdue} overdue</Chip>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      ) : (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No onboarding tasks assigned yet.</p>
+      )}
+    </Card>
+  );
+}
+
+async function RecentActivity({ eventId }: { eventId: string }) {
+  const activity = recentActivity(eventId, 6);
+
+  return (
+    <Card>
+      <CardHeader title="Recent activity" />
+      <ul className="divide-y divide-rule">
+        {activity.length ? (
+          activity.map((entry) => (
+            <li key={entry.id} className="px-4 py-3 text-sm">
+              <p className="text-neutral">{entry.summary ?? entry.action}</p>
+              <p className="wordmark mt-0.5 text-xs text-muted-foreground">
+                {entry.actor_name} · {relativeStamp(entry.created_at)}
+              </p>
+            </li>
+          ))
+        ) : (
+          <li className="px-4 py-6 text-sm text-muted-foreground">Nothing yet.</li>
+        )}
+      </ul>
+    </Card>
   );
 }
