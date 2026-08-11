@@ -2,11 +2,8 @@ import { requireOrganizer } from "@/lib/guards";
 import { importSpeakersAction } from "@/server/speaker-actions";
 import {
   Button,
-  Card,
-  CardHeader,
   FormError,
   LinkButton,
-  Notice,
   PageHeader,
   Textarea,
 } from "@/components/ui";
@@ -37,31 +34,47 @@ export default async function ImportSpeakersPage({
         </div>
       ) : null}
 
-      <Notice tone="info" className="mb-4">
-        Recognised columns:{" "}
-        {IMPORT_FIELDS.map((field) => field.label).join(", ")}. Anything else is ignored. Headers are
-        matched automatically — you can override each one before importing.
-      </Notice>
+      <p className="mb-4 text-sm text-neutral">
+        Required header: <span className="font-medium text-ink">Email</span>. Name helps when the
+        row is new. Anything unrecognised is ignored — full field list appears with column mapping
+        after you upload.
+      </p>
 
       <CsvImporter slug={slug} action={importSpeakersAction} />
 
-      <Card className="mt-6">
-        <CardHeader
-          title="Paste CSV instead"
-          description="Handy when you are copying out of a spreadsheet."
-        />
-        <form action={importSpeakersAction} className="space-y-3 p-4">
+      <details className="mt-6 rounded-card border border-rule bg-paper">
+        <summary
+          className={[
+            "cursor-pointer list-none px-4 py-3 text-sm font-medium text-ink",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+            "[&::-webkit-details-marker]:hidden",
+          ].join(" ")}
+        >
+          <span className="flex flex-wrap items-baseline gap-x-2">
+            <span>Paste CSV instead</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              Alternative · copy from a spreadsheet
+            </span>
+          </span>
+        </summary>
+        <form action={importSpeakersAction} className="space-y-3 border-t border-rule p-4">
           <input type="hidden" name="slug" value={slug} />
+          <p className="text-xs text-muted-foreground">
+            Include an Email column. Recognised fields:{" "}
+            {IMPORT_FIELDS.map((field) => field.label).join(", ")}.
+          </p>
           <Textarea
             name="csv"
             rows={8}
-            placeholder={"First Name,Last Name,Email,Job Title,Company\nAda,Lovelace,ada@example.com,Analyst,Analytical Engines"}
+            placeholder={
+              "First Name,Last Name,Email,Job Title,Company\nAda,Lovelace,ada@example.com,Analyst,Analytical Engines"
+            }
           />
           <Button type="submit" variant="primary">
             Import pasted CSV
           </Button>
         </form>
-      </Card>
+      </details>
     </div>
   );
 }
