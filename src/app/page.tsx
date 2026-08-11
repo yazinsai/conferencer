@@ -7,11 +7,13 @@ import { publicSessions, publicSpeakers, statusCounts } from "@/lib/repo/submiss
 import { daysUntil, formatEventDates } from "@/lib/datetime";
 import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
+import { LogoMark } from "@/components/ui/logo";
+import { HeroVideo } from "@/components/marketing/hero-video";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
 
 /* Hallmark · genre: modern-minimal · macrostructure: 05 Workbench ·
  * design-system: design.md · designed-as-app
- * hero: H8 knobs frame=minimal-hairline, tilt=0deg, shots=stack-of-2 ·
+ * hero: full-bleed outcome video + left copy over ink scrim ·
  * figures: T4 4-up display-weight · loop: F4 hairline lattice ·
  * price: F3 ledger with inverted final row · tour: full-width captures ·
  * inside: F3 two-up · footer: Ft5 statement over photography (rule 8.4) ·
@@ -330,92 +332,82 @@ export default function HomePage() {
 
   return (
     <>
-      <MarketingNav links={NAV_LINKS} ctaHref={ctaHref} ctaLabel={ctaLabel} />
+      <MarketingNav
+        links={NAV_LINKS}
+        ctaHref={ctaHref}
+        ctaLabel={ctaLabel}
+        overMedia
+      />
 
-      {/* --------------------------------------------------- H8 · hero -----
-          Headline left, real capture right — a stack of two, the agenda board
-          stepping out from behind the dashboard. Both frames are the minimal
-          hairline the system allows; no browser chrome is ever drawn. */}
-      <section className="bg-paper pt-[calc(var(--nav-height)+3rem)] sm:pt-[calc(var(--nav-height)+4.5rem)]">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6 sm:pb-28">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16">
-            <div className="min-w-0">
-              {/* Three sentences, three lines. The break is the design, not the
-                  consequence of a max-width guessing where to wrap. */}
-              <h1 className="reveal display text-display-m text-ink" style={{ ["--i" as string]: 0 }}>
-                <span className="block">Open the call.</span>
-                <span className="block">Ship the agenda.</span>
-                <span className="block">Own every line.</span>
-              </h1>
+      {/* ------------------------------------------- hero · outcome video --
+          Full-bleed loop of the conference people came for. Copy sits on an
+          ink scrim so the type stays readable; product captures live lower. */}
+      <section
+        data-scrim
+        className="relative isolate min-h-[min(92svh,56rem)] overflow-hidden bg-ink text-paper"
+      >
+        <HeroVideo
+          src="/media/hero-conference-v3.mp4"
+          poster="/media/hero-conference-v3.webp"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_88%,transparent)_42%,color-mix(in_oklch,var(--color-ink)_55%,transparent)_72%,color-mix(in_oklch,var(--color-ink)_35%,transparent)_100%)]"
+        />
 
-              <p
-                className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-neutral"
-                style={{ ["--i" as string]: 1 }}
-              >
-                Conferencer runs the entire programme — call for speakers, committee review,
-                decisions, speaker onboarding, agenda, public site — and every line of it is MIT.
-                No per-event licence, no per-submission tier, no percentage of your ticket sales,
-                no demo to sit through. One container, one file, and a copy of the source nobody
-                can take back.
-              </p>
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col justify-end px-4 pb-20 pt-[calc(var(--nav-height)+4.5rem)] sm:px-6 sm:pb-24 sm:pt-[calc(var(--nav-height)+6rem)]">
+          <div className="min-w-0 max-w-[38rem]">
+            <h1 className="reveal display text-display-m text-paper" style={{ ["--i" as string]: 0 }}>
+              <span className="block">Open the call.</span>
+              <span className="block">Ship the agenda.</span>
+              <span className="block">Own every line.</span>
+            </h1>
 
-              <div
-                className="reveal mt-8 flex flex-wrap items-center gap-3"
-                style={{ ["--i" as string]: 2 }}
-              >
-                <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
-                  {event ? "Open the live demo" : "Create an account"}
-                </LinkButton>
-                <LinkButton href="/sign-in" size="lg" className="nowrap-affordance">
-                  Sign in as an organizer
-                </LinkButton>
-              </div>
+            <p
+              className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-paper/75"
+              style={{ ["--i" as string]: 1 }}
+            >
+              Conferencer runs the entire programme — call for speakers, committee review,
+              decisions, speaker onboarding, agenda, public site — and every line of it is MIT.
+              No per-event licence, no per-submission tier, no percentage of your ticket sales,
+              no demo to sit through. One container, one file, and a copy of the source nobody
+              can take back.
+            </p>
 
-              {event ? (
-                <p
-                  className="reveal wordmark mt-6 text-xs leading-relaxed text-muted-foreground"
-                  style={{ ["--i" as string]: 3 }}
-                >
-                  Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
-                </p>
-              ) : (
-                <p
-                  className="reveal mt-6 text-xs text-muted-foreground"
-                  style={{ ["--i" as string]: 3 }}
-                >
-                  No event on this instance yet — run <Code>npm run seed</Code> to load the demo
-                  conference.
-                </p>
-              )}
-            </div>
-
-            {/* The stack: the board fans out behind, top and right, so the
-                pair reads as one object — the desk the loop is run from. The
-                peek stays clear of the caption line below the front capture. */}
             <div
-              className="reveal min-w-0 lg:pr-8 lg:pt-6"
+              className="reveal mt-8 flex flex-wrap items-center gap-3"
               style={{ ["--i" as string]: 2 }}
             >
-              <div className="relative">
-                <Shot
-                  src="/screens/agenda.webp"
-                  alt="The agenda board: unscheduled sessions beside a rooms-by-time grid."
-                  priority
-                  width={1200}
-                  height={760}
-                  className="absolute inset-0 hidden translate-x-8 -translate-y-6 lg:block [&>div]:h-full [&_img]:h-full [&_img]:object-cover [&_img]:object-left-top"
-                />
-                <Shot
-                  src="/screens/dashboard.webp"
-                  alt="The organizer dashboard: days until the event, submission counts, submission status and a speaker-readiness table."
-                  priority
-                  width={1440}
-                  height={900}
-                  caption="The organizer dashboard and the agenda board, rendered from this repository."
-                  className="relative"
-                />
-              </div>
+              <Link
+                href={ctaHref}
+                className="nowrap-affordance inline-flex h-11 items-center rounded-pill bg-paper px-6 text-[0.9375rem] font-medium text-ink transition-colors duration-[120ms] ease-out hover:bg-paper-3 active:translate-y-px"
+              >
+                {event ? "Open the live demo" : "Create an account"}
+              </Link>
+              <Link
+                href="/sign-in"
+                className="nowrap-affordance inline-flex h-11 items-center rounded-pill border border-paper/35 bg-transparent px-6 text-[0.9375rem] font-medium text-paper transition-colors duration-[120ms] ease-out hover:bg-paper/10 active:translate-y-px"
+              >
+                Sign in as an organizer
+              </Link>
             </div>
+
+            {event ? (
+              <p
+                className="reveal wordmark mt-6 text-xs leading-relaxed text-paper/55"
+                style={{ ["--i" as string]: 3 }}
+              >
+                Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
+              </p>
+            ) : (
+              <p
+                className="reveal mt-6 text-xs text-paper/55"
+                style={{ ["--i" as string]: 3 }}
+              >
+                No event on this instance yet — run <Code>npm run seed</Code> to load the demo
+                conference.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -737,7 +729,10 @@ export default function HomePage() {
           </div>
 
           <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-paper/20 pt-6 text-xs text-paper/65">
-            <p className="wordmark text-paper">Conferencer</p>
+            <p className="wordmark flex items-center gap-2 text-paper">
+              <LogoMark size={18} />
+              Conferencer
+            </p>
             <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
               <Link
                 href="/api-docs"
