@@ -100,11 +100,11 @@ export default async function SubmissionDetailPage({
         <div className="min-w-0">
           <Link
             href={`/admin/e/${slug}/submissions`}
-            className="text-sm font-medium text-brand-700 hover:underline"
+            className="text-sm font-medium text-signal hover:underline"
           >
             ← All submissions
           </Link>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
             {submission.title}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -116,28 +116,12 @@ export default async function SubmissionDetailPage({
               <Chip color={submission.track_color}>{submission.track_name}</Chip>
             ) : null}
             {submission.format_name ? <Chip tone="slate">{submission.format_name}</Chip> : null}
-            <span className="text-xs text-slate-500">
-              Speaker sees: <strong>{speakerFacingStatus(submission.status)}</strong>
+            <span className="text-xs text-muted-foreground">
+              Speaker sees: <strong className="text-ink">{speakerFacingStatus(submission.status)}</strong>
             </span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <form action={setStatusAction} className="flex items-center gap-1">
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="id" value={submission.id} />
-            <input type="hidden" name="status" value="accepted" />
-            <Button type="submit" variant="success" size="sm">
-              Accept
-            </Button>
-          </form>
-          <form action={setStatusAction} className="flex items-center gap-1">
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="id" value={submission.id} />
-            <input type="hidden" name="status" value="declined" />
-            <Button type="submit" variant="danger" size="sm">
-              Decline (Reject)
-            </Button>
-          </form>
           <LinkButton
             href={`/admin/e/${slug}/emails/compose?submission=${submission.id}`}
             size="sm"
@@ -168,7 +152,7 @@ export default async function SubmissionDetailPage({
 
       {editing ? (
         <Card className="p-5">
-          <h2 className="mb-4 text-sm font-semibold text-slate-900">Edit submission</h2>
+          <h2 className="mb-4 text-sm font-semibold text-ink">Edit submission</h2>
           <form action={saveSubmissionAction} className="space-y-4">
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="id" value={submission.id} />
@@ -234,7 +218,7 @@ export default async function SubmissionDetailPage({
             </div>
             {allTags.length ? (
               <fieldset>
-                <legend className="mb-1 text-sm font-medium text-slate-700">Tags</legend>
+                <legend className="mb-1 text-sm font-medium text-ink-2">Tags</legend>
                 <div className="flex flex-wrap gap-3">
                   {allTags.map((t) => (
                     <label key={t.id} className="flex items-center gap-1.5 text-sm">
@@ -278,7 +262,7 @@ export default async function SubmissionDetailPage({
             </div>
           </form>
 
-          <form action={deleteSubmissionAction} className="mt-6 border-t border-slate-200 pt-4">
+          <form action={deleteSubmissionAction} className="mt-6 border-t border-rule pt-4">
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="id" value={submission.id} />
             <ConfirmSubmit message={`Delete "${submission.title}"? This cannot be undone.`}>
@@ -315,11 +299,11 @@ export default async function SubmissionDetailPage({
                       <div>
                         <Link
                           href={`/admin/e/${slug}/speakers/${p.contact_id}`}
-                          className="font-medium text-slate-800 hover:text-brand-700"
+                          className="font-medium text-ink hover:text-signal"
                         >
                           {p.first_name} {p.last_name}
                         </Link>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {[p.job_title, p.company].filter(Boolean).join(", ")}
                         </p>
                       </div>
@@ -380,7 +364,7 @@ export default async function SubmissionDetailPage({
           </Table>
           <form
             action={addParticipantAction}
-            className="grid gap-3 border-t border-slate-200 p-4 sm:grid-cols-5"
+            className="grid gap-3 border-t border-rule p-4 sm:grid-cols-5"
           >
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="id" value={submission.id} />
@@ -445,7 +429,7 @@ export default async function SubmissionDetailPage({
                     <Td className="text-xs">{formatStamp(upload.created_at)}</Td>
                     <Td>
                       <a
-                        className="text-sm font-medium text-brand-700 hover:underline"
+                        className="text-sm font-medium text-signal hover:underline"
                         href={`/f/${upload.id}?download=1`}
                       >
                         Download
@@ -456,7 +440,7 @@ export default async function SubmissionDetailPage({
               </tbody>
             </Table>
           ) : (
-            <p className="px-4 py-6 text-sm text-slate-500">No files uploaded yet.</p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">No files uploaded yet.</p>
           )}
         </Card>
       ) : tab === "reviews" ? (
@@ -467,13 +451,13 @@ export default async function SubmissionDetailPage({
             actions={<LinkButton href={`/admin/e/${slug}/evaluation`} size="sm">Evaluation</LinkButton>}
           />
           {reviews.length ? (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-rule">
               {reviews.map((review) => (
                 <li key={review.id} className="px-4 py-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-ink">
                       {review.reviewer_name}
-                      <span className="ml-2 text-xs font-normal text-slate-500">
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
                         {review.plan_name} · {review.round_name}
                       </span>
                     </p>
@@ -482,20 +466,20 @@ export default async function SubmissionDetailPage({
                     </Chip>
                   </div>
                   {review.comment ? (
-                    <p className="mt-1 text-sm text-slate-700">{review.comment}</p>
+                    <p className="mt-1 text-sm text-ink-2">{review.comment}</p>
                   ) : null}
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Submitted {formatStamp(review.submitted_at)}
                   </p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="px-4 py-6 text-sm text-slate-500">No reviews submitted yet.</p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">No reviews submitted yet.</p>
           )}
           {assignments.length ? (
-            <div className="border-t border-slate-200 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="border-t border-rule px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Assigned reviewers
               </p>
               <ul className="mt-1 flex flex-wrap gap-2">
@@ -517,20 +501,20 @@ export default async function SubmissionDetailPage({
             description="Every edit, with who made it and when. Restore an earlier version if needed."
           />
           {history.length ? (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-rule">
               {history.map((entry) => (
                 <li key={entry.id} className="flex items-start justify-between gap-3 px-4 py-3">
                   <div>
-                    <p className="text-sm text-slate-800">{entry.summary ?? entry.action}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm text-ink">{entry.summary ?? entry.action}</p>
+                    <p className="text-xs text-muted-foreground">
                       {entry.actor_name} · {formatStamp(entry.created_at)}
                     </p>
                     {entry.before ? (
                       <details className="mt-1">
-                        <summary className="cursor-pointer text-xs text-brand-700">
+                        <summary className="cursor-pointer text-xs text-signal">
                           What changed
                         </summary>
-                        <pre className="mt-1 max-w-2xl overflow-x-auto rounded bg-slate-50 p-2 text-[11px] text-slate-600">
+                        <pre className="mt-1 max-w-2xl overflow-x-auto rounded bg-paper-2 p-2 text-[11px] text-neutral">
                           {JSON.stringify(
                             { before: JSON.parse(entry.before), after: JSON.parse(entry.after ?? "{}") },
                             null,
@@ -557,53 +541,53 @@ export default async function SubmissionDetailPage({
               ))}
             </ul>
           ) : (
-            <p className="px-4 py-6 text-sm text-slate-500">No changes recorded yet.</p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">No changes recorded yet.</p>
           )}
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-2">
             <Card className="p-5">
-              <h2 className="text-sm font-semibold text-slate-900">Abstract</h2>
-              <p className="mt-2 whitespace-pre-line text-sm text-slate-700">
+              <h2 className="text-sm font-semibold text-ink">Abstract</h2>
+              <p className="mt-2 whitespace-pre-line text-sm text-ink-2">
                 {stripHtml(submission.description ?? "") || "No description provided."}
               </p>
             </Card>
 
             <Card>
               <CardHeader title="Answers" description="Everything captured by the form." />
-              <dl className="divide-y divide-slate-100">
+              <dl className="divide-y divide-rule">
                 {Object.entries(answers).length ? (
                   Object.entries(answers).map(([key, value]) => (
                     <div key={key} className="grid gap-1 px-4 py-3 sm:grid-cols-3">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {answerLabel(key)}
                       </dt>
-                      <dd className="text-sm text-slate-800 sm:col-span-2">
+                      <dd className="text-sm text-ink sm:col-span-2">
                         {Array.isArray(value) ? value.join(", ") : stripHtml(String(value ?? "—")) || "—"}
                       </dd>
                     </div>
                   ))
                 ) : (
-                  <p className="px-4 py-6 text-sm text-slate-500">No custom answers.</p>
+                  <p className="px-4 py-6 text-sm text-muted-foreground">No custom answers.</p>
                 )}
               </dl>
             </Card>
 
             <Card>
               <CardHeader title="Participants" description="Speakers attached to this submission." />
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-rule">
                 {participants.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-4 py-3">
                     <Avatar src={p.headshot_url} name={`${p.first_name} ${p.last_name}`} size={34} />
                     <div className="min-w-0 flex-1">
                       <Link
                         href={`/admin/e/${slug}/speakers/${p.contact_id}`}
-                        className="text-sm font-medium text-slate-900 hover:text-brand-700"
+                        className="text-sm font-medium text-ink hover:text-signal"
                       >
                         {p.first_name} {p.last_name}
                       </Link>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {[p.job_title, p.company].filter(Boolean).join(", ")} · {p.email}
                       </p>
                     </div>
@@ -615,50 +599,66 @@ export default async function SubmissionDetailPage({
           </div>
 
           <div className="space-y-4">
-            <Card className="p-4">
-              <h2 className="text-sm font-semibold text-slate-900">Decision</h2>
-              <form action={setStatusAction} className="mt-3 space-y-2">
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="id" value={submission.id} />
-                <Select name="status" defaultValue={submission.status} aria-label="Status">
-                  {SUBMISSION_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {STATUS_LABELS[s]}
-                    </option>
-                  ))}
-                </Select>
-                <Button type="submit" variant="primary" className="w-full">
-                  Save status
-                </Button>
-              </form>
-
-              <h3 className="mt-4 text-sm font-semibold text-slate-900">Content approval</h3>
-              <p className="mt-1 text-xs text-slate-500">
-                Only approved content appears on the public site.
-              </p>
-              <form action={setApprovalAction} className="mt-2 space-y-2">
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="id" value={submission.id} />
-                <Select
-                  name="approval_status"
-                  defaultValue={submission.approval_status}
-                  aria-label="Content approval status"
-                >
-                  {APPROVAL_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {APPROVAL_LABELS[s]}
-                    </option>
-                  ))}
-                </Select>
-                <Button type="submit" className="w-full">
-                  Save approval
-                </Button>
-              </form>
+            <Card className="overflow-hidden p-0">
+              <div className="border-b border-rule p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold text-ink">Decision</h2>
+                  <Chip tone={statusTone(submission.status)}>
+                    {STATUS_LABELS[submission.status]}
+                  </Chip>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Change status here — this is the only place that updates the decision.
+                </p>
+                <form action={setStatusAction} className="mt-3 space-y-2">
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="id" value={submission.id} />
+                  <Select name="status" defaultValue={submission.status} aria-label="Status">
+                    {SUBMISSION_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {STATUS_LABELS[s]}
+                      </option>
+                    ))}
+                  </Select>
+                  <Button type="submit" variant="primary" className="w-full">
+                    Save status
+                  </Button>
+                </form>
+              </div>
+              <div className="bg-paper-2/60 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-medium text-ink-2">Content approval</h3>
+                  <Chip tone={submission.approval_status === "approved" ? "green" : "slate"}>
+                    {APPROVAL_LABELS[submission.approval_status]}
+                  </Chip>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Only approved content appears on the public site.
+                </p>
+                <form action={setApprovalAction} className="mt-2 space-y-2">
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="id" value={submission.id} />
+                  <Select
+                    name="approval_status"
+                    defaultValue={submission.approval_status}
+                    aria-label="Content approval status"
+                  >
+                    {APPROVAL_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {APPROVAL_LABELS[s]}
+                      </option>
+                    ))}
+                  </Select>
+                  <Button type="submit" variant="secondary" className="w-full">
+                    Save approval
+                  </Button>
+                </form>
+              </div>
             </Card>
 
             <Card className="p-4">
-              <h2 className="text-sm font-semibold text-slate-900">Schedule</h2>
-              <p className="mt-1 text-xs text-slate-500">
+              <h2 className="text-sm font-semibold text-ink">Schedule</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Set a slot here or drag the session on the agenda board.
               </p>
               <form action={scheduleSubmissionAction} className="mt-3 space-y-3">
@@ -711,22 +711,60 @@ export default async function SubmissionDetailPage({
                 </Button>
               </form>
               {submission.pub_published_at ? (
-                <p className="mt-2 text-xs text-emerald-700">
+                <p className="mt-2 text-xs text-positive">
                   Published to the public agenda {formatStamp(submission.pub_published_at)}
                 </p>
               ) : submission.starts_at ? (
-                <p className="mt-2 text-xs text-amber-700">
+                <p className="mt-2 text-xs text-warn">
                   Scheduled but not published yet — publish from the agenda board.
                 </p>
               ) : null}
             </Card>
 
-            <Card className="p-4">
-              <h2 className="text-sm font-semibold text-slate-900">AI first-pass triage</h2>
+            <div className="rounded-card border border-rule bg-paper-2/40 p-4 text-sm">
+              <h2 className="wordmark text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+                Record
+              </h2>
+              <dl className="mt-2 space-y-1 text-xs text-neutral">
+                <div className="flex justify-between gap-2">
+                  <dt>Submitted</dt>
+                  <dd className="tnum text-ink-2">
+                    {formatDateTime(submission.created_at.slice(0, 16))}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt>Source form</dt>
+                  <dd className="text-ink-2">{form ? form.name : "Added manually"}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt>Submitter</dt>
+                  <dd className="text-ink-2">{submission.submitter_name ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt>Average score</dt>
+                  <dd className="tnum text-ink-2">
+                    {submission.avg_score !== null && submission.avg_score !== undefined
+                      ? `${submission.avg_score.toFixed(2)} (${submission.review_count})`
+                      : "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt>Notified</dt>
+                  <dd className="text-ink-2">
+                    {submission.notified_at ? formatStamp(submission.notified_at) : "Not yet"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="rounded-card border border-rule bg-paper-2/40 p-4">
+              <h2 className="wordmark text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+                AI first-pass triage
+              </h2>
               {submission.ai_score !== null && submission.ai_score !== undefined ? (
                 <>
                   <div className="mt-2 flex items-center gap-2">
-                    <Chip tone="violet">AI score {submission.ai_score.toFixed(1)}</Chip>
+                    <Chip tone="blue">AI score {submission.ai_score.toFixed(1)}</Chip>
                     {submission.ai_override_score !== null &&
                     submission.ai_override_score !== undefined ? (
                       <Chip tone="green">
@@ -734,17 +772,17 @@ export default async function SubmissionDetailPage({
                       </Chip>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-xs text-slate-600">{submission.ai_rationale}</p>
+                  <p className="mt-2 text-xs text-neutral">{submission.ai_rationale}</p>
                 </>
               ) : (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Not scored yet. Run triage from the Evaluation area.
                 </p>
               )}
               <form action={aiScoreAction} className="mt-3">
                 <input type="hidden" name="slug" value={slug} />
                 <input type="hidden" name="submission_id" value={submission.id} />
-                <Button type="submit" size="sm">
+                <Button type="submit" size="sm" variant="secondary">
                   {submission.ai_score !== null ? "Re-run AI triage" : "Run AI triage"}
                 </Button>
               </form>
@@ -767,37 +805,7 @@ export default async function SubmissionDetailPage({
                   Save
                 </Button>
               </form>
-            </Card>
-
-            <Card className="p-4 text-sm">
-              <h2 className="text-sm font-semibold text-slate-900">Record</h2>
-              <dl className="mt-2 space-y-1 text-xs text-slate-600">
-                <div className="flex justify-between gap-2">
-                  <dt>Submitted</dt>
-                  <dd>{formatDateTime(submission.created_at.slice(0, 16))}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Source form</dt>
-                  <dd>{form ? form.name : "Added manually"}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Submitter</dt>
-                  <dd>{submission.submitter_name ?? "—"}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Average score</dt>
-                  <dd>
-                    {submission.avg_score !== null && submission.avg_score !== undefined
-                      ? `${submission.avg_score.toFixed(2)} (${submission.review_count})`
-                      : "—"}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Notified</dt>
-                  <dd>{submission.notified_at ? formatStamp(submission.notified_at) : "Not yet"}</dd>
-                </div>
-              </dl>
-            </Card>
+            </div>
           </div>
         </div>
       )}

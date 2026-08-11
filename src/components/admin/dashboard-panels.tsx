@@ -80,26 +80,50 @@ function FormsPanel({ eventId, slug }: { eventId: string; slug: string }) {
 
   return (
     <div className="grid gap-5 md:grid-cols-2">
-      <div>
-        <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
-          Submission pacing · {total} in the last {pacing.length} active days
-        </p>
-        <div className="mt-2 flex h-32 items-end gap-1">
-          {pacing.map((point) => (
-            // The column has to carry a real height or the bar's percentage
-            // resolves against `auto` and every day renders as a 3px dash.
-            <div key={point.day} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-              <div
-                className="w-full rounded-t-sm bg-ink"
-                style={{ height: `${10 + (point.n / max) * 85}%`, minHeight: 4 }}
-                title={`${point.n} on ${point.day}`}
-              />
-              <span className="wordmark tnum text-[9px] text-muted-foreground">{point.day.slice(8)}</span>
+      <figure className="min-w-0">
+        <figcaption className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+            Submission pacing · {total} in the last {pacing.length} active days
+          </p>
+          {pacing.length ? (
+            <p className="wordmark tnum text-[0.6875rem] text-muted-foreground">
+              Peak {max}
+            </p>
+          ) : null}
+        </figcaption>
+        {pacing.length ? (
+          <>
+            <ul className="sr-only">
+              {pacing.map((point) => (
+                <li key={point.day}>
+                  {point.n} on {point.day}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-2 flex h-32 items-end gap-1" aria-hidden="true">
+              {pacing.map((point) => (
+                // The column has to carry a real height or the bar's percentage
+                // resolves against `auto` and every day renders as a 3px dash.
+                <div
+                  key={point.day}
+                  className="flex h-full flex-1 flex-col items-center justify-end gap-1"
+                >
+                  <div
+                    className="w-full rounded-t-sm bg-ink"
+                    style={{ height: `${10 + (point.n / max) * 85}%`, minHeight: 4 }}
+                    title={`${point.n} on ${point.day}`}
+                  />
+                  <span className="wordmark tnum text-[9px] text-muted-foreground">
+                    {point.day.slice(8)}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-          {!pacing.length ? <p className="text-sm text-muted-foreground">No submissions yet.</p> : null}
-        </div>
-      </div>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">No submissions yet.</p>
+        )}
+      </figure>
       <div>
         <p className="wordmark text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">Forms</p>
         <ul className="mt-2 space-y-2">
