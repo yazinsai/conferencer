@@ -12,9 +12,9 @@ import { Band, Faq, Shot } from "@/components/marketing/pieces";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Conferencer — run your conference programme",
+  title: "Conferencer — the conference programme you own",
   description:
-    "Open-source conference programme management. Call for speakers, committee review, speaker onboarding, agenda building and a public schedule — one app, one SQLite file, MIT licensed.",
+    "MIT-licensed conference programme management: call for speakers, committee review, decisions, speaker onboarding, agenda and a public schedule. One container, one SQLite file, no per-event fee, no cut of your ticket sales, and no vendor who can switch it off.",
 };
 
 /**
@@ -26,10 +26,18 @@ export const metadata: Metadata = {
  * proof bar is worse than no proof bar. What stands in their place is checkable:
  * real captures, real repository facts, and counts read out of the database on
  * this instance at request time.
+ *
+ * The argument the page is built to make is ownership — MIT source, one file, no
+ * vendor who can reprice or close it — so § the price names competitors and
+ * quotes what they charge. That section carries its own evidence rule: every
+ * figure comes from the vendor's own public pricing page, is linked, is dated in
+ * the footnote, and describes only cost. No claim about a rival's product
+ * quality appears here, because we cannot check one and do not need to.
  */
 
 const NAV_LINKS = [
   { href: "#loop", label: "The loop" },
+  { href: "#price", label: "The price" },
   { href: "#tour", label: "The product" },
   { href: "#inside", label: "What's inside" },
   { href: "/api-docs", label: "API" },
@@ -68,6 +76,51 @@ const LOOP = [
   },
 ];
 
+/**
+ * The price row. Every figure is quoted from the vendor's own public pricing page
+ * and linked so a reader can check it in one click. Where a vendor publishes no
+ * number, the row says exactly that rather than inventing one, and no row
+ * characterises a competitor's product — only what it costs to use.
+ */
+const ELSEWHERE = [
+  {
+    name: "Sessionboard",
+    href: "https://www.sessionboard.com/pricing",
+    price: "From $249 / mo",
+    note: "The suite whose Program module this was written to replace. Every plan on the pricing page — Professional, Enterprise, Tailored — ends in the same button: request a demo.",
+  },
+  {
+    name: "Sessionize",
+    href: "https://sessionize.com/pricing",
+    price: "$499 / event",
+    note: "Per event occurrence, plus tax. The free tier is for free community events only, and is explicitly not valid for internal, private, promotional, marketing or commercial ones.",
+  },
+  {
+    name: "Oxford Abstracts",
+    href: "https://oxfordabstracts.com/pricing/",
+    price: "$890–$3,450 / event",
+    note: "Add-ons on top at $150 to $850 each — a second submission stream is $850, grouping abstracts into panels is another $850. Registration costs 2.5% of your ticket revenue, capped at $5,000.",
+  },
+  {
+    name: "Ex Ordo",
+    href: "https://www.exordo.com/pricing/",
+    price: "Ask us",
+    note: "The pricing page is a contact form. It asks how many submissions you expect — 125, 250, 500, up to 2,000+ — and then a person sends you a number.",
+  },
+  {
+    name: "PaperCall",
+    href: "https://www.papercall.io",
+    price: "$0, until August",
+    note: "Free, well liked, and closing on 31 August 2026. New events can no longer be created. This is the risk that every hosted option carries and none of them price in.",
+  },
+  {
+    name: "pretalx",
+    href: "https://pretalx.com/p/pricing",
+    price: "From €199 / event",
+    note: "Open source and genuinely good, hosted or self-run. Self-hosting wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy, and it hands off after the schedule is released.",
+  },
+] as const;
+
 const INSIDE = [
   [
     "Call for speakers",
@@ -90,6 +143,10 @@ const INSIDE = [
     "Submissions, profile and tasks, scoped to the signed-in speaker in SQL rather than by hiding links. Cross-user access returns a real 403.",
   ],
   [
+    "Speaker CRM",
+    "An org-level directory that outlives a single event: cross-event history, duplicate detection and merge, a kanban sourcing pipeline, saved segments and bulk email.",
+  ],
+  [
     "Tasks and files",
     "Action, file-request and form tasks. Versioned uploads with the latest flagged, cross-role comments, a deliverables matrix, ZIP export by session or speaker.",
   ],
@@ -109,6 +166,52 @@ const INSIDE = [
 
 const FAQ = [
   {
+    q: "It's free. What's the catch?",
+    a: (
+      <>
+        There is no paid tier, no seat limit, no feature held back for an enterprise plan and no
+        licence clause that turns commercial use into a phone call. One repository, MIT, all of it.
+        It was written to replace the programme module of a suite that costs a real conference about
+        forty thousand dollars a year — publishing the result costs nothing extra.
+      </>
+    ),
+  },
+  {
+    q: "What happens to my conference if this project stops?",
+    a: (
+      <>
+        Nothing. It is already on your machine: no licence server to check in with, no phone-home,
+        no key that expires, and it runs with the network unplugged. An abandoned repository still
+        boots, and you can fork it. Compare the failure mode of a hosted tool — PaperCall was free
+        and well liked, and it closes on 31 August 2026, taking new events with it.
+      </>
+    ),
+  },
+  {
+    q: "Isn't pretalx open source already?",
+    a: (
+      <>
+        It is, it is excellent, and if it fits your conference you should use it. Two differences.
+        It hands off once the schedule is released, where this carries on through decisions, speaker
+        onboarding tasks, versioned file deliverables and a cross-event speaker CRM. And its install
+        wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy in front; this wants Node
+        22, or one <Code>docker compose up</Code>.
+      </>
+    ),
+  },
+  {
+    q: "How do I get my data out?",
+    a: (
+      <>
+        The database is the export: <Code>data/conferencer.db</Code> is a single SQLite file you can
+        copy, open in any tool and query with plain SQL. On top of that there is CSV for
+        submissions, speakers, tasks and evaluation scores, a ZIP of every uploaded file by session
+        or speaker, iCal feeds, and a bearer-token REST API with an OpenAPI 3 document. Leaving is a{" "}
+        <Code>cp</Code>.
+      </>
+    ),
+  },
+  {
     q: "Where does the data live?",
     a: (
       <>
@@ -122,9 +225,10 @@ const FAQ = [
     q: "Do I need Postgres, Redis or a queue?",
     a: (
       <>
-        No — Node 22 and nothing else. Queries are synchronous and sub-millisecond, which is exactly
-        what lets every page render in one server pass. There is no client-side data fetching and no
-        loading-spinner waterfall anywhere in the product.
+        No — Node 22 and nothing else. That is the whole dependency list, and it is the difference
+        between an afternoon and a weekend when you self-host. Queries are synchronous and
+        sub-millisecond, which is exactly what lets every page render in one server pass. There is
+        no client-side data fetching and no loading-spinner waterfall anywhere in the product.
       </>
     ),
   },
@@ -161,11 +265,14 @@ const FAQ = [
     ),
   },
   {
-    q: "Is it really MIT?",
+    q: "Who is behind it, and can I change it?",
     a: (
       <>
-        Yes. Fork it, run it, never pay for it. It was built to replace the programme module of a
-        conference suite that costs about forty thousand dollars a year, for one real conference.
+        It was built for one real conference and opened up because there was no reason not to. Read
+        every line before you trust it with a call for speakers — roughly thirty-five thousand of
+        them, plain SQL and no ORM, a schema in one <Code>schema.sql</Code> file. Change a review
+        rule, add a field type, rip out a module you do not want: that is a pull request against
+        your own fork, not a feature request in someone else&rsquo;s backlog.
       </>
     ),
   },
@@ -213,16 +320,19 @@ export default function HomePage() {
                 consequence of a max-width guessing where to wrap. */}
             <h1 className="reveal display text-display-m text-ink" style={{ ["--i" as string]: 0 }}>
               <span className="block">Open the call.</span>
-              <span className="block">Review the talks.</span>
               <span className="block">Ship the agenda.</span>
+              <span className="block">Own every line.</span>
             </h1>
 
             <p
               className="reveal mt-6 max-w-[52ch] text-lg leading-relaxed text-neutral"
               style={{ ["--i" as string]: 1 }}
             >
-              Conferencer is the programme half of a conference-management suite, as one app with
-              one file. No database server, no cloud account, and no API key required to boot it.
+              Conferencer runs the entire programme — call for speakers, committee review,
+              decisions, speaker onboarding, agenda, public site — and every line of it is MIT. No
+              per-event licence, no per-submission tier, no percentage of your ticket sales, no
+              demo to sit through. One container, one file, and a copy of the source nobody can take
+              back.
             </p>
 
             <div
@@ -298,7 +408,8 @@ export default function HomePage() {
                 {formatEventDates(event.starts_at, event.ends_at)}
               </>
             ) : null}
-            . Nothing on this page is a marketing number.
+            , out of the one SQLite file this instance runs on. Nothing on this page is a marketing
+            number, and there is no logo cloud under it because there is nobody to name yet.
           </p>
         </div>
       </Band>
@@ -310,8 +421,10 @@ export default function HomePage() {
             One loop, covered properly.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Everything in the product serves the same circuit. Anything that does not sit on it was
-            left out.
+            Everything in the product serves the same circuit, and anything that does not sit on it
+            was left out. Note where the loop keeps going after step four: the accepted-speaker half
+            — onboarding, chasing slides, versioned deliverables — is the part free tools hand back
+            to you and paid ones charge for.
           </p>
 
           <ol className="mt-12 grid gap-x-10 gap-y-10 border-t border-rule pt-10 sm:grid-cols-2 lg:grid-cols-3">
@@ -328,8 +441,87 @@ export default function HomePage() {
         </div>
       </Band>
 
+      {/* ------------------------------ the price ------------------------- */}
+      <Band id="price" band="paper-2">
+        <div className="py-20 sm:py-28">
+          <h2 className="display max-w-[22ch] text-2xl text-ink sm:text-3xl">
+            What the same loop costs everywhere else.
+          </h2>
+          <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
+            Quoted from each vendor&rsquo;s own pricing page, linked so you can check it. Notice the
+            shapes as much as the numbers: per event, per submission band, per month, or a slice of
+            the registrations you sold.
+          </p>
+
+          <dl className="mt-12 border-t border-rule">
+            {ELSEWHERE.map((row) => (
+              <div
+                key={row.name}
+                className="grid gap-x-8 gap-y-1 border-b border-rule py-5 md:grid-cols-[minmax(0,10rem)_minmax(0,11rem)_minmax(0,1fr)]"
+              >
+                <dt className="display text-[0.9375rem] text-ink">
+                  <a
+                    href={row.href}
+                    className="nowrap-affordance underline-offset-4 hover:underline"
+                  >
+                    {row.name}
+                  </a>
+                </dt>
+                <dd className="wordmark tnum text-sm text-ink-2">{row.price}</dd>
+                <dd className="text-sm leading-relaxed text-neutral">{row.note}</dd>
+              </div>
+            ))}
+
+            {/* The last row is the argument, so it is set in the page's loudest
+                register rather than given a coloured badge. */}
+            <div className="grid gap-x-8 gap-y-1 border-b-2 border-ink py-6 md:grid-cols-[minmax(0,10rem)_minmax(0,11rem)_minmax(0,1fr)]">
+              <dt className="display text-md text-ink">Conferencer</dt>
+              <dd className="wordmark tnum text-md text-ink">$0, always</dd>
+              <dd className="text-sm leading-relaxed text-ink-2">
+                No plan, no per-event fee, no submission ceiling, no share of your revenue, no
+                account to create. Your only bill is the box it runs on, and a $5 VPS clears it.
+              </dd>
+            </div>
+          </dl>
+
+          <p className="mt-6 max-w-[68ch] text-xs leading-relaxed text-muted-foreground">
+            Public pricing pages, read on 11 August 2026; follow the links and check us. Ours is the{" "}
+            <a
+              href="https://github.com/yazinsai/conferencer/blob/main/LICENSE"
+              className="underline underline-offset-4 hover:text-ink"
+            >
+              LICENSE
+            </a>{" "}
+            file, which is twenty-one lines and has no pricing table in it.
+          </p>
+
+          <div className="mt-16 border-t border-rule pt-12 lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-14">
+            <h3 className="display max-w-[16ch] text-xl text-ink sm:text-2xl">
+              And nobody can switch it off.
+            </h3>
+            <div className="mt-4 lg:mt-0">
+              <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
+                A price you can plan around is the small half of this. The other half is that a
+                hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
+                repositioned upmarket, or closed. PaperCall is free and widely used, and it shuts
+                down on 31 August 2026 — new events can no longer be created, and the existing ones
+                are guaranteed only until that date.
+              </p>
+              <p className="mt-4 max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
+                Conferencer cannot do that to you. There is no licence check, no phone-home and no
+                key with an expiry; it runs with the network unplugged. Every submission, review
+                score, decision and uploaded slide deck sits in one SQLite file on a disk you
+                control, which you can back up with <Code>cp</Code> and read with any tool that
+                speaks SQL. If this repository went quiet tomorrow, your conference would not
+                notice.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Band>
+
       {/* ------------------------------ F5 · the workbench tour ------------ */}
-      <Band id="tour" band="paper-2">
+      <Band id="tour" band="paper">
         <div className="py-20 sm:py-24">
           <h2 className="display max-w-[20ch] text-2xl text-ink sm:text-3xl">
             Three screens do most of the work.
@@ -362,12 +554,13 @@ export default function HomePage() {
       </Band>
 
       {/* ------------------------------ F3 · the spec sheet ---------------- */}
-      <Band id="inside" band="paper">
+      <Band id="inside" band="paper-2">
         <div className="py-20 sm:py-24">
           <h2 className="display text-2xl text-ink sm:text-3xl">What is in the box</h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
             Roughly thirty-five thousand lines across a hundred and sixteen pages. The list below is
-            the whole of it, not a highlight reel.
+            the whole of it, not a highlight reel — and unusually for a feature list, you can go and
+            check it line by line.
           </p>
 
           <dl className="mt-12 max-w-4xl border-t border-rule">
@@ -385,7 +578,7 @@ export default function HomePage() {
       </Band>
 
       {/* ------------------------------ the published result --------------- */}
-      <Band band="paper-2">
+      <Band band="paper">
         <div className="grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
           <div className="min-w-0">
             <h2 className="display max-w-[16ch] text-2xl text-ink sm:text-3xl">
@@ -428,7 +621,7 @@ export default function HomePage() {
       </Band>
 
       {/* ------------------------------ conversational FAQ ----------------- */}
-      <Band band="paper">
+      <Band band="paper-2">
         <div className="py-20 sm:py-24">
           <h2 className="display text-2xl text-ink sm:text-3xl">Reasonable questions</h2>
           <div className="mt-10">
@@ -438,17 +631,26 @@ export default function HomePage() {
       </Band>
 
       {/* ------------------------------ Ft5 · statement footer ------------- */}
-      <footer className="border-t border-rule bg-paper-2">
+      <footer className="border-t border-rule bg-paper">
         <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
-          <p className="display max-w-[16ch] text-display-s text-ink">Own your programme.</p>
+          <p className="display max-w-[16ch] text-display-s text-ink">
+            Rent nothing. Own the programme.
+          </p>
           <p className="mt-5 max-w-[46ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Clone it, run it, never pay for it. One container, one volume, and a database you can
-            copy with <Code>cp</Code>.
+            Clone it, run it, fork it, never pay for it. One container, one volume, and a conference
+            you can back up with <Code>cp</Code>.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">
             <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
               {ctaLabel}
+            </LinkButton>
+            <LinkButton
+              href="https://github.com/yazinsai/conferencer"
+              size="lg"
+              className="nowrap-affordance"
+            >
+              Read the source
             </LinkButton>
           </div>
 

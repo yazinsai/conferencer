@@ -308,6 +308,14 @@ customers to name, and slop gate 46 bans fabricated proof. In their place:
 - **live counts read from the database at request time** for the seeded demo event, labelled as such.
   When the database is empty the strip renders `—` placeholders with the same label. A number-shaped
   hole is honest; a fabricated number is not.
+- **quoted competitor pricing**, in `/` § the price. The landing page's whole argument is ownership,
+  and ownership is only legible next to what renting costs, so this is the one section that names
+  other products. It has its own rule, and a future edit may not relax it: every figure is quoted
+  from the vendor's **own public pricing page**, linked inline, and dated in a footnote under the
+  table. A row states cost and nothing else — no claim about anyone else's product quality, because
+  that is not checkable from a pricing page and the comparison does not need it. Where a vendor
+  publishes no price, the row says so instead of estimating one. Re-read the links before shipping a
+  change to that table; a stale price is the one number on this page that can rot on its own.
 
 ## Exports
 
