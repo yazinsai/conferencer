@@ -64,9 +64,15 @@
   --font-sans: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Three display steps. `display` is for type that owns the full measure (the
+     event marquee); `display-m` for a split hero, where the headline only has
+     half the page; `display-s` for a closing statement or a section lead. */
   --text-display: clamp(2.5rem, 4.4vw + 1rem, 4.5rem);
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.03em;
+  --text-display-m: clamp(2.25rem, 3.2vw + 0.9rem, 3.375rem);
+  --text-display-m--line-height: 1.06;
+  --text-display-m--letter-spacing: -0.03em;
   --text-display-s: clamp(1.875rem, 2.4vw + 1rem, 2.75rem);
   --text-display-s--line-height: 1.1;
   --text-display-s--letter-spacing: -0.025em;

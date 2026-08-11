@@ -137,8 +137,13 @@ Type scale — 1.25 major third from a 16 px body:
 --text-2xl       2.25rem
 --text-3xl       2.75rem
 --text-display-s clamp(1.875rem, 2.4vw + 1rem, 2.75rem)
---text-display   clamp(2.5rem,  4.4vw + 1rem, 4.5rem)
+--text-display-m clamp(2.25rem,  3.2vw + 0.9rem, 3.375rem)
+--text-display   clamp(2.5rem,   4.4vw + 1rem,   4.5rem)
 ```
+
+Three display steps, because a headline's size has to answer to the width it is given:
+`display` is for type that owns the full measure (the event marquee), `display-m` for a split
+hero where the headline only has half the page, `display-s` for a closing statement.
 
 Display caps at 4.5 rem (72 px) — under the 5.5 rem ceiling — because every headline in this product
 runs 40–60 characters and a bigger clamp would push the hero past the fold at 1280×800 (gate 44b).
@@ -286,6 +291,7 @@ everything below is a translation of it.
   --text-xs: 0.75rem;  --text-sm: 0.875rem; --text-md: 1.125rem;
   --text-lg: 1.375rem; --text-xl: 1.75rem;  --text-2xl: 2.25rem; --text-3xl: 2.75rem;
   --text-display-s: clamp(1.875rem, 2.4vw + 1rem, 2.75rem);
+  --text-display-m: clamp(2.25rem, 3.2vw + 0.9rem, 3.375rem);
   --text-display:   clamp(2.5rem, 4.4vw + 1rem, 4.5rem);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);

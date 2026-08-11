@@ -289,17 +289,20 @@ async function productShots() {
   const formId = await discover(`/admin/e/${SLUG}/forms`, /\/forms\/([A-Za-z0-9]{12,})/);
   const planId = await discover(`/admin/e/${SLUG}/evaluation`, /\/evaluation\/([A-Za-z0-9]{12,})/);
 
+  // The hero capture gets the full desktop width; the tour captures are taken at
+  // a narrower viewport so the UI inside them is proportionally larger once the
+  // page scales them down to half a column.
+  const tour = { width: 1200, height: 760, auth: true };
+
   return [
     { name: "dashboard", path: `/admin/e/${SLUG}`, width: 1440, height: 900, auth: true },
     // Step 3 is the question list — the part of the builder worth showing.
     formId
-      ? { name: "cfp-builder", path: `/admin/e/${SLUG}/forms/${formId}?step=3`, width: 1440, height: 900, auth: true }
+      ? { name: "cfp-builder", path: `/admin/e/${SLUG}/forms/${formId}?step=3`, ...tour }
       : null,
-    planId
-      ? { name: "review", path: `/admin/e/${SLUG}/evaluation/${planId}`, width: 1440, height: 900, auth: true }
-      : null,
-    { name: "agenda", path: `/admin/e/${SLUG}/agenda`, width: 1440, height: 900, auth: true },
-    { name: "public-agenda", path: `/e/${SLUG}/agenda`, width: 1440, height: 900 },
+    planId ? { name: "review", path: `/admin/e/${SLUG}/evaluation/${planId}`, ...tour } : null,
+    { name: "agenda", path: `/admin/e/${SLUG}/agenda`, ...tour },
+    { name: "public-agenda", path: `/e/${SLUG}/agenda`, width: 1200, height: 760 },
   ].filter(Boolean);
 }
 
