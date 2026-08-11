@@ -95,9 +95,11 @@ Four of those values were tuned by the audit rather than picked by eye:
 regression, so this is checked rather than asserted.
 
 **The accent is monochrome and the signal is rationed.** `--color-signal` is the one chromatic colour
-in the system. It is allowed on focus rings, on links inside app chrome, and on the one chart series —
-and nothing else. Held under 5 % of any viewport (gate 23). Marketing and public surfaces are
-ink-on-paper only.
+in the system. It is allowed on focus rings, on links inside app chrome, on the one chart series, and
+in **the logo mark** (`src/components/ui/logo.tsx`) — an open ink ring with a signal-coloured handoff
+wedge and dot. The ring is drawn in `currentColor`, so the same SVG sits on paper (ink ring) and on
+the dark bands (paper ring) with no variant prop. Nothing else. Held under 5 % of any viewport
+(gate 23). Marketing and public surfaces are otherwise ink-on-paper only.
 
 The **active navigation item** is *not* signal-coloured. It is a `--color-paper-3` fill with ink text
 at medium weight — the same quiet fill the hover state uses, one step stronger. Tinting fifteen
@@ -240,7 +242,9 @@ reflows or an item drops — the label does not break.
 
 ## What pages MUST share
 
-- The wordmark, set in `Geist Mono` 500 with `-0.02em` tracking.
+- The wordmark, set in `Geist Mono` 500 with `-0.02em` tracking, **paired with the logo mark**
+  (`<LogoMark>`, 18–20 px, a `gap-2` to its left) wherever the wordmark anchors a nav rail, a
+  marketing bar, or the landing footer.
 - `--font-display` / `--font-body` / `--font-outlier`.
 - The CTA voice above — shape, radius, padding rhythm, weight.
 - Hairline rule weight (`--rule-hair: 1px`) and card radius (`--radius-card: 12px`).

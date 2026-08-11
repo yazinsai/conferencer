@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { buttonClass, cx } from "@/components/ui";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { LogoMark } from "@/components/ui/logo";
 
 const ITEMS: Array<{ href: string; label: string; icon: IconName; exact?: boolean }> = [
   { href: "/portal", label: "Home", icon: "dashboard", exact: true },
@@ -35,8 +36,9 @@ export function PortalSidebar({ eventName }: { eventName: string }) {
         <div className="px-2 pb-4">
           <Link
             href="/portal"
-            className="wordmark nowrap-affordance block text-[0.9375rem] text-ink"
+            className="wordmark nowrap-affordance flex items-center gap-2 text-[0.9375rem] text-ink"
           >
+            <LogoMark size={18} />
             Conferencer
           </Link>
           <p className="mt-1 truncate text-xs text-muted-foreground" title={eventName}>
@@ -91,7 +93,10 @@ export function PortalSidebarSheet({ eventName }: { eventName: string }) {
         )}
       >
         <span className="min-w-0">
-          <span className="wordmark block text-[0.9375rem] text-ink">Conferencer</span>
+          <span className="wordmark flex items-center gap-2 text-[0.9375rem] text-ink">
+            <LogoMark size={18} />
+            Conferencer
+          </span>
           <span className="block truncate text-xs text-muted-foreground">{eventName}</span>
         </span>
         <span className={cx(buttonClass("secondary", "sm"), "pointer-events-none")}>
