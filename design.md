@@ -59,24 +59,40 @@ generous density, a left-biased hero paired with a product capture, and **no chr
 the "accent" is ink itself, worn as a black pill CTA.
 
 ```
---color-paper        oklch(100%   0     0    )   page white
---color-paper-2      oklch(98.2%  0.002 265  )   alternating section band
---color-paper-3      oklch(96.4%  0.003 265  )   inset surfaces, table heads
---color-rule         oklch(92.5%  0.004 265  )   hairline borders
---color-rule-2       oklch(87%    0.005 265  )   stronger dividers, input borders
---color-muted        oklch(53%    0.012 265  )   meta text        (4.5:1 on paper-3)
---color-neutral      oklch(44%    0.012 265  )   secondary text
---color-ink-2        oklch(32%    0.010 265  )   subheads
---color-ink          oklch(17%    0.008 265  )   primary text
+--color-paper        oklch(100%   0     0    )   page white                          #ffffff
+--color-paper-2      oklch(98.2%  0.002 265  )   alternating section band            #f8f9fa
+--color-paper-3      oklch(96.4%  0.003 265  )   inset surfaces, table heads         #f2f3f5
+--color-rule         oklch(92.5%  0.004 265  )   hairline borders                    #e5e6e9
+--color-rule-2       oklch(87%    0.005 265  )   stronger dividers                   #d2d4d8
+--color-field        oklch(63%    0.013 265  )   form-control boundary (3.5:1)       #83878f
+--color-muted        oklch(53%    0.012 265  )   meta text        (4.76:1 on paper-3) #686c73
+--color-neutral      oklch(44%    0.012 265  )   secondary text                      #4f5359
+--color-ink-2        oklch(32%    0.010 265  )   subheads                            #303338
+--color-ink          oklch(17%    0.008 265  )   primary text                        #0e0f13
 --color-accent       oklch(17%    0.008 265  )   = ink. Primary CTA fill.
---color-accent-ink   oklch(99%    0     0    )   text on accent
---color-signal       oklch(51.1%  0.262 277  )   the product's indigo — focus, active, links in app chrome
+--color-accent-ink   oklch(99%    0     0    )   text on accent   (18.6:1)
+--color-signal       oklch(51.1%  0.262 277  )   the product's indigo — active, links in app chrome  #4f39f6
 --color-signal-ink   oklch(99%    0     0    )
---color-focus        oklch(51.1%  0.262 277  )   = signal
---color-positive     oklch(52%    0.13  155  )   accepted / complete
---color-warn         oklch(62%    0.14  75   )   overdue / pending
+--color-signal-soft  oklch(96.5%  0.016 277  )   the active item's tint
+--color-focus        oklch(58%    0.235 277  )   focus ring — a shade brighter than the signal
+--color-positive     oklch(50%    0.13  155  )   accepted / complete
+--color-warn         oklch(52%    0.12  68   )   overdue / pending
 --color-danger       oklch(53%    0.21  27   )   declined / destructive
 ```
+
+Four of those values were tuned by the audit rather than picked by eye:
+
+- **`--color-field`** is much darker than the decorative rules. When an input's fill matches the page,
+  its border is the only thing identifying it as a control, and WCAG 1.4.11 wants 3:1 for that. The
+  studied reference uses a near-invisible field border; this system does not follow it there.
+- **`--color-focus`** is a shade brighter than `--color-signal`, because the ring has to clear 3:1
+  against the **ink pill** it surrounds as well as against paper. At the signal's own lightness it
+  measured 2.97:1 on ink.
+- **`--color-warn`** and **`--color-positive`** were darkened until their chips cleared 4.5:1 against
+  their own soft tints (the amber chip measured 3.94:1 at first).
+
+`npm run contrast` recomputes all 27 pairs from `src/app/tokens.css` and exits non-zero on a
+regression, so this is checked rather than asserted.
 
 **The accent is monochrome and the signal is rationed.** `--color-signal` is the one chromatic colour
 in the system. It is allowed on focus rings, the active sidebar item, links inside app chrome, and
@@ -244,6 +260,7 @@ everything below is a translation of it.
   --color-paper-3:    oklch(96.4%  0.003 265);
   --color-rule:       oklch(92.5%  0.004 265);
   --color-rule-2:     oklch(87%    0.005 265);
+  --color-field:      oklch(63%    0.013 265);
   --color-muted:      oklch(53%    0.012 265);
   --color-neutral:    oklch(44%    0.012 265);
   --color-ink-2:      oklch(32%    0.010 265);
@@ -251,7 +268,7 @@ everything below is a translation of it.
   --color-accent:     oklch(17%    0.008 265);
   --color-accent-ink: oklch(99%    0     0);
   --color-signal:     oklch(51.1%  0.262 277);
-  --color-focus:      oklch(51.1%  0.262 277);
+  --color-focus:      oklch(58%    0.235 277);
 
   --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-body:    "Switzer", ui-sans-serif, system-ui, sans-serif;
@@ -287,6 +304,7 @@ everything below is a translation of it.
   --color-paper-3:    oklch(96.4%  0.003 265);
   --color-rule:       oklch(92.5%  0.004 265);
   --color-rule-2:     oklch(87%    0.005 265);
+  --color-field:      oklch(63%    0.013 265);
   --color-muted:      oklch(53%    0.012 265);
   --color-neutral:    oklch(44%    0.012 265);
   --color-ink-2:      oklch(32%    0.010 265);
@@ -323,6 +341,7 @@ everything below is a translation of it.
     "paper-3":    { "$value": "oklch(96.4% 0.003 265)",    "$type": "color" },
     "rule":       { "$value": "oklch(92.5% 0.004 265)",    "$type": "color" },
     "rule-2":     { "$value": "oklch(87% 0.005 265)",      "$type": "color" },
+    "field":      { "$value": "oklch(63% 0.013 265)",      "$type": "color" },
     "muted":      { "$value": "oklch(53% 0.012 265)",      "$type": "color" },
     "neutral":    { "$value": "oklch(44% 0.012 265)",      "$type": "color" },
     "ink-2":      { "$value": "oklch(32% 0.010 265)",      "$type": "color" },
@@ -330,7 +349,7 @@ everything below is a translation of it.
     "accent":     { "$value": "oklch(17% 0.008 265)",      "$type": "color" },
     "accent-ink": { "$value": "oklch(99% 0 0)",            "$type": "color" },
     "signal":     { "$value": "oklch(51.1% 0.262 277)",    "$type": "color" },
-    "focus":      { "$value": "oklch(51.1% 0.262 277)",    "$type": "color" }
+    "focus":      { "$value": "oklch(58% 0.235 277)",      "$type": "color" }
   },
   "font": {
     "display": { "$value": "Geist, ui-sans-serif, system-ui, sans-serif",   "$type": "fontFamily" },
@@ -381,8 +400,8 @@ consumes them directly.
   --accent-foreground:      oklch(17%    0.008 265);
   --destructive:            oklch(53%    0.21  27);
   --border:                 oklch(92.5%  0.004 265);    /* rule */
-  --input:                  oklch(87%    0.005 265);    /* rule-2 */
-  --ring:                   oklch(51.1%  0.262 277);    /* focus / signal */
+  --input:                  oklch(63%    0.013 265);    /* field — 3.5:1 against paper */
+  --ring:                   oklch(58%    0.235 277);    /* focus */
   --radius:                 0.625rem;
 }
 ```
