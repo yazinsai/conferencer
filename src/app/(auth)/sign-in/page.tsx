@@ -75,15 +75,45 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
 
       {demo.length ? (
         <Notice tone="info">
-          <p className="font-medium">Demo accounts</p>
-          <ul className="mt-1 space-y-0.5 font-mono text-xs">
-            {demo.map((d) => (
-              <li key={d.email}>
-                {d.email} — {passwordFor(d.email)}{" "}
-                <span className="font-sans text-sky-800">({d.role})</span>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-sky-800">
+                Demo mode enabled
+              </p>
+              <p className="mt-1 text-sm text-sky-950">Pick a role and sign straight in.</p>
+            </div>
+            <span className="rounded-pill border border-sky-200 bg-white/70 px-2.5 py-1 text-xs font-medium text-sky-900">
+              {demo.length} accounts
+            </span>
+          </div>
+          <div className="mt-3 grid gap-2">
+            {demo.map((d) => {
+              const password = passwordFor(d.email);
+              const name = [d.first_name, d.last_name].filter(Boolean).join(" ") || d.email;
+              return (
+                <form key={d.email} action={signInAction}>
+                  <input type="hidden" name="next" value={next} />
+                  <input type="hidden" name="email" value={d.email} />
+                  <input type="hidden" name="password" value={password} />
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    className="h-auto w-full justify-between gap-4 rounded-2xl border-sky-200 bg-white/80 px-3 py-2.5 text-left hover:bg-white"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-ink">{name}</span>
+                      <span className="mt-0.5 block truncate font-mono text-xs font-normal text-sky-900/80">
+                        {d.email}
+                      </span>
+                    </span>
+                    <span className="shrink-0 rounded-pill bg-sky-100 px-2 py-1 text-xs font-medium capitalize text-sky-900">
+                      {d.role}
+                    </span>
+                  </Button>
+                </form>
+              );
+            })}
+          </div>
         </Notice>
       ) : null}
     </div>
