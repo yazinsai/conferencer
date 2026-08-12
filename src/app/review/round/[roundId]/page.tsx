@@ -183,7 +183,7 @@ export default async function RoundQueue({
                   <li key={item.id}>
                     <Card className="p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1 basis-56">
                           <Link
                             href={`/review/a/${item.id}`}
                             className="text-base font-semibold text-slate-900 hover:text-brand-700"
@@ -208,7 +208,7 @@ export default async function RoundQueue({
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
+                        <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
                           <Chip tone={item.status === "abstained" ? "amber" : done ? "green" : "slate"}>
                             {item.status === "abstained"
                               ? "Conflict declared"
