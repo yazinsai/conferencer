@@ -8,6 +8,7 @@ import { daysUntil, formatEventDates } from "@/lib/datetime";
 import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
 import { LogoMark } from "@/components/ui/logo";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
 
 /* Hallmark · genre: modern-minimal · macrostructure: 05 Workbench ·
@@ -61,7 +62,7 @@ const LOOP = [
   {
     n: "01",
     title: "You build the call for speakers",
-    body: "Write your questions in the form builder: 14 field types, required and locked flags, and rules that hide a question until an earlier answer calls for it.",
+    body: "Write your questions in the form builder: 14 field types, required and locked flags, and show-when rules that hide a question until it matters.",
   },
   {
     n: "02",
@@ -135,48 +136,108 @@ const ELSEWHERE = [
   },
 ] as const;
 
+/**
+ * The spec sheet. Each row carries the glyph the organizer sidebar uses for that
+ * module, so the icon is wayfinding a reader will meet again inside the product
+ * rather than an ornament per feature card (design.md § Iconography).
+ */
 const INSIDE = [
-  [
-    "Call for speakers",
-    "A form builder with 14 field types, show-when logic, track routing, close dates, per-person limits, saved drafts and your own success page.",
-  ],
-  [
-    "Submissions",
-    "Status tabs with counts, inline and bulk edits, a column picker, saved views, search, CSV export, and a change history you can restore from.",
-  ],
-  [
-    "Review",
-    "Multi-round plans, eight scorecard types, anonymized rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, weighted results.",
-  ],
-  [
-    "Decisions",
-    "Accept and decline in bulk, with templated email, merge fields and a per-recipient preview. Acceptance hands off to onboarding on its own.",
-  ],
-  [
-    "Speaker portal",
-    "Each speaker's own submissions, profile and tasks, scoped in SQL rather than by hiding links. Another speaker's page returns a real 403.",
-  ],
-  [
-    "Speaker CRM",
-    "An organization-level directory that outlives one event: cross-event history, duplicate merge, a sourcing pipeline, saved segments, bulk email.",
-  ],
-  [
-    "Tasks and files",
-    "Action, file-request and form tasks. Versioned uploads with the latest flagged, comments across roles, a deliverables matrix, ZIP export.",
-  ],
-  [
-    "Agenda",
-    "A rooms grid you drag sessions onto; list, day, week, month and conflict views; auto-schedule assist; .ics invites and per-speaker calendar feeds.",
-  ],
-  [
-    "Public site",
-    "Sessions, speakers, agenda, itinerary, gallery and a personal schedule with .ics export — all of it readable without signing in.",
-  ],
-  [
-    "Embeds and API",
-    "One script tag per widget, plus HTML, JSON, XML and iCal feeds. A bearer-token REST API with cursor pagination, OpenAPI 3 and signed webhooks.",
-  ],
-] as const;
+  {
+    icon: "forms",
+    area: "Call for speakers",
+    detail:
+      "A form builder with 14 field types, show-when logic, track routing, close dates, per-person limits, saved drafts and your own success page.",
+  },
+  {
+    icon: "submissions",
+    area: "Submissions",
+    detail:
+      "Status tabs with counts, inline and bulk edits, a column picker, saved views, search, CSV export, and a change history you can restore from.",
+  },
+  {
+    icon: "evaluation",
+    area: "Review",
+    detail:
+      "Multi-round plans, eight scorecard types, anonymized rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, weighted results.",
+  },
+  {
+    icon: "decision",
+    area: "Decisions",
+    detail:
+      "Accept and decline in bulk, with templated email, merge fields and a per-recipient preview. Acceptance hands off to onboarding on its own.",
+  },
+  {
+    icon: "portals",
+    area: "Speaker portal",
+    detail:
+      "Each speaker's own submissions, profile and tasks, scoped in SQL rather than by hiding links. Another speaker's page returns a real 403.",
+  },
+  {
+    icon: "crm",
+    area: "Speaker CRM",
+    detail:
+      "An organization-level directory that outlives one event: cross-event history, duplicate merge, a sourcing pipeline, saved segments, bulk email.",
+  },
+  {
+    icon: "tasks",
+    area: "Tasks and files",
+    detail:
+      "Action, file-request and form tasks. Versioned uploads with the latest flagged, comments across roles, a deliverables matrix, ZIP export.",
+  },
+  {
+    icon: "agenda",
+    area: "Agenda",
+    detail:
+      "A rooms grid you drag sessions onto; list, day, week, month and conflict views; auto-schedule assist; .ics invites and per-speaker calendar feeds.",
+  },
+  {
+    icon: "globe",
+    area: "Public site",
+    detail:
+      "Sessions, speakers, agenda, itinerary, gallery and a personal schedule with .ics export — all of it readable without signing in.",
+  },
+  {
+    icon: "embeds",
+    area: "Embeds and API",
+    detail:
+      "One script tag per widget, plus HTML, JSON, XML and iCal feeds. A bearer-token REST API with cursor pagination, OpenAPI 3 and signed webhooks.",
+  },
+] as const satisfies ReadonlyArray<{ icon: IconName; area: string; detail: string }>;
+
+/** The three guarantees behind § the price. Prose until now; the glyphs make
+    them scannable, and each one carries the claim rather than decorating it. */
+const OWNERSHIP = [
+  {
+    icon: "unlocked",
+    title: "No licence check",
+    body: (
+      <>
+        Nothing to phone home to, no key that expires, no seat count. It runs with the network
+        unplugged.
+      </>
+    ),
+  },
+  {
+    icon: "database",
+    title: "One file, on your disk",
+    body: (
+      <>
+        Every submission, review score, decision and uploaded slide deck lives in{" "}
+        <Code>data/conferencer.db</Code>, which any tool that speaks SQL can read.
+      </>
+    ),
+  },
+  {
+    icon: "copy",
+    title: "Leaving is a copy",
+    body: (
+      <>
+        Back the whole conference up with <Code>cp</Code>. If this repository went quiet tomorrow,
+        yours would not notice.
+      </>
+    ),
+  },
+] as const satisfies ReadonlyArray<{ icon: IconName; title: string; body: React.ReactNode }>;
 
 const FAQ = [
   {
@@ -342,14 +403,14 @@ export default function HomePage() {
               style={{ ["--i" as string]: 1 }}
             >
               Conferencer is free, open-source software for running a conference programme: the
-              call for speakers, committee review, the accept and decline emails, speaker
-              onboarding, the agenda, and the public schedule site.
+              call for speakers, committee review, accept and decline emails, speaker onboarding,
+              the agenda, and the public schedule site.
             </p>
             <p
               className="reveal mt-4 max-w-[46ch] text-[0.9375rem] leading-relaxed text-neutral"
               style={{ ["--i" as string]: 2 }}
             >
-              You run it yourself — one container, one SQLite file, no database server. It is MIT
+              You run it yourself: one container, one SQLite file, no database server. MIT
               licensed, so there is no per-event fee, no cut of your ticket sales, and no demo to
               sit through.
             </p>
@@ -390,8 +451,8 @@ export default function HomePage() {
               alt="The organizer dashboard: 274 days until the event opens, then counts for submissions, accepted speakers, sessions scheduled and outstanding tasks."
               caption="The organizer's view of the demo conference, on the day this was captured."
               priority
-              width={1440}
-              height={900}
+              width={1040}
+              height={680}
             />
           </div>
         </div>
@@ -437,8 +498,8 @@ export default function HomePage() {
       <Band id="loop" band="paper" bordered={false}>
         <div className="py-20 sm:py-28">
           <Eyebrow>How it works</Eyebrow>
-          <h2 className="display mt-3 max-w-[20ch] text-2xl text-ink sm:text-3xl">
-            From an open call to a published agenda, in six steps.
+          <h2 className="display mt-3 max-w-[24ch] text-2xl text-ink sm:text-3xl">
+            From an open call to a published agenda.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
             One loop, and anything that does not sit on it was left out. The half after step four —
@@ -529,15 +590,23 @@ export default function HomePage() {
                 A hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
                 moved upmarket, or shut down. PaperCall is free and widely used, and it closes on
                 31 August 2026 — no new events, and the existing ones are guaranteed only to that
-                date.
+                date. Conferencer cannot do that to you.
               </p>
-              <p className="mt-4 max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
-                Conferencer cannot do that to you. No licence check, no phone-home, no key that
-                expires; it runs with the network unplugged. Every submission, score, decision and
-                uploaded slide deck sits in one SQLite file on a disk you control — back it up with{" "}
-                <Code>cp</Code>, read it with any tool that speaks SQL. If this repository went
-                quiet tomorrow, your conference would not notice.
-              </p>
+
+              <dl className="mt-8 space-y-5">
+                {OWNERSHIP.map((item) => (
+                  <div
+                    key={item.title}
+                    className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3"
+                  >
+                    <Icon name={item.icon} size={20} className="mt-px text-ink-2" />
+                    <dt className="display text-[0.9375rem] text-ink">{item.title}</dt>
+                    <dd className="col-start-2 mt-1 max-w-[52ch] text-sm leading-relaxed text-neutral">
+                      {item.body}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </div>
@@ -590,15 +659,22 @@ export default function HomePage() {
           <Eyebrow>Features</Eyebrow>
           <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">Everything it does</h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            The whole list, not a highlight reel: 116 pages across ten areas. Unusually for a
+            The whole list, not a highlight reel — ten areas across 116 screens. Unusually for a
             feature list, you can go and check it line by line.
           </p>
 
           <dl className="mt-14 grid grid-cols-1 gap-x-12 border-t border-rule md:grid-cols-2">
-            {INSIDE.map(([area, detail]) => (
-              <div key={area} className="border-b border-rule py-6">
-                <dt className="display text-[0.9375rem] text-ink">{area}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-neutral">{detail}</dd>
+            {INSIDE.map((row) => (
+              <div
+                key={row.area}
+                className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 border-b border-rule py-6"
+              >
+                {/* 17px muted is the organizer sidebar's exact treatment. */}
+                <Icon name={row.icon} size={17} className="mt-0.5 text-muted-foreground" />
+                <dt className="display text-[0.9375rem] text-ink">{row.area}</dt>
+                <dd className="col-start-2 mt-2 text-sm leading-relaxed text-neutral">
+                  {row.detail}
+                </dd>
               </div>
             ))}
           </dl>
@@ -617,8 +693,8 @@ export default function HomePage() {
               <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-neutral">
                 Publishing gives your conference a public site nobody has to sign in to read:
                 sessions, speakers, the agenda grid, an itinerary, a speaker gallery, and a
-                personal schedule that exports to <Code>.ics</Code>. Only sessions you have
-                accepted <em>and</em> approved appear on it — those are two separate gates.
+                personal schedule that exports to <Code>.ics</Code>. A session appears only once you
+                have both accepted it and approved its content — two separate gates.
               </p>
               {event ? (
                 <div className="mt-8 flex flex-wrap gap-3">

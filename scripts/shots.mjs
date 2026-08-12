@@ -289,13 +289,14 @@ async function productShots() {
   const formId = await discover(`/admin/e/${SLUG}/forms`, /\/forms\/([A-Za-z0-9]{12,})/);
   const planId = await discover(`/admin/e/${SLUG}/evaluation`, /\/evaluation\/([A-Za-z0-9]{12,})/);
 
-  // The hero capture gets the full desktop width; the tour captures are taken at
-  // a narrower viewport so the UI inside them is proportionally larger once the
-  // page scales them down to half a column.
+  // The tour captures run at full measure on the page, so a 1200px viewport
+  // lands near 1:1 and stays readable. The hero capture is shown at half a
+  // column, so it is taken narrower still — otherwise it scales to ~38% and the
+  // dashboard reads as grey texture instead of as software.
   const tour = { width: 1200, height: 760, auth: true };
 
   return [
-    { name: "dashboard", path: `/admin/e/${SLUG}`, width: 1440, height: 900, auth: true },
+    { name: "dashboard", path: `/admin/e/${SLUG}`, width: 1040, height: 680, auth: true },
     // Step 3 is the question list — the part of the builder worth showing.
     formId
       ? { name: "cfp-builder", path: `/admin/e/${SLUG}/forms/${formId}?step=3`, ...tour }

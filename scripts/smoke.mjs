@@ -166,7 +166,7 @@ async function main() {
   const landing = await expectContains(
     anon,
     "/",
-    ["Conferencer", "Open the call.", "Ship the agenda.", "Reasonable questions"],
+    ["Conferencer", "Collect talks.", "Publish the agenda.", "Reasonable questions"],
     "product landing page",
   );
   if (landing?.includes(`/e/${SLUG}`)) ok("landing page links to the live event", `/e/${SLUG}`);

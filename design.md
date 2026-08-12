@@ -168,7 +168,7 @@ Two style families, mirroring the display/body split in the type:
 - **`bold`** — one register only, for filled status markers that have to read at 14 px (toasts).
 
 Solar ships 7,627 icons; `scripts/icons.mjs` extracts only the ones the product renders into
-`src/components/ui/icons.generated.ts` (37 icons, 14 KB of path data). `@iconify-json/solar` is a
+`src/components/ui/icons.generated.ts` (44 icons, 16.7 KB of path data). `@iconify-json/solar` is a
 devDependency that nothing at build time or runtime imports. Adding an icon means adding it to the
 manifest at the top of that script and re-running `npm run icons`; the script fails on an unknown
 name rather than emitting a hole.
@@ -179,9 +179,21 @@ Pass `label` when the icon is the only thing naming a control.
 
 **Where icons go.** Only where they carry information: sidebar wayfinding, the kind of thing a
 dashboard nudge is about, the two different data types on a session's meta line, disclosure state,
-empty states, toasts. **Not** on the landing page's numbered loop steps or its spec sheet — the
-numerals and the row labels already carry those, and an icon per feature card is the icon-tile grid
-slop gate 3 exists to stop.
+empty states, toasts.
+
+On the landing page, two places qualify, and the test both pass is that the glyph is *the same
+glyph the reader will meet again in the product* — not a picture chosen to fill a card:
+
+- **the spec sheet's ten rows** carry the organizer sidebar's icon for that module, at the
+  sidebar's own 17 px / `--color-muted-foreground`, so the row is an index into the product;
+- **the three ownership guarantees** under § the price carry one glyph each at 20 px /
+  `--color-ink-2`, because that block was a paragraph of prose and the glyphs are what make three
+  separate claims scannable as three.
+
+**Not** the numbered loop steps: the `01`–`06` numerals are the ordinal device there, a glyph beside
+a numeral says the same thing twice, and six cards each with an icon is precisely the icon-tile grid
+slop gate 3 exists to stop. Nothing else on `/` gets an icon — an icon per feature is a decoration
+budget, and this system does not have one.
 
 `npx shadcn@latest add <name>` writes `lucide-react` imports. They have to be swapped for `<Icon>`
 before the component ships; there is no Lucide in this project and there should not be.
@@ -307,7 +319,11 @@ These are deliberate departures. Each names the rule it bends and why.
 ## Honest copy
 
 The landing page carries no logo cloud, no testimonials and no percentage claims. Conferencer has no
-customers to name, and slop gate 46 bans fabricated proof. In their place:
+customers to name, and slop gate 46 bans fabricated proof. **No generated imagery either** — no
+model-made photograph or video of a conference that did not happen, anywhere in the product. The
+four sanctioned photographs are stock shots of real rooms, credited in `public/media/NOTICE.md`;
+everything else that looks like the product is a screenshot of the product. In place of proof we
+cannot have:
 
 - **real product screenshots** of this repository's own UI,
 - **real repository facts** — MIT, one container and one volume, a SQLite file with no database server,
@@ -323,6 +339,13 @@ customers to name, and slop gate 46 bans fabricated proof. In their place:
   that is not checkable from a pricing page and the comparison does not need it. Where a vendor
   publishes no price, the row says so instead of estimating one. Re-read the links before shipping a
   change to that table; a stale price is the one number on this page that can rot on its own.
+
+Clarity outranks voice on `/`. The fold names the job in plain verbs and the category in one
+sentence — *"free, open-source software for running a conference programme"* — before the page
+argues anything, and section heads say what the section is (*How it works*, *What it costs*,
+*Features*) rather than what it is called. Every caption beside a screenshot describes what is
+visible in that screenshot, in the words the UI itself uses: *show-when*, *anonymized*, *Place*,
+*Publish agenda*. When a capture is regenerated, re-read its caption.
 
 ## Exports
 
