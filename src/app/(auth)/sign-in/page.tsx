@@ -98,7 +98,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
                   <Button
                     type="submit"
                     variant="secondary"
-                    className="h-auto w-full justify-between gap-4 rounded-2xl border-sky-200 bg-white/80 px-3 py-2.5 text-left hover:bg-white"
+                    className="h-auto w-full cursor-pointer justify-between gap-3 rounded-2xl border-sky-300 bg-white px-3.5 py-3 text-left shadow-sm transition-[background-color,border-color,box-shadow,transform] hover:border-sky-500 hover:bg-sky-50 hover:shadow-md active:translate-y-px"
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium text-ink">{name}</span>
@@ -106,8 +106,25 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
                         {d.email}
                       </span>
                     </span>
-                    <span className="shrink-0 rounded-pill bg-sky-100 px-2 py-1 text-xs font-medium capitalize text-sky-900">
-                      {d.role}
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="rounded-pill border border-sky-200 bg-sky-100 px-2 py-1 text-xs font-medium capitalize text-sky-900">
+                        {d.role}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-800">
+                        Sign in
+                        <svg
+                          aria-hidden
+                          viewBox="0 0 16 16"
+                          className="size-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.5 10.5 8 6 12.5" />
+                        </svg>
+                      </span>
                     </span>
                   </Button>
                 </form>
