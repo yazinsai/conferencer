@@ -34,7 +34,7 @@ component archetype.
 
 | Family | Routes | Macrostructure | Nav | Footer |
 | --- | --- | --- | --- | --- |
-| **Marketing** | `/` | **05 Workbench** — real product captures are the argument | **N1b** canonical SaaS three-section | **Ft5** Statement |
+| **Marketing** | `/`, `/vs/**` | **05 Workbench** — real product captures are the argument; on `/vs` the sourced ledger is | **N1b** canonical SaaS three-section | **Ft5** Statement |
 | **Public event** | `/e/[slug]/**` | **03 Marquee Hero** — the event name fills the fold, then the page becomes a list | **N12** announcement banner + retracting bar | **Ft1** Mast-headed |
 | **App** | `/admin/**`, `/portal/**`, `/review/**`, `/crm/**` | **04 Stat-Led** — a real figure leads, every panel beneath qualifies it | **N3** side-rail + a frosted top bar | none |
 
@@ -331,14 +331,23 @@ cannot have:
 - **live counts read from the database at request time** for the seeded demo event, labelled as such.
   When the database is empty the strip renders `—` placeholders with the same label. A number-shaped
   hole is honest; a fabricated number is not.
-- **quoted competitor pricing**, in `/` § the price. The landing page's whole argument is ownership,
-  and ownership is only legible next to what renting costs, so this is the one section that names
-  other products. It has its own rule, and a future edit may not relax it: every figure is quoted
-  from the vendor's **own public pricing page**, linked inline, and dated in a footnote under the
-  table. A row states cost and nothing else — no claim about anyone else's product quality, because
-  that is not checkable from a pricing page and the comparison does not need it. Where a vendor
-  publishes no price, the row says so instead of estimating one. Re-read the links before shipping a
-  change to that table; a stale price is the one number on this page that can rot on its own.
+- **quoted competitor pricing**, in `/` § the price. The landing page argues simplicity first, then
+  that simple does not mean small, and closes on ownership — and ownership is only legible next to
+  what renting costs, so this is the one section that names other products. It has its own rule,
+  and a future edit may not relax it: every figure is quoted from the vendor's **own public pricing
+  page**, linked inline, and dated in a footnote under the table. A row states cost and nothing
+  else — no claim about anyone else's product quality, because that is not checkable from a pricing
+  page and the comparison does not need it. Where a vendor publishes no price, the row says so
+  instead of estimating one. Re-read the links before shipping a change to that table; a stale
+  price is the one number on this page that can rot on its own.
+- **the `/vs/**` pages**, which extend that rule from cost to features. Every claim about
+  another product — a price, a feature, a limit, a shutdown date — is sourced from that vendor's
+  own public pages (pricing first, feature pages second), linked at the foot of the page, and
+  dated; the scrapes live in `.firecrawl/compare/`. Where a vendor publishes nothing, the page
+  says "not published" rather than estimating. Two further requirements keep a comparison honest:
+  every page carries a **"where they are genuinely better"** section — a page that only lists our
+  wins is marketing, not information, and gate 46's spirit covers selective truth as much as
+  invented truth — and the Conferencer column states only what is checkable in this repository.
 
 Clarity outranks voice on `/`. The fold names the job in plain verbs and the category in one
 sentence — *"free, open-source software for running a conference programme"* — before the page

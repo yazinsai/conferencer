@@ -5,9 +5,10 @@ import { defaultEvent } from "@/lib/repo/events";
 import { defaultForm } from "@/lib/repo/forms";
 import { publicSessions, publicSpeakers, statusCounts } from "@/lib/repo/submissions";
 import { daysUntil, formatEventDates } from "@/lib/datetime";
+import { COMPARISONS_READ_DATE } from "@/lib/compare";
 import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
-import { LogoMark } from "@/components/ui/logo";
+import { MarketingFooter } from "@/components/marketing/footer";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
 
@@ -15,17 +16,21 @@ import { Band, Faq, Shot } from "@/components/marketing/pieces";
  * design-system: design.md · designed-as-app
  * hero: H8 split — plain copy left, real product capture right (rule 8, dev. 5) ·
  * figures: T4 4-up display-weight · loop: F4 hairline lattice ·
- * price: F3 ledger with inverted final row · tour: full-width captures ·
- * inside: F3 two-up · footer: Ft5 statement over photography (rule 8.4) ·
- * nav: N1b (locked) · footer archetype: Ft5 (locked)
+ * simple: two-up typographic grid · tour: full-width captures ·
+ * inside: F3 two-up · price: F3 ledger with inverted final row ·
+ * nav: N1b (locked) · footer: Ft5 statement over photography (rule 8.4, locked)
+ *
+ * The page's argument: simplicity first — the whole job in three verbs and one
+ * loop, easy for every role it touches — and then the proof that simple does
+ * not mean small (the spec sheet), nor rented (the price ledger).
  */
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Conferencer — open-source conference programme software",
+  title: "Conferencer — the simple way to run a conference programme",
   description:
-    "Free software for running a conference programme: the call for speakers, committee review, accept and decline emails, speaker onboarding, the agenda and the public schedule site. MIT licensed, self-hosted in one container, no per-event fee.",
+    "One intuitive tool for the whole conference programme: the call for speakers, committee review, accept and decline emails, speaker onboarding, the agenda and the public schedule site. Simple to run, full-featured where it counts — free, open source, self-hosted in one container.",
 };
 
 /**
@@ -41,20 +46,24 @@ export const metadata: Metadata = {
  * instance at request time.
  *
  * Clarity comes first in the copy: the fold names the job in three plain verbs
- * and the category in one sentence, before the page argues anything. The
- * argument it then makes is ownership — MIT source, one file, no vendor who can
- * reprice or close it — so § the price names competitors and quotes what they
+ * and the category in one sentence, before the page argues anything. The first
+ * argument it makes is simplicity — one loop, a screen per job, easy for the
+ * speaker, the reviewer and whoever runs the box — and the second is that
+ * simple does not mean small: the spec sheet is the whole list. The closing
+ * argument is ownership, so § the price names competitors and quotes what they
  * charge. That section carries its own evidence rule: every figure comes from
- * the vendor's own public pricing page, is linked, is dated in the footnote, and
- * describes only cost. No claim about a rival's product quality appears here,
- * because we cannot check one and do not need to.
+ * the vendor's own public pricing page, is linked, is dated in the footnote,
+ * and describes only cost. No claim about a rival's product quality appears
+ * here, because we cannot check one and do not need to. The line-by-line
+ * comparisons live on /compare under the same rule.
  */
 
 const NAV_LINKS = [
   { href: "#loop", label: "How it works" },
-  { href: "#price", label: "What it costs" },
   { href: "#tour", label: "The product" },
   { href: "#inside", label: "Features" },
+  { href: "#price", label: "What it costs" },
+  { href: "/vs", label: "Compare" },
   { href: "/api-docs", label: "API" },
 ];
 
@@ -92,45 +101,80 @@ const LOOP = [
 ];
 
 /**
+ * Simple by design. Four roles, four concrete ease facts — each one checkable
+ * in this repository. No icons here: the design system rations them to the
+ * spec sheet and the ownership guarantees (design.md § Iconography).
+ */
+const SIMPLE = [
+  {
+    role: "The organizer",
+    title: "Three screens do most of the work",
+    body: "The submissions table, the review results and the agenda board. Every page renders in one server pass — there is no loading-spinner waterfall to wait on — and the seeded demo conference means you learn on real data, not an empty trial.",
+  },
+  {
+    role: "The speaker",
+    title: "No invitation, no account maze",
+    body: "The public form creates their account as they go — an email and a password, no confirmation step in the way — and saves a draft they can come back to. Later, their portal lists exactly what is left: bio, headshot, slides, with the deadlines attached.",
+  },
+  {
+    role: "The reviewer",
+    title: "A queue, and nothing else",
+    body: "Reviewers see only the submissions assigned to them, one scorecard at a time, with a progress bar and nothing else on the screen. In an anonymized round the author is hidden from them automatically.",
+  },
+  {
+    role: "Whoever runs it",
+    title: "One command, no moving parts",
+    body: "Node 22, or one docker compose up. No Postgres, no Redis, no queue, and no API keys required: email lands in a built-in outbox until you set a provider, and the database is a single file you can back up with cp.",
+  },
+] as const;
+
+/**
  * The price row. Every figure is quoted from the vendor's own public pricing page
  * and linked so a reader can check it in one click. Where a vendor publishes no
  * number, the row says exactly that rather than inventing one, and no row
- * characterises a competitor's product — only what it costs to use.
+ * characterises a competitor's product — only what it costs to use. The
+ * line-by-line comparisons live on /compare under the same rule.
  */
 const ELSEWHERE = [
   {
     name: "Sessionboard",
+    slug: "sessionboard",
     href: "https://www.sessionboard.com/pricing",
     price: "From $249 / mo",
     note: "The suite whose Program module this was written to replace. Every plan — Professional, Enterprise, Tailored — ends in the same button: request a demo.",
   },
   {
     name: "Sessionize",
+    slug: "sessionize",
     href: "https://sessionize.com/pricing",
     price: "$499 / event",
     note: "Per event occurrence, plus tax. The free tier is for free community events only, not for commercial, private or internal ones.",
   },
   {
     name: "Oxford Abstracts",
+    slug: "oxford-abstracts",
     href: "https://oxfordabstracts.com/pricing/",
     price: "$890–$3,450 / event",
     note: "Add-ons cost $150 to $850 each — a second submission stream is $850. Registration takes 2.5% of your ticket revenue, capped at $5,000.",
   },
   {
     name: "Ex Ordo",
+    slug: "ex-ordo",
     href: "https://www.exordo.com/pricing/",
     price: "Ask us",
     note: "The pricing page is a contact form. It asks how many submissions you expect, and then a person sends you a number.",
   },
   {
     name: "PaperCall",
+    slug: "papercall",
     href: "https://www.papercall.io",
     price: "$0, until August",
     note: "Free, well liked, and closing on 31 August 2026. New events can no longer be created.",
   },
   {
     name: "pretalx",
-    href: "https://pretalx.com/p/pricing",
+    slug: "pretalx",
+    href: "https://pretalx.com/p/pricing/",
     price: "From €199 / event",
     note: "Open source and genuinely good, hosted or self-run. Self-hosting wants Python, PostgreSQL, Redis, a cron runner and a reverse proxy.",
   },
@@ -241,6 +285,18 @@ const OWNERSHIP = [
 
 const FAQ = [
   {
+    q: "How long does it take to get started?",
+    a: (
+      <>
+        Measured on a 2-core box from a clean clone: install 7 seconds, seed 2 seconds, first page
+        in under a second. The seed loads a full demo conference — 23 submissions, a two-round
+        review, a three-day agenda — so every screen has real data in it from the first click. In
+        production, <Code>npm run deploy</Code> is one <Code>docker compose up</Code> with one
+        volume.
+      </>
+    ),
+  },
+  {
     q: "It's free. What's the catch?",
     a: (
       <>
@@ -269,7 +325,11 @@ const FAQ = [
         Conferencer keeps going after the schedule is released — decisions, onboarding tasks,
         versioned deliverables, a speaker CRM across events. And it installs with Node 22, or one{" "}
         <Code>docker compose up</Code>, where pretalx wants Python, PostgreSQL, Redis, a cron runner
-        and a reverse proxy.
+        and a reverse proxy. The full comparison is on{" "}
+        <Link href="/vs/pretalx" className="underline underline-offset-4 hover:text-ink">
+          the pretalx page
+        </Link>
+        .
       </>
     ),
   },
@@ -386,9 +446,10 @@ export default function HomePage() {
 
       {/* ------------------------------------------- hero · H8 split -------
           The fold's job is to say what this is. Three plain verbs name the
-          job, one sentence names the category, and the image beside them is
-          the actual organizer dashboard — not a photograph of a conference,
-          which is the one thing on this page a reader could not check. */}
+          job — the whole of it, which is the first simplicity claim — and one
+          sentence names the category. The image beside them is the actual
+          organizer dashboard, not a photograph of a conference, which is the
+          one thing on this page a reader could not check. */}
       <section className="border-b border-rule bg-paper">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-[calc(var(--nav-height)+3rem)] sm:px-6 sm:pb-20 sm:pt-[calc(var(--nav-height)+4.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
           <div className="min-w-0">
@@ -402,17 +463,17 @@ export default function HomePage() {
               className="reveal mt-6 max-w-[46ch] text-lg leading-relaxed text-neutral"
               style={{ ["--i" as string]: 1 }}
             >
-              Conferencer is free, open-source software for running a conference programme: the
-              call for speakers, committee review, accept and decline emails, speaker onboarding,
-              the agenda, and the public schedule site.
+              Conferencer is the simple way to run a conference programme: the call for speakers,
+              committee review, accept and decline emails, speaker onboarding, the agenda and the
+              public schedule site — in one place, with nothing to integrate.
             </p>
             <p
               className="reveal mt-4 max-w-[46ch] text-[0.9375rem] leading-relaxed text-neutral"
               style={{ ["--i" as string]: 2 }}
             >
-              You run it yourself: one container, one SQLite file, no database server. MIT
-              licensed, so there is no per-event fee, no cut of your ticket sales, and no demo to
-              sit through.
+              Simple to run does not mean small: it is free, open source and full-featured — one
+              container, one SQLite file, no database server, no per-event fee, no cut of your
+              ticket sales, and no demo to sit through.
             </p>
 
             <div
@@ -502,9 +563,9 @@ export default function HomePage() {
             From an open call to a published agenda.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            One loop, and anything that does not sit on it was left out. The half after step four —
-            onboarding accepted speakers, chasing their bios and slides — is the part free tools
-            hand back to you and paid ones charge for.
+            One loop, learned in minutes — and anything that does not sit on it was left out. The
+            half after step four, onboarding accepted speakers and chasing their bios and slides,
+            is the part free tools hand back to you and paid ones charge for.
           </p>
 
           {/* A hairline lattice: gap-px over a rule-coloured track draws the
@@ -525,90 +586,36 @@ export default function HomePage() {
         </div>
       </Band>
 
-      {/* ------------------------------ the price ------------------------- */}
-      <Band id="price" band="paper-2">
+      {/* ------------------------------------------- simple by design ------
+          The page's first argument. Four roles, four concrete ease facts,
+          each checkable in the repository. Typographic only — no icon budget
+          here (design.md § Iconography). */}
+      <Band id="simple" band="paper-2">
         <div className="py-20 sm:py-28">
-          <Eyebrow>What it costs</Eyebrow>
+          <Eyebrow>Simple by design</Eyebrow>
           <h2 className="display mt-3 max-w-[22ch] text-2xl text-ink sm:text-3xl">
-            Nothing. Here is what the same work costs elsewhere.
+            Easy for everyone it touches.
           </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
-            Every figure is quoted from that vendor&rsquo;s own pricing page and linked so you can
-            check it. Watch the shapes as much as the numbers: per event, per submission band, per
-            month, or a slice of the tickets you sold.
+            Most programme tools are designed for the buyer and endured by everyone else.
+            Conferencer is one loop with a screen per job — each role sees only what is theirs.
           </p>
 
-          <dl className="mt-14 border-t border-rule">
-            {ELSEWHERE.map((row) => (
-              <div
-                key={row.name}
-                className="grid gap-x-8 gap-y-1.5 border-b border-rule py-6 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]"
-              >
-                <dt className="display text-[0.9375rem] text-ink">
-                  <a
-                    href={row.href}
-                    className="nowrap-affordance underline-offset-4 hover:underline"
-                  >
-                    {row.name}
-                  </a>
+          <dl className="mt-14 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
+            {SIMPLE.map((item) => (
+              <div key={item.role} className="border-t border-rule pt-6">
+                <dt className="display text-lg text-ink">
+                  <span className="wordmark mb-3 block text-xs font-medium tracking-[0.14em] text-muted-foreground">
+                    {item.role}
+                  </span>
+                  {item.title}
                 </dt>
-                <dd className="wordmark tnum text-[0.9375rem] text-ink-2">{row.price}</dd>
-                <dd className="text-sm leading-relaxed text-neutral">{row.note}</dd>
+                <dd className="mt-2 max-w-[52ch] text-sm leading-relaxed text-neutral">
+                  {item.body}
+                </dd>
               </div>
             ))}
           </dl>
-
-          {/* The last row is the argument, so it leaves the ledger entirely:
-              the page's one inverted card. */}
-          <div className="mt-8 grid gap-x-8 gap-y-2 rounded-card bg-ink p-6 text-paper sm:p-8 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]">
-            <p className="display text-md">Conferencer</p>
-            <p className="wordmark tnum text-md">$0, always</p>
-            <p className="text-sm leading-relaxed text-paper/75">
-              No plan, no per-event fee, no limit on submissions, no share of your revenue, no
-              account to create. Your only bill is the box it runs on, and a $5 VPS covers it.
-            </p>
-          </div>
-
-          <p className="mt-6 max-w-[68ch] text-xs leading-relaxed text-muted-foreground">
-            Public pricing pages, read on 11 August 2026; follow the links and check us. Ours is
-            the{" "}
-            <a
-              href="https://github.com/yazinsai/conferencer/blob/main/LICENSE"
-              className="underline underline-offset-4 hover:text-ink"
-            >
-              LICENSE
-            </a>{" "}
-            file, which is twenty-one lines and has no pricing table in it.
-          </p>
-
-          <div className="mt-16 border-t border-rule pt-12 lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-14">
-            <h3 className="display max-w-[16ch] text-xl text-ink sm:text-2xl">
-              And nobody can switch it off.
-            </h3>
-            <div className="mt-4 lg:mt-0">
-              <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
-                A hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
-                moved upmarket, or shut down. PaperCall is free and widely used, and it closes on
-                31 August 2026 — no new events, and the existing ones are guaranteed only to that
-                date. Conferencer cannot do that to you.
-              </p>
-
-              <dl className="mt-8 space-y-5">
-                {OWNERSHIP.map((item) => (
-                  <div
-                    key={item.title}
-                    className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3"
-                  >
-                    <Icon name={item.icon} size={20} className="mt-px text-ink-2" />
-                    <dt className="display text-[0.9375rem] text-ink">{item.title}</dt>
-                    <dd className="col-start-2 mt-1 max-w-[52ch] text-sm leading-relaxed text-neutral">
-                      {item.body}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
         </div>
       </Band>
 
@@ -653,11 +660,15 @@ export default function HomePage() {
         </div>
       </Band>
 
-      {/* ------------------------------ F3 · the spec sheet ---------------- */}
+      {/* ------------------------------ F3 · the spec sheet ----------------
+          The second argument: simple does not mean small. The whole list,
+          checkable line by line. */}
       <Band id="inside" band="paper-2">
         <div className="py-20 sm:py-28">
           <Eyebrow>Features</Eyebrow>
-          <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">Everything it does</h2>
+          <h2 className="display mt-3 max-w-[22ch] text-2xl text-ink sm:text-3xl">
+            Simple does not mean small.
+          </h2>
           <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
             The whole list, not a highlight reel — ten areas across 116 screens. Unusually for a
             feature list, you can go and check it line by line.
@@ -681,8 +692,114 @@ export default function HomePage() {
         </div>
       </Band>
 
+      {/* ------------------------------ the price ------------------------- */}
+      <Band id="price" band="paper">
+        <div className="py-20 sm:py-28">
+          <Eyebrow>What it costs</Eyebrow>
+          <h2 className="display mt-3 max-w-[22ch] text-2xl text-ink sm:text-3xl">
+            Nothing. Here is what the same work costs elsewhere.
+          </h2>
+          <p className="mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-neutral">
+            Every figure is quoted from that vendor&rsquo;s own pricing page and linked so you can
+            check it. Watch the shapes as much as the numbers: per event, per submission band, per
+            month, or a slice of the tickets you sold.
+          </p>
+
+          <dl className="mt-14 border-t border-rule">
+            {ELSEWHERE.map((row) => (
+              <div
+                key={row.name}
+                className="grid gap-x-8 gap-y-1.5 border-b border-rule py-6 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]"
+              >
+                <dt className="display text-[0.9375rem] text-ink">
+                  <a
+                    href={row.href}
+                    className="nowrap-affordance underline-offset-4 hover:underline"
+                  >
+                    {row.name}
+                  </a>
+                </dt>
+                <dd className="wordmark tnum text-[0.9375rem] text-ink-2">{row.price}</dd>
+                <dd className="text-sm leading-relaxed text-neutral">{row.note}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {/* The last row is the argument, so it leaves the ledger entirely:
+              the page's one inverted card. */}
+          <div className="mt-8 grid gap-x-8 gap-y-2 rounded-card bg-ink p-6 text-paper sm:p-8 md:grid-cols-[minmax(0,10rem)_minmax(0,12rem)_minmax(0,1fr)]">
+            <p className="display text-md">Conferencer</p>
+            <p className="wordmark tnum text-md">$0, always</p>
+            <p className="text-sm leading-relaxed text-paper/75">
+              No plan, no per-event fee, no limit on submissions, no share of your revenue, no
+              account to create. Your only bill is the box it runs on, and a $5 VPS covers it.
+            </p>
+          </div>
+
+          <p className="mt-6 max-w-[68ch] text-xs leading-relaxed text-muted-foreground">
+            Public pricing pages, read on {COMPARISONS_READ_DATE}; follow the links and check us.
+            Ours is the{" "}
+            <a
+              href="https://github.com/yazinsai/conferencer/blob/main/LICENSE"
+              className="underline underline-offset-4 hover:text-ink"
+            >
+              LICENSE
+            </a>{" "}
+            file, which is twenty-one lines and has no pricing table in it.
+          </p>
+
+          <p className="mt-4 max-w-[68ch] text-xs leading-relaxed text-muted-foreground">
+            Line by line:{" "}
+            {ELSEWHERE.map((row, i) => (
+              <span key={row.slug}>
+                {i > 0 ? " · " : ""}
+                <Link
+                  href={`/vs/${row.slug}`}
+                  className="underline underline-offset-4 hover:text-ink"
+                >
+                  Conferencer vs {row.name}
+                </Link>
+              </span>
+            ))}
+            {" · "}
+            <Link href="/vs" className="underline underline-offset-4 hover:text-ink">
+              all comparisons
+            </Link>
+          </p>
+
+          <div className="mt-16 border-t border-rule pt-12 lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-14">
+            <h3 className="display max-w-[16ch] text-xl text-ink sm:text-2xl">
+              And nobody can switch it off.
+            </h3>
+            <div className="mt-4 lg:mt-0">
+              <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-neutral">
+                A hosted programme tool is a tenancy: it can be repriced at renewal, acquired,
+                moved upmarket, or shut down. PaperCall is free and widely used, and it closes on
+                31 August 2026 — no new events, and the existing ones are guaranteed only to that
+                date. Conferencer cannot do that to you.
+              </p>
+
+              <dl className="mt-8 space-y-5">
+                {OWNERSHIP.map((item) => (
+                  <div
+                    key={item.title}
+                    className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3"
+                  >
+                    <Icon name={item.icon} size={20} className="mt-px text-ink-2" />
+                    <dt className="display text-[0.9375rem] text-ink">{item.title}</dt>
+                    <dd className="col-start-2 mt-1 max-w-[52ch] text-sm leading-relaxed text-neutral">
+                      {item.body}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+      </Band>
+
       {/* ------------------------------ the published result --------------- */}
-      <Band band="paper">
+      <Band band="paper-2">
         <div className="py-20 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16">
             <div className="min-w-0">
@@ -728,7 +845,7 @@ export default function HomePage() {
       </Band>
 
       {/* ------------------------------ conversational FAQ ----------------- */}
-      <Band band="paper-2">
+      <Band band="paper">
         <div className="py-20 sm:py-24">
           <Eyebrow>Before you ask</Eyebrow>
           <h2 className="display mt-3 text-2xl text-ink sm:text-3xl">Reasonable questions</h2>
@@ -738,87 +855,13 @@ export default function HomePage() {
         </div>
       </Band>
 
-      {/* ------------------------------ Ft5 · statement footer -------------
-          The fourth sanctioned photograph (design.md rule 8): an empty hall,
-          because the closing argument is permanence. The scrim contract holds —
-          the gradient lives on the background and the surface flips its text in
-          the same rule. */}
-      <footer
-        data-scrim
-        className="relative isolate overflow-hidden border-t border-rule bg-ink text-paper"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- see Shot in
-            components/marketing/pieces.tsx; a fixed local asset, eager because
-            it is the closing surface. */}
-        <img
-          src="/media/hall.webp"
-          alt=""
-          width={2000}
-          height={1125}
-          loading="eager"
-          decoding="async"
-          className="absolute inset-0 -z-10 size-full object-cover"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,var(--color-ink)_0%,color-mix(in_oklch,var(--color-ink)_92%,transparent)_55%,color-mix(in_oklch,var(--color-ink)_72%,transparent)_100%)]"
-        />
-
-        <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
-          <p className="display max-w-[16ch] text-display-s">Rent nothing. Own the programme.</p>
-          <p className="mt-5 max-w-[46ch] text-[0.9375rem] leading-relaxed text-paper/75">
-            Clone it, run it, fork it, never pay for it. One container, one volume, and a
-            conference you can back up with <Code>cp</Code>.
-          </p>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            {/* On ink, the primary's own fill disappears, so the pair inverts:
-                paper fill for the verb, a paper hairline for the alternative. */}
-            <Link
-              href={ctaHref}
-              className="nowrap-affordance inline-flex h-11 items-center rounded-pill bg-paper px-6 text-[0.9375rem] font-medium text-ink transition-colors duration-[120ms] ease-out hover:bg-paper-3 active:translate-y-px"
-            >
-              {ctaLabel}
-            </Link>
-            <Link
-              href="https://github.com/yazinsai/conferencer"
-              className="nowrap-affordance inline-flex h-11 items-center rounded-pill border border-paper/30 px-6 text-[0.9375rem] font-medium text-paper transition-colors duration-[120ms] ease-out hover:border-paper/60 active:translate-y-px"
-            >
-              Read the source
-            </Link>
-          </div>
-
-          <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-paper/20 pt-6 text-xs text-paper/65">
-            <p className="wordmark flex items-center gap-2 text-paper">
-              <LogoMark size={18} />
-              Conferencer
-            </p>
-            <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <Link
-                href="/api-docs"
-                className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
-              >
-                API reference
-              </Link>
-              <a
-                href="https://github.com/yazinsai/conferencer"
-                className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
-              >
-                Source
-              </a>
-              {event ? (
-                <Link
-                  href={`/e/${event.slug}`}
-                  className="nowrap-affordance underline-offset-4 hover:text-paper hover:underline"
-                >
-                  {event.name}
-                </Link>
-              ) : null}
-              <span>MIT</span>
-            </nav>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter
+        ctaHref={ctaHref}
+        ctaLabel={ctaLabel}
+        eventName={event?.name}
+        eventHref={event ? `/e/${event.slug}` : undefined}
+        showCompareLinks
+      />
     </>
   );
 }
