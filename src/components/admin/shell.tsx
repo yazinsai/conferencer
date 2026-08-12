@@ -15,16 +15,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: IconName;
+  exact?: boolean;
+  badge?: number;
+};
+
 export type NavGroup = {
   label?: string;
-  items: Array<{
-    href: string;
-    label: string;
-    icon: IconName;
-    exact?: boolean;
-    badge?: number;
-  }>;
+  items: NavItem[];
 };
+
+function pathMatches(pathname: string, item: Pick<NavItem, "href" | "exact">) {
+  return item.exact
+    ? pathname === item.href
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+/** Longest matching href wins so nested siblings (Tasks / Deliverables) do not both highlight. */
+function isNavActive(pathname: string, item: NavItem, allItems: NavItem[]) {
+  if (!pathMatches(pathname, item)) return false;
+  return !allItems.some(
+    (other) =>
+      other.href !== item.href &&
+      other.href.length > item.href.length &&
+      pathMatches(pathname, other),
+  );
+}
 
 /** Fixed-size pending hint; CSS delays visibility so fast navs don't flash. */
 function NavPending() {
@@ -43,6 +62,7 @@ function NavPending() {
  */
 export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: string }) {
   const pathname = usePathname();
+  const allItems = groups.flatMap((g) => g.items);
   return (
     <nav
       aria-label="Admin"
@@ -71,9 +91,7 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
             ) : null}
             <ul className="space-y-px">
               {group.items.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const active = isNavActive(pathname, item, allItems);
                 return (
                   <li key={item.href}>
                     <Link
@@ -125,6 +143,7 @@ export function Sidebar({ groups, eventName }: { groups: NavGroup[]; eventName: 
  */
 export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventName: string }) {
   const pathname = usePathname();
+  const allItems = groups.flatMap((g) => g.items);
   return (
     <details className="group border-b border-rule bg-paper md:hidden">
       <summary
@@ -155,9 +174,7 @@ export function SidebarSheet({ groups, eventName }: { groups: NavGroup[]; eventN
             ) : null}
             <ul className="space-y-px">
               {group.items.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const active = isNavActive(pathname, item, allItems);
                 return (
                   <li key={item.href}>
                     <Link
