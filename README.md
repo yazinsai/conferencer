@@ -101,7 +101,7 @@ has to dig through the README to get in.
 
 | Area | What you get |
 | --- | --- |
-| **Call for speakers** | Seven-step form builder, 13 field types, required/locked flags, **conditional show-when logic**, track routing into a review round on arrival, close dates, per-person limits, drafts, custom success page, confirmation email |
+| **Call for speakers** | Seven-step form builder, 14 field types, required/locked flags, **conditional show-when logic**, track routing into a review round on arrival, close dates, per-person limits, drafts, custom success page, confirmation email |
 | **Public submission** | Five-step wizard (Welcome → Account → Submission → Participants → Review) a stranger can complete without an invitation, with email+password signup and no email-confirmation step |
 | **Submissions** | Status tabs with counts, inline and bulk status changes, column picker, saved views, filters, search across titles *and* speaker names, CSV export, change history with restore |
 | **Review** | Multi-round evaluation plans, per-round reviewer pools and scorecards (1–3 / 1–5 / 1–10 / numeric / weighted dropdown / free text / file / separator), blind rounds, conflict-of-interest recusal, auto-distribution with per-reviewer caps, live progress, weighted aggregate results, bulk reminders, two CSV export shapes |
