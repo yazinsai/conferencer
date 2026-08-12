@@ -49,7 +49,12 @@ export function ReviewForm({
 }) {
   const [dirty, setDirty] = useState(false);
   const [goNext, setGoNext] = useState(false);
+  const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>(answers);
   const submitting = useRef(false);
+
+  useEffect(() => {
+    setLocalAnswers(answers);
+  }, [answers]);
 
   useEffect(() => {
     function onBeforeUnload(e: BeforeUnloadEvent) {
@@ -85,7 +90,7 @@ export function ReviewForm({
 
         <div className="space-y-4 p-4">
           {questions.map((question) => {
-            const value = answers[question.id];
+            const value = localAnswers[question.id];
             if (question.type === "separator") {
               return (
                 <div key={question.id} className="border-t border-slate-200 pt-3">
@@ -128,8 +133,12 @@ export function ReviewForm({
                           type="radio"
                           name={`q_${question.id}`}
                           value={n}
-                          defaultChecked={String(value) === String(n)}
+                          checked={String(value) === String(n)}
                           disabled={readOnly}
+                          onChange={() => {
+                            setLocalAnswers((prev) => ({ ...prev, [question.id]: n }));
+                            setDirty(true);
+                          }}
                           className="sr-only"
                         />
                         {n}
