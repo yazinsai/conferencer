@@ -75,6 +75,12 @@ const MANIFEST = {
   star: "star-linear",
   starFilled: "star-bold",
   edit: "pen-2-linear",
+
+  /* landing page — the public site, and the three ownership guarantees --- */
+  globe: "global-linear",
+  unlocked: "lock-keyhole-unlocked-linear",
+  database: "database-linear",
+  copy: "copy-linear",
 };
 
 const solar = require("@iconify-json/solar/icons.json");
