@@ -25,36 +25,36 @@ scenarios:
     steps: |
       1. Navigate to the app root and find the organizer/admin area. Try obvious routes
          (/admin, /dashboard, /organizer) and nav links (Organizer, Admin, Dashboard, Events,
-         Manage). If open signup exists, sign up as organizer Jordan Alvarez using the fixture
+         Manage). If open signup exists, sign up as organizer Minerva McGonagall using the fixture
          email and password; otherwise sign in with the organizer fixture credentials.
       2. Locate or create the event "DevFlow Conf 2027" using the fixture event details
          (dates 2027-05-12 to 2027-05-14, Moscone West SF). Fill only what the form requires.
       3. Open the speakers area for the event. It may be called Speakers, People, Participants,
          Contacts, or Roster. Screenshot its empty or initial state.
-      4. Add speaker Priya Raman manually using her fixture data (name, email, title
-         "Principal Engineer", company "Latticework Systems", full bio; fill Twitter/LinkedIn
+      4. Add speaker Hermione Granger manually using her fixture data (name, email, title
+         "Principal Engineer", company "Hogwarts Buildworks", full bio; fill Twitter/LinkedIn
          if fields exist). Screenshot the filled form BEFORE saving, then the saved record.
-      5. Add speaker Marcus Okafor the same way with his fixture data (name, email, title,
+      5. Add speaker Harry Potter the same way with his fixture data (name, email, title,
          company, bio).
       6. Look for a bulk import control (Import, Upload CSV, Import speakers). If found, upload
          the speakers.csv fixture, mapping columns if prompted. Screenshot the import flow and
          the roster afterward showing the imported rows. If no import exists, record that
          observation explicitly.
-      7. Use the roster search (or a filter) to find "Priya". Screenshot the narrowed list,
+      7. Use the roster search (or a filter) to find "Hermione". Screenshot the narrowed list,
          then clear it and screenshot the restored full roster.
-      8. Change Priya's status to Confirmed (statuses may be named Invited/Confirmed/Accepted/
+      8. Change Hermione's status to Confirmed (statuses may be named Invited/Confirmed/Accepted/
          Pending or similar). Reload the page and confirm the status persisted. If the roster
          has a status filter, apply it for Confirmed and screenshot the result.
-      9. Open Priya's record and edit her bio by appending the sentinel text "SBEK-ORG-EDIT-01".
+      9. Open Hermione's record and edit her bio by appending the sentinel text "SBEK-ORG-EDIT-01".
          Save, reload, and verify the sentinel persists. Screenshot after reload.
       10. Create or link a session titled "Taming 40-Minute CI: Incremental Builds at Monorepo
-          Scale" and assign Priya as its speaker (via her record, a Sessions area, or wherever
+          Scale" and assign Hermione as its speaker (via her record, a Sessions area, or wherever
           the clone allows). If room/time fields are easy to set, use Room 2A on 2027-05-12 —
           creating the room first if the clone requires rooms to exist before they can be
           selected (rooms are otherwise first configured in the agenda area).
-          Screenshot Priya's record or the session showing the speaker-session link.
+          Screenshot Hermione's record or the session showing the speaker-session link.
       11. Find the tasks area (Tasks, Checklist, To-dos). Create three GENERAL/action tasks
-          from the fixture speaker task list, each assigned to BOTH Priya and Marcus (use
+          from the fixture speaker task list, each assigned to BOTH Hermione and Harry (use
           multi-select or bulk assignment if offered):
           a. "Confirm participation" - due 2027-04-01.
           b. "Complete bio and profile" - due 2027-04-01.
@@ -64,14 +64,14 @@ scenarios:
           Screenshot at least one filled creation form and the resulting task list showing
           titles, due dates, and both assignees.
       12. Look for a portal invitation control (Invite, Send portal invite, Send welcome email)
-          on Priya's record or as a bulk action. Trigger it for Priya and screenshot the
+          on Hermione's record or as a bulk action. Trigger it for Hermione and screenshot the
           success/confirmation state. Check whether the send appears in any communications
           history or activity log and screenshot if so. If no explicit invite control exists,
           record how speakers are expected to reach their portal (e.g. self-signup or link).
     success_signals:
-      - Filled add-speaker form and the saved Priya record with title/company/bio
-      - Roster listing at least Priya and Marcus (plus CSV-imported speakers if import exists)
-      - Search narrowing to Priya and restoring on clear
+      - Filled add-speaker form and the saved Hermione record with title/company/bio
+      - Roster listing at least Hermione and Harry (plus CSV-imported speakers if import exists)
+      - Search narrowing to Hermione and restoring on clear
       - Confirmed status badge persisting after reload
       - Sentinel "SBEK-ORG-EDIT-01" in the bio after reload
       - Task list with three tasks, due dates, and two assignees each
@@ -81,15 +81,15 @@ scenarios:
     persona: speaker
     steps: |
       1. Navigate to the app root and find the speaker-facing entry point (Portal, Speaker
-         login, My account, Sign in). Try signing in as Priya Raman with the fixture speaker
+         login, My account, Sign in). Try signing in as Hermione Granger with the fixture speaker
          email and password. If her account does not exist yet, sign up with her fixture email
          and password (the organizer added her to the roster in a prior scenario; clones may
          link the portal account by email).
-      2. Screenshot the portal home/dashboard. Verify it identifies Priya (name, initials, or
+      2. Screenshot the portal home/dashboard. Verify it identifies Hermione (name, initials, or
          photo) and is a speaker-facing view, not the organizer admin UI.
-      3. Verify scoping: the portal should show only Priya's own profile, sessions, and tasks.
-         Explicitly check that Marcus Okafor's name and tasks appear nowhere in the portal
-         (nor Dana Kowalski's, if the CSV import in the earlier scenario succeeded).
+      3. Verify scoping: the portal should show only Hermione's own profile, sessions, and tasks.
+         Explicitly check that Harry Potter's name and tasks appear nowhere in the portal
+         (nor Fleur Delacour's, if the CSV import in the earlier scenario succeeded).
          Record this observation.
       4. Find her assigned session "Taming 40-Minute CI: Incremental Builds at Monorepo Scale"
          (widget or tab named My Sessions, Sessions, My Submissions, or similar). Screenshot it
@@ -112,7 +112,7 @@ scenarios:
       11. Reload the task list and verify the two completed states persisted. Screenshot the
           final task list (2 complete, 1 incomplete with its due date).
     success_signals:
-      - Portal dashboard identifying Priya with no other speaker's data visible
+      - Portal dashboard identifying Hermione with no other speaker's data visible
       - Her session title visible inside the portal
       - Saved profile showing sentinel bio "SBEK-PORTAL-BIO-01" and the uploaded headshot rendering
       - Task list with due dates; two tasks completed and persisting after reload; one left incomplete
@@ -120,19 +120,19 @@ scenarios:
     name: Organizer tracks progress and sends bulk communications
     persona: organizer
     steps: |
-      1. Sign in as organizer Jordan Alvarez (fixture credentials from the earlier scenario)
+      1. Sign in as organizer Minerva McGonagall (fixture credentials from the earlier scenario)
          and open the DevFlow Conf 2027 event.
-      2. Open Priya Raman's speaker record. Verify the portal-side edits synced to the
+      2. Open Hermione Granger's speaker record. Verify the portal-side edits synced to the
          organizer view: the bio contains "SBEK-PORTAL-BIO-01" and the headshot uploaded from
          headshot.png is displayed. Screenshot the record.
       3. Open the task progress view (a tasks dashboard, tasks tab, or completion indicators
-         on the roster). Verify mixed statuses are visible WITHOUT opening each record: Priya
+         on the roster). Verify mixed statuses are visible WITHOUT opening each record: Hermione
          shows completed tasks ("Confirm participation", "Complete bio and profile") while
-         "Sign speaker release form" and all of Marcus's tasks show incomplete. Screenshot at
+         "Sign speaker release form" and all of Harry's tasks show incomplete. Screenshot at
          list level.
       4. If status filters exist, filter to incomplete/pending and screenshot, then filter to
          complete and screenshot. Record if filters are absent.
-      5. Locate the headshot file Priya uploaded via her portal profile edit, wherever the
+      5. Locate the headshot file Hermione uploaded via her portal profile edit, wherever the
          clone stores speaker files (her record or a files area). Verify it is listed with
          metadata (filename and uploader or timestamp) and that a download/view control
          exists; click it and note whether it responds without error (do not try to open the
@@ -148,7 +148,7 @@ scenarios:
          outstanding tasks are exercised and graded in the content-management area (CNT-08).
       7. Open the communications history/log and verify the send is recorded with recipients
          and a timestamp. Screenshot the log entry.
-      8. Back on Priya's record, look for travel-preference, logistics, or custom fields. If
+      8. Back on Hermione's record, look for travel-preference, logistics, or custom fields. If
          present, enter "Arrival May 11, aisle seat; dietary: Vegetarian" and save, reload,
          and verify persistence; screenshot. If absent, look for a custom-field settings area
          and record the observation either way.
@@ -156,7 +156,7 @@ scenarios:
          extension control exists on a task assignment, and whether task/document-request
          types include contract or certificate-of-insurance style requests.
     success_signals:
-      - Priya's organizer-side record showing the portal sentinel bio and new headshot
+      - Hermione's organizer-side record showing the portal sentinel bio and new headshot
       - List-level progress view distinguishing complete vs incomplete across both speakers
       - Filtered progress views (or explicit observation that filters are missing)
       - Uploaded headshot file listed with metadata and a responsive download control
@@ -200,13 +200,13 @@ rubric:
     pass_criteria: >-
       An import control accepts the speakers.csv fixture (with or without a column-mapping
       step) and the roster afterward contains the CSV speakers. The fixture CSV repeats the
-      two manually added speakers (Priya, Marcus) plus one new person (Dana Kowalski):
+      two manually added speakers (Hermione, Harry) plus one new person (Fleur Delacour):
       Dana appearing as a new record is the pass signal, and merging or skipping the two
       existing rows by email (dedupe) is acceptable and must not be penalized; duplicate
-      rows for Priya/Marcus are also acceptable for this item.
+      rows for Hermione/Harry are also acceptable for this item.
     evidence: >-
       Screenshots of the import flow and the roster before/after showing the new Dana
-      Kowalski row; agent observation if no import control exists (fail).
+      Delacour row; agent observation if no import control exists (fail).
   - id: SPK-04
     criterion: "Speakers carry a workflow status that can be changed, persists, and is filterable"
     weight: 2
@@ -215,7 +215,7 @@ rubric:
     scenarios: [SPK-S1]
     pass_criteria: >-
       A status control (e.g. Invited/Confirmed/Accepted or equivalent vocabulary) changes
-      Priya's status, the new status survives reload, and a status filter (if the roster has
+      Hermione's status, the new status survives reload, and a status filter (if the roster has
       filters) correctly narrows membership. Custom-status creation is a bonus, not required.
     evidence: >-
       Screenshots of the status control, the updated badge after reload, and the
@@ -258,15 +258,15 @@ rubric:
     testability: auto-partial
     scenarios: [SPK-S2]
     pass_criteria: >-
-      Logging in as Priya lands on a speaker-facing view (distinct from the organizer admin)
+      Logging in as Hermione lands on a speaker-facing view (distinct from the organizer admin)
       that identifies her and lists her own tasks/sessions/profile, with no other speaker's
       name, tasks, or data visible anywhere in the portal. Any speaker-scoped access mechanism
       passes (invite link, magic link, or password login), but the agent can only exercise
       password sign-in/sign-up; if the clone's only portal access is a link delivered by
       email, the agent cannot reach the portal and this item falls to the manual half.
     evidence: >-
-      Screenshot of the portal home showing Priya's identity and content, plus the agent's
-      recorded observation that Marcus's (and, if imported, Dana's) data is absent. If the
+      Screenshot of the portal home showing Hermione's identity and content, plus the agent's
+      recorded observation that Harry's (and, if imported, Dana's) data is absent. If the
       portal was unreachable without an emailed link, the agent's observation of that access
       path.
     manual_instructions: >-
@@ -283,7 +283,7 @@ rubric:
     pass_criteria: >-
       Portal profile editing saves the sentinel bio SBEK-PORTAL-BIO-01 and the uploaded
       headshot.png (image renders after save and survives reload), and the organizer's view of
-      Priya's record later shows the same bio text and headshot without manual re-entry.
+      Hermione's record later shows the same bio text and headshot without manual re-entry.
     evidence: >-
       Screenshots of the portal profile after save and reload (sentinel plus rendered
       headshot) and of the organizer-side record in SPK-S3 showing the same data.
@@ -294,7 +294,7 @@ rubric:
     testability: auto
     scenarios: [SPK-S2]
     pass_criteria: >-
-      All three organizer-assigned general tasks show in Priya's portal with due dates and an
+      All three organizer-assigned general tasks show in Hermione's portal with due dates and an
       incomplete state; marking two of them complete flips each to a completed state that
       survives a reload, while the untouched task stays incomplete. No upload-against-task
       flow is required here — that capability is graded once, by CNT-02.
@@ -308,7 +308,7 @@ rubric:
     testability: auto-partial
     scenarios: [SPK-S3]
     pass_criteria: >-
-      The headshot file Priya uploaded via her portal profile edit is listed organizer-side
+      The headshot file Hermione uploaded via her portal profile edit is listed organizer-side
       (on her record or a files area) with its filename plus uploader and/or timestamp, and a
       download/view control responds without error. File content integrity is not
       agent-verifiable.
@@ -325,13 +325,13 @@ rubric:
     testability: auto
     scenarios: [SPK-S1, SPK-S2]
     pass_criteria: >-
-      After the organizer links the "Taming 40-Minute CI" session to Priya, the speaker-session
+      After the organizer links the "Taming 40-Minute CI" session to Hermione, the speaker-session
       link shows on her organizer-side record (or the session shows her as speaker), and the
       same session title is visible inside her portal. Room/time display is a bonus; full
       scheduling and conflict detection belong to the agenda area.
     evidence: >-
       Screenshot of the organizer-side speaker-session link and of the session appearing in
-      Priya's portal.
+      Hermione's portal.
   - id: SPK-12
     criterion: A progress view shows per-speaker completion of general tasks at list level and reflects portal completions (the deliverables dashboard tracking uploads with filtering depth is graded by content-management's CNT-07)
     weight: 2
@@ -340,8 +340,8 @@ rubric:
     scenarios: [SPK-S3]
     pass_criteria: >-
       Without opening each record, the organizer can see which speakers completed which
-      general tasks: Priya's two portal completions from SPK-S2 ("Confirm participation",
-      "Complete bio and profile") show complete while her release form and all of Marcus's
+      general tasks: Hermione's two portal completions from SPK-S2 ("Confirm participation",
+      "Complete bio and profile") show complete while her release form and all of Harry's
       tasks show incomplete; a complete/incomplete filter (if present) narrows correctly. A
       roster-level completion indicator or a tasks dashboard both qualify. Upload/deliverables
       tracking depth is graded once, by CNT-07.
@@ -376,7 +376,7 @@ rubric:
     pass_criteria: >-
       The compose flow offers saved or pre-built templates whose bodies contain
       personalization tokens (name, session, or portal link), and a preview or
-      rendered output demonstrably resolves tokens to a real speaker's data (e.g. "Priya").
+      rendered output demonstrably resolves tokens to a real speaker's data (e.g. "Hermione").
     evidence: >-
       Screenshot of the template body showing tokens and of a per-recipient preview showing
       resolved values.

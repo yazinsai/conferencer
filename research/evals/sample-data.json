@@ -26,36 +26,45 @@
   },
   "identities": {
     "organizer": {
-      "name": "Jordan Alvarez",
+      "name": "Minerva McGonagall",
       "email": "sbek-organizer@example.com",
+      "alt_email": "minerva.organizer@sbek-test.example.com",
       "password": "SbekTest!2027-org",
-      "role": "Event Organizer / Admin"
+      "role": "Event Organizer / Admin",
+      "title": "Event Organizer · Program Director",
+      "note": "Demo organizer — runs the programme, reviews, and onboarding."
     },
     "speaker": {
-      "name": "Priya Raman",
+      "name": "Hermione Granger",
       "email": "sbek-speaker@example.com",
+      "alt_email": "hermione.speaker@sbek-test.example.com",
       "password": "SbekTest!2027-spk",
-      "title": "Principal Engineer",
-      "company": "Latticework Systems",
-      "bio": "Priya Raman is a Principal Engineer at Latticework Systems where she leads the build-tooling platform team. She previously maintained the open-source task runner 'gantry' and has spoken at over a dozen developer conferences on build systems, CI reliability, and developer productivity metrics.",
-      "twitter": "@priyabuilds",
-      "linkedin": "https://www.linkedin.com/in/priya-raman-example",
+      "role": "Lead Speaker",
+      "title": "Lead Speaker · Principal Engineer",
+      "company": "Hogwarts Buildworks",
+      "bio": "Hermione Granger is the Lead Speaker in this demo — a Principal Engineer at Hogwarts Buildworks who leads the build-tooling platform team. She previously maintained the open-source task runner 'Expecto' and speaks often on CI reliability and developer productivity.",
+      "twitter": "@hermionebuilds",
+      "linkedin": "https://www.linkedin.com/in/hermione-granger-example",
       "dietary": "Vegetarian",
       "tshirt": "M"
     },
     "speaker2": {
-      "name": "Marcus Okafor",
+      "name": "Harry Potter",
       "email": "sbek-speaker2@example.com",
+      "alt_email": "harry.speaker@sbek-test.example.com",
       "password": "SbekTest!2027-spk2",
-      "title": "Staff Developer Advocate",
-      "company": "Cloudreach Labs",
-      "bio": "Marcus Okafor is a Staff Developer Advocate at Cloudreach Labs focused on AI agents in production. He writes the newsletter 'Agents Weekly' and co-organizes the SF AI Tinkerers meetup."
+      "role": "Speaker",
+      "title": "Speaker · Staff Developer Advocate",
+      "company": "Order of the Phoenix Labs",
+      "bio": "Harry Potter is the secondary Speaker in this demo — a Staff Developer Advocate at Order of the Phoenix Labs focused on AI agents in production. He writes the newsletter 'Patronus Weekly' and co-organizes the SF AI Tinkerers meetup."
     },
     "reviewer": {
-      "name": "Sam Whitfield",
+      "name": "Severus Snape",
       "email": "sbek-reviewer@example.com",
+      "alt_email": "severus.reviewer@sbek-test.example.com",
       "password": "SbekTest!2027-rev",
-      "role": "Program Committee Reviewer"
+      "role": "Reviewer · Program Committee",
+      "note": "Demo reviewer — scores abstracts and leaves actionable comments."
     }
   },
   "submissions": [

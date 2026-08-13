@@ -16,14 +16,14 @@ const SLUG = process.env.SMOKE_SLUG ?? "devflow-conf-2027";
 const ACCOUNTS = {
   organizer: { email: "sbek-organizer@example.com", password: "SbekTest!2027-org" },
   organizerAlt: {
-    email: "jordan.organizer@sbek-test.example.com",
+    email: "minerva.organizer@sbek-test.example.com",
     password: "SbekTest!2027-org",
   },
   speaker: { email: "sbek-speaker@example.com", password: "SbekTest!2027-spk" },
-  speakerAlt: { email: "priya.speaker@sbek-test.example.com", password: "SbekTest!2027-spk" },
+  speakerAlt: { email: "hermione.speaker@sbek-test.example.com", password: "SbekTest!2027-spk" },
   speaker2: { email: "sbek-speaker2@example.com", password: "SbekTest!2027-spk2" },
   reviewer: { email: "sbek-reviewer@example.com", password: "SbekTest!2027-rev" },
-  reviewerAlt: { email: "sam.reviewer@sbek-test.example.com", password: "SbekTest!2027-rev" },
+  reviewerAlt: { email: "severus.reviewer@sbek-test.example.com", password: "SbekTest!2027-rev" },
 };
 
 let passed = 0;
@@ -193,11 +193,11 @@ async function main() {
   );
   await expectContains(
     anon,
-    `/e/${SLUG}/sessions?q=Raman`,
+    `/e/${SLUG}/sessions?q=Granger`,
     ["Taming 40-Minute CI"],
     "sessions search matches speaker surname",
   );
-  await expectContains(anon, `/e/${SLUG}/speakers`, ["Priya", "Raman"], "speakers directory");
+  await expectContains(anon, `/e/${SLUG}/speakers`, ["Hermione", "Granger"], "speakers directory");
   await expectContains(anon, `/e/${SLUG}/agenda`, ["Room 2A", "Day 1"], "agenda grid");
   await expectContains(anon, `/e/${SLUG}/itinerary`, ["Add to my schedule"], "itinerary");
   await expectContains(anon, `/e/${SLUG}/gallery`, ["Speaker gallery"], "speaker gallery");
@@ -261,7 +261,7 @@ async function main() {
     const body = await expectContains(
       organizer,
       `/admin/e/${SLUG}/speakers`,
-      ["Priya", "Raman"],
+      ["Hermione", "Granger"],
       "speaker roster",
     );
     // SearchBox owns a <form>; it must not sit inside the portal-invite form
@@ -369,11 +369,11 @@ async function main() {
   }
 
   section("Speaker scoping");
-  await expectContains(speaker, "/portal", ["My submissions", "Priya"], "speaker portal home");
+  await expectContains(speaker, "/portal", ["My submissions", "Hermione"], "speaker portal home");
   await expectMissing(
     speaker,
     "/portal",
-    ["Marcus Okafor", "Dana Kowalski"],
+    ["Harry Potter", "Fleur Delacour"],
     "portal shows no other speaker's data",
   );
   await expectStatus(speaker, `/admin/e/${SLUG}`, [403, 404, 307], "speaker blocked from admin");
@@ -459,7 +459,7 @@ async function main() {
       .get(ACCOUNTS.reviewer.email);
     if (assignment) {
       const page = await reviewer.get(`/review/a/${assignment.id}`);
-      const leaks = ["Priya Raman", "Marcus Okafor", "Latticework Systems"].filter((needle) =>
+      const leaks = ["Hermione Granger", "Harry Potter", "Hogwarts Buildworks"].filter((needle) =>
         page.body.includes(needle),
       );
       if (page.status === 200 && !leaks.length) {
@@ -470,7 +470,7 @@ async function main() {
       const organizerView = await organizer.get(
         `/admin/e/${SLUG}/submissions/${db.prepare("SELECT submission_id FROM evaluation_assignments WHERE id = ?").get(assignment.id).submission_id}?tab=participants`,
       );
-      if (organizerView.body.includes("Priya")) {
+      if (organizerView.body.includes("Hermione")) {
         ok("the organizer still sees author identity on the same submission");
       } else {
         fail("the organizer still sees author identity on the same submission");

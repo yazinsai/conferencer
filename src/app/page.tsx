@@ -493,7 +493,7 @@ export default function HomePage() {
                 className="reveal wordmark mt-6 text-xs leading-relaxed text-muted-foreground"
                 style={{ ["--i" as string]: 4 }}
               >
-                Demo organizer · sbek-organizer@example.com · SbekTest!2027-org
+                Organizer Minerva McGonagall · sbek-organizer@example.com · SbekTest!2027-org
               </p>
             ) : (
               <p

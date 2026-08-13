@@ -1029,13 +1029,13 @@ Workshop (120 min) · Panel (45 min)
 
 | Role | Name | Email | Password |
 | --- | --- | --- | --- |
-| Organizer | Jordan Alvarez | `sbek-organizer@example.com` | `SbekTest!2027-org` |
-| Speaker | Priya Raman | `sbek-speaker@example.com` | `SbekTest!2027-spk` |
-| Speaker | Marcus Okafor | `sbek-speaker2@example.com` | `SbekTest!2027-spk2` |
-| Reviewer | Sam Whitfield | `sbek-reviewer@example.com` | `SbekTest!2027-rev` |
+| Organizer | Minerva McGonagall | `sbek-organizer@example.com` | `SbekTest!2027-org` |
+| Lead Speaker | Hermione Granger | `sbek-speaker@example.com` | `SbekTest!2027-spk` |
+| Speaker | Harry Potter | `sbek-speaker2@example.com` | `SbekTest!2027-spk2` |
+| Reviewer | Severus Snape | `sbek-reviewer@example.com` | `SbekTest!2027-rev` |
 
-Priya: Principal Engineer, Latticework Systems, `@priyabuilds`, vegetarian, size M.
-Marcus: Staff Developer Advocate, Cloudreach Labs.
+Hermione: Lead Speaker · Principal Engineer, Hogwarts Buildworks, `@hermionebuilds`, vegetarian, size M.
+Harry: Speaker · Staff Developer Advocate, Order of the Phoenix Labs.
 
 **A published CFP form** with the standard questions plus a required short-text
 "Key takeaway" and a dropdown "Audience level" (Beginner / Intermediate / Advanced),
@@ -1105,8 +1105,8 @@ REST API and OpenAPI · Airtable sync · Auto-schedule assist · AI first-pass r
 Speaker CRM · MCP/agentic interface.
 
 **Final hour, non-negotiable.** Re-run the seed on a clean deploy and walk the whole
-loop as a stranger: submit a talk logged-out, review it as Sam, decide as Jordan,
-onboard as Priya, schedule it, and open all five public pages. Fix whatever breaks.
+loop as a stranger: submit a talk logged-out, review it as Severus, decide as Minerva,
+onboard as Hermione, schedule it, and open all five public pages. Fix whatever breaks.
 Record a 3-minute walkthrough. Write the README.
 
 ---

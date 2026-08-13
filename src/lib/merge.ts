@@ -31,9 +31,9 @@ export function renderMerge(template: string, context: MergeContext): string {
 }
 
 export const SAMPLE_CONTEXT: MergeContext = {
-  speaker_name: "Priya Raman",
-  first_name: "Priya",
-  last_name: "Raman",
+  speaker_name: "Hermione Granger",
+  first_name: "Hermione",
+  last_name: "Granger",
   talk_title: "Taming 40-Minute CI: Incremental Builds at Monorepo Scale",
   event_name: "DevFlow Conf 2027",
   event_dates: "May 12–14, 2027",
@@ -46,5 +46,5 @@ export const SAMPLE_CONTEXT: MergeContext = {
   due_date: "April 1, 2027",
   task_name: "Upload final slides",
   decision: "Accepted",
-  organizer_name: "Jordan Alvarez",
+  organizer_name: "Minerva McGonagall",
 };

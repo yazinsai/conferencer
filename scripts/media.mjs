@@ -40,21 +40,21 @@ const RANDOMUSER = "https://randomuser.me/api/portraits";
  * `--review` writes, matching each fixture's name as plausibly as a 200-face set
  * allows. `dir` is randomuser's own directory split, not a claim about anybody.
  *
- * Jonas is absent deliberately: one speaker without a photo keeps the gallery's
+ * Ron is absent deliberately: one speaker without a photo keeps the gallery's
  * no-photo fallback demonstrable (EMB-12).
  */
 const FACES = {
-  priya: { dir: "women", index: 8 }, //  Priya Raman
-  marcus: { dir: "men", index: 80 }, //  Marcus Okafor
-  grace: { dir: "women", index: 27 }, // Grace Nakamura
-  hugo: { dir: "men", index: 41 }, //    Hugo Martins
-  elena: { dir: "women", index: 26 }, // Elena Fischer
-  ana: { dir: "women", index: 29 }, //   Ana Beltrán
-  keiko: { dir: "women", index: 51 }, // Keiko Tanaka
-  farid: { dir: "men", index: 86 }, //   Farid Haddad
-  iris: { dir: "women", index: 62 }, //  Iris Oyelaran
-  chen: { dir: "men", index: 26 }, //    Chen Wei
-  dana: { dir: "women", index: 45 }, //  Dana Kowalski
+  priya: { dir: "women", index: 8 }, //  Hermione Granger
+  marcus: { dir: "men", index: 80 }, //  Harry Potter
+  grace: { dir: "women", index: 27 }, // Albus Dumbledore
+  hugo: { dir: "men", index: 41 }, //    Remus Lupin
+  elena: { dir: "women", index: 26 }, // Ginny Weasley
+  ana: { dir: "women", index: 29 }, //   Molly Weasley
+  keiko: { dir: "women", index: 51 }, // Nymphadora Tonks
+  farid: { dir: "men", index: 86 }, //   Kingsley Shacklebolt
+  iris: { dir: "women", index: 62 }, //  Cho Chang
+  chen: { dir: "men", index: 26 }, //    Cedric Diggory
+  dana: { dir: "women", index: 45 }, //  Fleur Delacour
 };
 
 async function download(url) {
@@ -126,7 +126,7 @@ ${rows.join("\n")}
 
 Total ${Math.round(total / 1024)} KB across ${rows.length} portraits.
 
-One speaker — Jonas Lindqvist — has no portrait on purpose, so the speaker gallery's no-photo
+One speaker — Ron Weasley — has no portrait on purpose, so the speaker gallery's no-photo
 fallback stays visible in the demo.
 `,
   );

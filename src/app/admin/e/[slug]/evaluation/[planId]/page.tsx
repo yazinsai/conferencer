@@ -391,7 +391,7 @@ export default async function PlanPage({
               </Field>
               <hr className="border-slate-200" />
               <Field label="Name" name="name">
-                <Input id="name" name="name" placeholder="Sam Whitfield" />
+                <Input id="name" name="name" placeholder="Severus Snape" />
               </Field>
               <Field label="Email" name="email">
                 <Input id="email" name="email" type="email" placeholder="sam@example.com" />
