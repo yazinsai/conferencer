@@ -90,6 +90,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
             {demo.map((d) => {
               const password = passwordFor(d.email);
               const name = [d.first_name, d.last_name].filter(Boolean).join(" ") || d.email;
+              const label = demoRoleLabel(d.role, d.email);
               return (
                 <form key={d.email} action={signInAction}>
                   <input type="hidden" name="next" value={next} />
@@ -107,8 +108,8 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-2">
-                      <span className="rounded-pill border border-sky-200 bg-sky-100 px-2 py-1 text-xs font-medium capitalize text-sky-900">
-                        {d.role}
+                      <span className="rounded-pill border border-sky-200 bg-sky-100 px-2 py-1 text-xs font-medium text-sky-900">
+                        {label}
                       </span>
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-800">
                         Sign in
@@ -142,4 +143,13 @@ function passwordFor(email: string): string {
   if (email.includes("reviewer")) return "SbekTest!2027-rev";
   if (email.includes("speaker2")) return "SbekTest!2027-spk2";
   return "SbekTest!2027-spk";
+}
+
+/** Membership stores speakers as "participant"; demo buttons should say the job. */
+function demoRoleLabel(role: string, email: string): string {
+  if (role === "organizer" || email.includes("organizer")) return "Organizer";
+  if (role === "reviewer" || email.includes("reviewer")) return "Reviewer";
+  if (email.includes("speaker2")) return "Speaker 2";
+  if (email.includes("speaker") || role === "participant") return "Speaker";
+  return role;
 }

@@ -797,7 +797,7 @@ function main() {
     }
   }
 
-  // Priya's slides deliverable: two versions plus a cross-role comment thread.
+  // Hermione's slides deliverable: two versions plus a cross-role comment thread.
   const slidesAssignment = get<{ id: string }>(
     `SELECT ta.id FROM task_assignments ta JOIN tasks t ON t.id = ta.task_id
       WHERE ta.contact_id = ? AND t.name = 'Upload final slides'`,
@@ -818,7 +818,7 @@ function main() {
     addComment({
       uploadId: v1.id,
       authorUserId: users.priya,
-      authorName: "Priya Raman",
+      authorName: "Hermione Granger",
       body: "Draft deck — final version coming Friday.",
     });
     storeBuffer({
@@ -918,7 +918,7 @@ function main() {
       null,
       entry.stage,
       null,
-      "Jordan Alvarez",
+      "Minerva McGonagall",
       nowIso(),
     );
   }
@@ -967,37 +967,37 @@ async function withEmails() {
   await sendEmail({
     eventId: event.id,
     to: priya!.email,
-    toName: "Priya Raman",
+    toName: "Hermione Granger",
     contactId: priya!.id,
     subject: "We received your submission to DevFlow Conf 2027",
-    body: `<p>Hi Priya,</p><p>Thanks for submitting <strong>Taming 40-Minute CI: Incremental Builds at Monorepo Scale</strong> to DevFlow Conf 2027.</p>`,
+    body: `<p>Hi Hermione,</p><p>Thanks for submitting <strong>Taming 40-Minute CI: Incremental Builds at Monorepo Scale</strong> to DevFlow Conf 2027.</p>`,
     templateKey: "submission_confirmation",
   });
   await sendEmail({
     eventId: event.id,
     to: priya!.email,
-    toName: "Priya Raman",
+    toName: "Hermione Granger",
     contactId: priya!.id,
     subject: "Your talk has been accepted to DevFlow Conf 2027",
-    body: `<p>Hi Priya Raman, congratulations! Your session 'Taming 40-Minute CI: Incremental Builds at Monorepo Scale' has been accepted. Please confirm your participation and complete your speaker profile by April 1, 2027.</p>`,
+    body: `<p>Hi Hermione Granger, congratulations! Your session 'Taming 40-Minute CI: Incremental Builds at Monorepo Scale' has been accepted. Please confirm your participation and complete your speaker profile by April 1, 2027.</p>`,
     templateKey: "decision_accepted",
   });
   await sendEmail({
     eventId: event.id,
     to: marcus!.email,
-    toName: "Marcus Okafor",
+    toName: "Harry Potter",
     contactId: marcus!.id,
     subject: "Your DevFlow Conf 2027 speaker portal",
-    body: `<p>Hi Marcus, your speaker portal is ready.</p>`,
+    body: `<p>Hi Harry, your speaker portal is ready.</p>`,
     templateKey: "portal_invite",
   });
   await sendEmail({
     eventId: event.id,
     to: sam!.email,
-    toName: "Sam Whitfield",
+    toName: "Severus Snape",
     contactId: sam!.id,
     subject: "You are reviewing for DevFlow Conf 2027",
-    body: `<p>Hi Sam, you have been added to the review committee. Your queue is ready.</p>`,
+    body: `<p>Hi Severus, you have been added to the review committee. Your queue is ready.</p>`,
     templateKey: "evaluation_invite",
   });
   console.log("· outbox seeded");
