@@ -152,11 +152,14 @@
   --shadow-raised: 0 12px 32px -16px oklch(17% 0.008 265 / 0.22);
   --shadow-nav: 0 8px 28px -20px oklch(17% 0.008 265 / 0.4);
 
-  /* Named z-scale — no ad-hoc 9999s. The nav out-paints in-page sticky boxes. */
+  /* Named z-scale — no ad-hoc 9999s.
+     Sticky nav out-paints in-page sticky boxes. Portaled menus (Radix
+     DropdownMenu / Popover) leave the nav stacking context, so --z-dropdown
+     must sit above --z-sticky-nav or the bar occludes the menu's top edge. */
   --z-raised: 10;
-  --z-dropdown: 100;
   --z-sticky: 200;
   --z-sticky-nav: 300;
+  --z-dropdown: 350;
   --z-modal: 400;
   --z-toast: 500;
 
