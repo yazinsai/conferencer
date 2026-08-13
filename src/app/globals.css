@@ -135,6 +135,157 @@ h6 {
   animation-delay: calc(var(--i, 0) * 60ms);
 }
 
+/* --------------------------------------------- marketing motion (design.md
+   § Motion · marketing surfaces). Eleven primitives, itemised there; items 4,
+   7, 8, 10 and 11 are the CSS-only ones and live here. Items 5 and 6 are React
+   <ViewTransition>s and only need the pseudo-element rules further down. */
+
+/* 4 · Scroll reveal — one-shot and **sticky**.
+ *
+ * This started as a pure-CSS `animation-timeline: view()` reveal, which is the
+ * prettier implementation and the wrong one. A view() timeline is a *function of
+ * scroll position*, so an element below the fold sits at progress 0 — invisible —
+ * and returns to invisible every time it leaves the viewport again. Measured on
+ * this page: 36 of 41 revealed elements were still at opacity 0 after scrolling
+ * the whole document and back. Anything that reads the page without sitting at
+ * the right scroll offset — a full-page screenshot, `npm run shots`, an audit
+ * measuring geometry, a print stylesheet — sees a blank page.
+ *
+ * So the state is driven once by an IntersectionObserver
+ * (components/marketing/reveal.tsx) and never taken away. The default is
+ * *visible*: the attribute only exists after the observer has marked an element,
+ * so server-rendered HTML, a JS-off reader and any tool that never runs the
+ * observer all get the content, and the animation is purely additive. */
+.hm-reveal[data-reveal-state="pending"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.hm-reveal[data-reveal-state="in"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-reveal) var(--ease-out),
+    transform var(--dur-reveal) var(--ease-out);
+}
+
+/* 7 · Insert reveal — a row that arrives after first paint (a show-when
+   question, an added question, a bulk-action bar). One rule, no JS timers. */
+@starting-style {
+  .hm-insert {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.hm-insert {
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
+}
+
+/* 8 · Draw-on check. The stroke length is set on the path itself so one
+   keyframe serves every size. */
+@keyframes hm-draw {
+  from {
+    stroke-dashoffset: var(--hm-draw-length, 24);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hm-check path,
+.hm-check polyline {
+  stroke-dasharray: var(--hm-draw-length, 24);
+  animation: hm-draw var(--dur-reveal) var(--ease-out) forwards;
+}
+
+/* 10 · Tile lift. A translate and a border step — never a scale, and no shadow
+   bloom. Fine pointers only, so a tap on a phone does not leave a tile stuck in
+   its hover state. */
+@media (hover: hover) and (pointer: fine) {
+  .hm-lift {
+    transition:
+      transform var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out);
+  }
+
+  .hm-lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-rule-2);
+  }
+}
+
+/* 11 · Drag affordance. The tilt is what makes a card feel picked up. */
+.hm-grab {
+  cursor: grab;
+}
+
+.hm-grab:active {
+  cursor: grabbing;
+}
+
+.hm-dragging {
+  transform: rotate(1.5deg);
+  opacity: 0.55;
+}
+
+/* 5 and 6 · View transitions. Two mechanisms, one look.
+ *
+ * The tab-strip crossfade and the publish flip are React `<ViewTransition>`s; the
+ * talk card travelling from the tray into its slot is the browser's API driven
+ * directly (see the note in demo/agenda-playground.tsx — React's version does not
+ * activate for an element moving between subtrees inside an already-keyed
+ * boundary). Both end up as `::view-transition-*` pseudo-elements, so styling every
+ * group rather than a named class covers both and cannot drift apart.
+ *
+ * The browser's default is 250ms `ease`; this is the system's own duration and
+ * easing (design.md § Motion — never the browser default `ease`). */
+::view-transition-group(*) {
+  animation-duration: var(--dur-reveal);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: var(--dur-reveal);
+  animation-timing-function: var(--ease-out);
+}
+
+/* The one transition that carries information — a talk moving from the tray into
+   its slot — is given its own class so it can be slower than the crossfades and can
+   blur mid-flight. `view-transition-class` is how a set of named participants share
+   one rule; without it these fall back to the `*` rules above. The blur hides the
+   pixel interpolation while the card changes shape, and it is also what makes the
+   movement legible at all in a screen recording that samples every 50ms. */
+.hm-morph {
+  view-transition-class: hm-morph;
+}
+
+::view-transition-group(.hm-morph) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-image-pair(.hm-morph) {
+  animation-name: hm-vt-blur;
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-out);
+}
+
+@keyframes hm-vt-blur {
+  40% {
+    filter: blur(2px);
+  }
+}
+
+/* A transition's overlay swallows clicks for its whole duration, which on a page
+   whose point is that you can play with it would eat the second drag. */
+::view-transition {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -148,6 +299,26 @@ h6 {
   .reveal {
     transform: none;
     animation-delay: 0ms;
+  }
+
+  /* Nothing on a marketing surface translates or rotates under reduced motion.
+     The reveal is not marked pending at all in that case (the observer bails),
+     so these only have to neutralise the transforms. */
+  .hm-insert,
+  .hm-dragging,
+  .hm-reveal[data-reveal-state="pending"] {
+    transform: none;
+  }
+
+  .hm-lift:hover {
+    transform: none;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
 

@@ -237,6 +237,26 @@ async function capture(chrome, shot, cookie) {
       expression: "document.fonts.ready.then(() => 1)",
       awaitPromise: true,
     });
+    // Scroll the whole document once before a full-page capture, then return to
+    // the top. The landing page reveals its sections on first sight, and a capture
+    // taken without scrolling would photograph the un-revealed state. The reveals
+    // are one-shot and sticky (design.md § Motion · marketing surfaces, item 4),
+    // so one pass is enough and the page ends up where it started.
+    if (shot.full) {
+      await page.send("Runtime.evaluate", {
+        expression: `(async () => {
+          const step = Math.max(200, window.innerHeight * 0.75);
+          for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+            window.scrollTo(0, y);
+            await new Promise((r) => requestAnimationFrame(r));
+          }
+          window.scrollTo(0, 0);
+          await new Promise((r) => setTimeout(r, 400));
+        })()`,
+        awaitPromise: true,
+      });
+    }
+
     await sleep(shot.settle ?? 500);
 
     // WebP for the shipped product captures: a 2× PNG of a dense admin screen is

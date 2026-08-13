@@ -157,10 +157,25 @@ async function main() {
   // The invariant moved, it did not go away: both must render logged out with
   // real content, and the landing page must link to the live event so the demo
   // is never orphaned.
+  // The last four strings belong to the landing page's playables, which are the
+  // whole argument of that page (design.md § Live product tiles): the agenda board's
+  // tray and publish action, and the form builder beside the speaker's own view of
+  // the same form. They are asserted here because rule 5 says each playable
+  // server-renders a real first frame — if one ever regresses to a client-only
+  // render, the page stops working with scripting off and this check should say so.
+  // Only the first step's panel is in the markup; the other two are behind the tab
+  // strip, which is JavaScript (design.md § Per-page allowances, item 9).
   const landing = await expectContains(
     anon,
     "/",
-    ["Conferencer", "Collect talks.", "Publish the agenda.", "Reasonable questions"],
+    [
+      "Conferencer",
+      "The better way to run your conference programme",
+      "Frequently asked questions",
+      "Unscheduled",
+      "Publish agenda",
+      "What the speaker sees",
+    ],
     "product landing page",
   );
   if (landing?.includes(`/e/${SLUG}`)) ok("landing page links to the live event", `/e/${SLUG}`);

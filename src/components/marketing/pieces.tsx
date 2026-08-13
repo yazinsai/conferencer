@@ -1,12 +1,26 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { cx } from "@/components/ui";
+import { Chip, cx } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 
 /**
- * Shared parts of the marketing page. Macrostructure 05 · Workbench: real
- * product captures are the argument, so the important component here is Shot.
+ * Shared parts of the marketing pages.
+ *
+ * `/` is Macrostructure 01 · Bento Grid with **live product tiles** — the running
+ * product is the argument, so the important components here are Tile and
+ * Playable. `/vs/**` is still 05 · Workbench, where the argument is a sourced
+ * ledger and the enrichment is a real capture, so Shot stays exactly as it was.
+ * See design.md § Macrostructure families and § Live product tiles.
  */
+
+/** The vertical rhythm steps. No two consecutive sections share one (gate 9). */
+const PAD = {
+  md: "py-16 sm:py-20",
+  lg: "py-20 sm:py-28",
+  xl: "py-24 sm:py-32",
+  "2xl": "py-28 sm:py-40",
+} as const;
 
 /**
  * A page band. Sections alternate paper / paper-2 and set their own vertical
@@ -19,6 +33,7 @@ export function Band({
   id,
   bordered = true,
   photo,
+  pad,
 }: {
   children: ReactNode;
   band?: "paper" | "paper-2" | "ink";
@@ -27,6 +42,8 @@ export function Band({
   bordered?: boolean;
   /** Only an ink band may carry a photograph, and only under a scrim. */
   photo?: { src: string; width: number; height: number };
+  /** Vertical rhythm. Omit and the caller pads the inner element itself. */
+  pad?: keyof typeof PAD;
 }) {
   return (
     <section
@@ -63,8 +80,181 @@ export function Band({
           />
         </>
       ) : null}
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">{children}</div>
+      <div className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6", pad && PAD[pad])}>{children}</div>
     </section>
+  );
+}
+
+/**
+ * A section head: centred, six words or fewer, one sentence of lede beneath.
+ *
+ * Centring is `/`-only and deliberate (design.md allowance 10) — it is what gives
+ * the page air, and it is what the studied reference does. There is no eyebrow
+ * slot: eyebrows were on eight of nine sections here, which made every section
+ * look like the same section, and a centred head carries itself (design.md
+ * § Marketing voice). Gate 54 bans the tag-left/heading-right two-column head,
+ * which this is not.
+ */
+export function Head({
+  title,
+  lede,
+  className,
+  size = "md",
+}: {
+  title: ReactNode;
+  lede?: ReactNode;
+  className?: string;
+  size?: "md" | "lg";
+}) {
+  return (
+    <div className={cx("hm-reveal mx-auto max-w-3xl text-center", className)}>
+      <h2
+        className={cx(
+          "display mx-auto max-w-[22ch] text-balance text-ink",
+          size === "lg" ? "text-display-s" : "text-2xl sm:text-3xl",
+        )}
+      >
+        {title}
+      </h2>
+      {lede ? (
+        <p className="mx-auto mt-4 max-w-[58ch] text-pretty text-md leading-relaxed text-neutral">
+          {lede}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * One cell of the bento.
+ *
+ * Width is the only span knob, and that is deliberate. A row span looks right in a
+ * mock-up and wrong in a browser: a tile spanning two content-sized rows is as tall
+ * as both of them plus the gap, and unless its content happens to be exactly that
+ * tall it leaves a hole. Two tiles side by side in one row stretch to match each
+ * other, which is what a bento is supposed to look like. So `wide` tiles take the
+ * full row and everything else pairs up.
+ *
+ * Tracks are declared `minmax(0, 1fr)` by the parent so an over-wide child scrolls
+ * inside its own cell rather than pushing the viewport sideways (gate 50).
+ */
+export function Tile({
+  children,
+  title,
+  body,
+  wide = false,
+  className,
+  bare = false,
+}: {
+  children?: ReactNode;
+  title?: ReactNode;
+  body?: ReactNode;
+  /** Take the whole row rather than half of it. */
+  wide?: boolean;
+  className?: string;
+  /** Skip the padded header/body frame — the child owns the whole tile. */
+  bare?: boolean;
+}) {
+  return (
+    <article
+      className={cx(
+        "hm-reveal hm-lift flex min-w-0 flex-col overflow-hidden rounded-tile border border-rule bg-paper shadow-[var(--shadow-tile)]",
+        wide && "sm:col-span-2",
+        className,
+      )}
+    >
+      {title ? (
+        <div className="min-w-0 p-5 pb-0 sm:p-6 sm:pb-0">
+          <h3 className="display text-md text-ink">{title}</h3>
+          {body ? (
+            <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-neutral">{body}</p>
+          ) : null}
+        </div>
+      ) : null}
+      <div className={cx("min-w-0 flex-1", bare ? (title ? "mt-4" : "") : "p-5 sm:p-6")}>
+        {children}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * The frame every playable sits in.
+ *
+ * design.md § Live product tiles rules 3 and 5 are enforced here rather than
+ * trusted: `note` and `href` are required props, so a tile cannot ship without
+ * saying what the real screen does that it does not, and without a way to go and
+ * look at that screen. The chip is the one place the signal colour appears on
+ * this page, and it is doing work — it tells a reader the panel is not a picture.
+ */
+export function Playable({
+  children,
+  note,
+  href,
+  hrefLabel,
+  hint,
+  className,
+}: {
+  children: ReactNode;
+  /** What the real screen does that this panel does not. One sentence. */
+  note: ReactNode;
+  /** The real screen, in the demo. */
+  href: string;
+  hrefLabel: string;
+  /** What to do with it, shown beside the chip. */
+  hint?: ReactNode;
+  className?: string;
+}) {
+  return (
+    // A column with the footnote pushed to the bottom, so a short playable in a
+    // tile that stretched to match its neighbour distributes the slack rather than
+    // leaving a block of white beneath itself.
+    <div className={cx("flex h-full min-w-0 flex-col", className)}>
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <Chip tone="blue">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="inline-block size-1.5 rounded-full bg-signal" />
+            Live
+          </span>
+        </Chip>
+        {hint ? <p className="min-w-0 text-sm text-neutral">{hint}</p> : null}
+      </div>
+
+      <div className="min-w-0">{children}</div>
+
+      <p className="mt-auto pt-3 text-xs leading-relaxed text-muted-foreground">
+        {note}{" "}
+        <Link
+          href={href}
+          className="nowrap-affordance text-ink underline decoration-rule-2 underline-offset-4 hover:decoration-ink"
+        >
+          {hrefLabel} <span aria-hidden>→</span>
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+/**
+ * A hairline row of repository facts.
+ *
+ * This occupies the slot the studied reference fills with a customer logo strip.
+ * Conferencer has no customers to name, and an invented logo would make every
+ * checkable claim beside it stop being believed (design.md § Honest copy). Every
+ * item here is true of this repository and checkable in it.
+ */
+export function FactStrip({ items }: { items: readonly string[] }) {
+  return (
+    <ul className="hm-reveal flex flex-wrap items-center justify-center gap-x-6 gap-y-2 sm:gap-x-8">
+      {items.map((item) => (
+        <li
+          key={item}
+          className="wordmark text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground"
+        >
+          {item}
+        </li>
+      ))}
+    </ul>
   );
 }
 

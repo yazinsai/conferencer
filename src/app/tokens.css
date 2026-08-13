@@ -1,15 +1,19 @@
 /* Hallmark · genre: modern-minimal · design-system: design.md · designed-as-app
- * macrostructures: Workbench (marketing) · Marquee Hero (public event) · Stat-Led (app)
+ * macrostructures: Bento Grid — live product tiles (/) · Workbench (/vs) ·
+ *                  Marquee Hero (public event) · Stat-Led (app)
  * theme: studied-DNA (source: image) · paper oklch(100% 0 0) · accent = ink oklch(17% 0.008 265)
  * signal oklch(51.1% 0.262 277) held under 5% · display: Geist 600 · body: Switzer 400 · outlier: Geist Mono 500
  * nav: N1b (marketing) · N12 (public event) · N3 (app)  ·  footer: Ft5 · Ft1 · —
- * enrichment: real product screenshots in hairline figures (no re-drawn chrome)
+ * enrichment: live product tiles on / (the product runs in the page; no screenshot
+ *             left there) · real screenshots in hairline figures on /vs
+ * motion: two budgets — 3 primitives on app + public-event surfaces, 11 itemised on
+ *         marketing surfaces (design.md § Motion)
  * studied: yes · DNA-source: image (user reference)
- * pre-emit critique: P5 H5 E4 S5 R4 V5
+ * pre-emit critique: P5 H5 E5 S5 R4 V5
  * slop test: 58/58 · contrast: pass (40-41, `npm run contrast`, 27 pairs)
  * mobile: pass (34, 49, 50-57, `npm run audit`, 320/375/414/768/1280/1440)
  * honest: pass (46) · chrome: pass (47) · tokens: pass (48) · icons: pass (30, Lucide only)
- * nav: pass (42) · footer: pass (43) · hero fold: pass (44, 470px of 800px)
+ * nav: pass (42) · footer: pass (43) · hero fold: pass (44, 396px of 800px)
  *
  * This file is the single source of truth for the product's look. globals.css imports it,
  * every screen renders through src/components/ui/index.tsx, and the ramps at the bottom
@@ -86,6 +90,9 @@
 
   /* ------------------------------------------------------------------ shapes -- */
   --radius-card: 12px;
+  /* A tile that holds a whole screen needs a softer corner than a table card.
+     Both sit inside the studied DNA's 12-16px band (design.md allowance 11). */
+  --radius-tile: 16px;
   --radius-pill: 999px;
   --radius-input: 10px;
 
@@ -144,6 +151,14 @@
   --dur-micro: 120ms;
   --dur-short: 180ms;
   --dur-long: 320ms;
+  /* The marketing surfaces' scroll reveal, crossfades and check draw all run at one
+     duration, so a page that reveals a head and swaps a panel in the same scroll
+     reads as one system moving (design.md § Motion · marketing). */
+  --dur-reveal: 320ms;
+  /* The shared-element morph gets the longest step in the budget. It is the one
+     animation on the page carrying information — *this* card went *there* — and at
+     320ms over a couple of hundred pixels it reads as a pop rather than a move. */
+  --dur-morph: 400ms;
 
   --rule-hair: 1px;
   --rule-fine: 2px;
@@ -151,6 +166,10 @@
   --shadow-card: 0 1px 2px oklch(17% 0.008 265 / 0.05);
   --shadow-raised: 0 12px 32px -16px oklch(17% 0.008 265 / 0.22);
   --shadow-nav: 0 8px 28px -20px oklch(17% 0.008 265 / 0.4);
+  /* A playable tile sits between the two: enough lift to read as a surface a
+     reader may touch, softer than a figure that is only being looked at. */
+  --shadow-tile:
+    0 1px 2px oklch(17% 0.008 265 / 0.04), 0 12px 24px -18px oklch(17% 0.008 265 / 0.14);
 
   /* Named z-scale — no ad-hoc 9999s.
      Sticky nav out-paints in-page sticky boxes. Portaled menus (Radix

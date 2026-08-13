@@ -1,16 +1,16 @@
 import { all, get, run } from "../db";
 import { id } from "../ids";
 import { nowIso, isPast, isFuture } from "../datetime";
-import { parseOptions } from "../fields";
 import {
   SCORECARD_TYPES,
   SCORECARD_TYPE_LABELS,
   scaleRange,
   isScored,
+  computeScore,
   type ScorecardQuestion,
 } from "../scorecard";
 
-export { SCORECARD_TYPES, SCORECARD_TYPE_LABELS, scaleRange, isScored };
+export { SCORECARD_TYPES, SCORECARD_TYPE_LABELS, scaleRange, isScored, computeScore };
 export type { ScorecardQuestion };
 
 export type EvaluationPlan = {
@@ -546,60 +546,6 @@ export function reviewsForSubmission(submissionId: string): ReviewRow[] {
  * its own scale, weighted, and summed back onto the widest scale in the card so
  * "4 and 2 with weights 2 and 1" reads as 3.33 rather than 3.0.
  */
-export function computeScore(
-  questions: ScorecardQuestion[],
-  answers: Record<string, unknown>,
-): { score: number | null; raw: number | null; weighted: boolean } {
-  let weightedSum = 0;
-  let weightTotal = 0;
-  let rawSum = 0;
-  let rawCount = 0;
-  let anyWeighted = false;
-
-  for (const question of questions) {
-    if (!isScored(question)) continue;
-    // Weight 0 means "collect it, but keep it out of the aggregate" — the default
-    // for dropdown criteria such as Accept/Maybe/Reject recommendations.
-    const weight = Number(question.weight ?? 1);
-    if (!weight || weight <= 0) continue;
-    const raw = answers[question.id];
-    if (raw === undefined || raw === null || raw === "") continue;
-
-    let value: number | null = null;
-    let max = 5;
-    if (question.type === "dropdown") {
-      const options = parseOptions(question.options);
-      const chosen = options.find((o) => o.value === String(raw) || o.label === String(raw));
-      if (!chosen || chosen.points === undefined || Number.isNaN(chosen.points)) continue;
-      value = Number(chosen.points);
-      max = Math.max(...options.map((o) => Number(o.points ?? 0)), 1);
-    } else {
-      const range = scaleRange(question);
-      if (!range) continue;
-      value = Number(raw);
-      if (Number.isNaN(value)) continue;
-      max = range.max;
-    }
-    if (weight !== 1) anyWeighted = true;
-    // Normalise onto a 1..5-style comparable scale then weight it.
-    weightedSum += (value / max) * weight;
-    weightTotal += weight;
-    rawSum += value;
-    rawCount += 1;
-  }
-
-  if (!weightTotal) return { score: null, raw: null, weighted: false };
-  const maxScale = Math.max(
-    ...questions
-      .filter((q) => isScored(q) && Number(q.weight ?? 1) > 0)
-      .map((q) => scaleRange(q)?.max ?? 5),
-    1,
-  );
-  const score = Number(((weightedSum / weightTotal) * maxScale).toFixed(2));
-  const raw = rawCount ? Number((rawSum / rawCount).toFixed(2)) : null;
-  return { score, raw, weighted: anyWeighted };
-}
-
 export type ResultRow = {
   submission_id: string;
   title: string;
