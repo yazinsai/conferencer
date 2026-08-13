@@ -377,7 +377,6 @@ function main() {
       first_name: person.first,
       last_name: person.last,
       email: person.email,
-      alt_email: person.altEmail ?? null,
       job_title: person.title ?? null,
       company: person.company ?? null,
       biography: person.bio ?? null,
@@ -416,27 +415,22 @@ function main() {
     const membershipRole =
       person.role === "organizer" ? "organizer" : person.role === "reviewer" ? "reviewer" : "participant";
 
-    for (const [index, address] of [person.email, person.altEmail].filter(Boolean).entries()) {
-      const email = address as string;
-      let user = findUserByEmail(email);
-      if (!user) {
-        user = createUser({
-          email,
-          password: person.password ?? defaultPasswordFor(person),
-          firstName: person.first,
-          lastName: person.last,
-        });
-      } else {
-        setUserPassword(user.id, person.password ?? defaultPasswordFor(person));
-      }
-      addMembership(event.id, user.id, membershipRole);
-      if (index === 0) {
-        users[person.key] = user.id;
-        updateContact(contact.id, { user_id: user.id });
-      }
+    let user = findUserByEmail(person.email);
+    if (!user) {
+      user = createUser({
+        email: person.email,
+        password: person.password ?? defaultPasswordFor(person),
+        firstName: person.first,
+        lastName: person.last,
+      });
+    } else {
+      setUserPassword(user.id, person.password ?? defaultPasswordFor(person));
     }
+    addMembership(event.id, user.id, membershipRole);
+    users[person.key] = user.id;
+    updateContact(contact.id, { user_id: user.id });
   }
-  console.log(`· ${PEOPLE.length} people (each with both fixture email aliases)`);
+  console.log(`· ${PEOPLE.length} people`);
 
   /* --------------------------------------------------------- submissions -- */
   const days = ["2027-05-12", "2027-05-13", "2027-05-14"];
@@ -960,9 +954,9 @@ async function withEmails() {
   );
   if (already && already.n > 0) return;
 
-  const priya = findContactByEmail(event.org_id, "sbek-speaker@example.com");
-  const marcus = findContactByEmail(event.org_id, "sbek-speaker2@example.com");
-  const sam = findContactByEmail(event.org_id, "sbek-reviewer@example.com");
+  const priya = findContactByEmail(event.org_id, "demo-speaker@example.com");
+  const marcus = findContactByEmail(event.org_id, "demo-speaker2@example.com");
+  const sam = findContactByEmail(event.org_id, "demo-reviewer@example.com");
 
   await sendEmail({
     eventId: event.id,

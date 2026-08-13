@@ -82,18 +82,13 @@ a populated email outbox. Nothing in the app has an empty state on a fresh insta
 
 | Role | Who | Email | Password |
 | --- | --- | --- | --- |
-| Organizer | Minerva McGonagall | `sbek-organizer@example.com` | `SbekTest!2027-org` |
-| Lead Speaker | Hermione Granger | `sbek-speaker@example.com` | `SbekTest!2027-spk` |
-| Speaker | Harry Potter | `sbek-speaker2@example.com` | `SbekTest!2027-spk2` |
-| Reviewer | Severus Snape | `sbek-reviewer@example.com` | `SbekTest!2027-rev` |
+| Organizer | Minerva McGonagall | `demo-organizer@example.com` | `SbekTest!2027-org` |
+| Lead Speaker | Hermione Granger | `demo-speaker@example.com` | `SbekTest!2027-spk` |
+| Speaker | Harry Potter | `demo-speaker2@example.com` | `SbekTest!2027-spk2` |
+| Reviewer | Severus Snape | `demo-reviewer@example.com` | `SbekTest!2027-rev` |
 
 Demo people are Harry Potter characters so each role is easy to tell apart. Luna Lovegood
 is the second reviewer; the rest of the roster fills the agenda.
-
-Every persona also has a second login at `@sbek-test.example.com`
-(`minerva.organizer@`, `hermione.speaker@`, `harry.speaker@`, `severus.reviewer@`) with the same
-password, pointing at the same person — the fixture files this was built against disagreed
-about addresses, so both work.
 
 The sign-in page lists these credentials while the seeded demo accounts exist, so nobody
 has to dig through the README to get in.

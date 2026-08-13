@@ -30,7 +30,7 @@ const CHROME =
   process.env.CHROME_BIN ??
   ["/usr/local/bin/google-chrome", "/usr/bin/google-chrome", "/usr/bin/chromium"].find(Boolean);
 
-const ORGANIZER = { email: "sbek-organizer@example.com", password: "SbekTest!2027-org" };
+const ORGANIZER = { email: "demo-organizer@example.com", password: "SbekTest!2027-org" };
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {

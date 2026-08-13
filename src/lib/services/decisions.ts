@@ -25,7 +25,7 @@ export function onSubmissionAccepted(
     if (!contact) continue;
     ensureEventContact(event.id, contact.id, { status: "active", speaker_status: "invited" });
 
-    const user = findUserByEmail(contact.email) ?? (contact.alt_email ? findUserByEmail(contact.alt_email) : undefined);
+    const user = findUserByEmail(contact.email);
     if (user) addMembership(event.id, user.id, "participant");
 
     for (const task of tasks) {
