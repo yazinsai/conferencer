@@ -175,7 +175,7 @@ export function SubmissionTable({
                     title="Quick edit"
                     aria-label={`Edit ${row.title}`}
                     className={cx(
-                      "inline-flex size-9 items-center justify-center rounded-input text-muted-foreground",
+                      "inline-flex size-8 items-center justify-center rounded-input text-muted-foreground",
                       "transition-colors duration-[120ms] ease-out",
                       "hover:bg-paper-3 hover:text-ink",
                       "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
@@ -203,17 +203,19 @@ export function SubmissionTable({
                 ) : null}
                 {show("title") ? (
                   <Td className={COLUMN_WIDTH.title}>
-                    <Link
-                      href={`${base}/${row.id}`}
-                      className="font-medium text-ink hover:text-signal"
-                    >
-                      {row.title}
-                    </Link>
-                    {showKind ? (
-                      <span className="ml-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
-                        {row.kind}
-                      </span>
-                    ) : null}
+                    <div className="flex items-baseline gap-1.5">
+                      <Link
+                        href={`${base}/${row.id}`}
+                        className="min-w-0 font-medium text-ink hover:text-signal"
+                      >
+                        {row.title}
+                      </Link>
+                      {showKind ? (
+                        <span className="shrink-0 text-[11px] uppercase tracking-wide text-muted-foreground">
+                          {row.kind}
+                        </span>
+                      ) : null}
+                    </div>
                   </Td>
                 ) : null}
                 {show("description") ? (
