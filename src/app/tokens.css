@@ -86,6 +86,9 @@
 
   /* ------------------------------------------------------------------ shapes -- */
   --radius-card: 12px;
+  /* A tile that holds a whole screen needs a softer corner than a table card.
+     Both sit inside the studied DNA's 12-16px band (design.md allowance 11). */
+  --radius-tile: 16px;
   --radius-pill: 999px;
   --radius-input: 10px;
 
@@ -144,6 +147,10 @@
   --dur-micro: 120ms;
   --dur-short: 180ms;
   --dur-long: 320ms;
+  /* The marketing surfaces' scroll reveal, shared-element morph and check draw
+     all run at one duration, so a page that reveals a head and morphs a card in
+     the same scroll reads as one system moving (design.md § Motion · marketing). */
+  --dur-reveal: 320ms;
 
   --rule-hair: 1px;
   --rule-fine: 2px;
@@ -151,6 +158,10 @@
   --shadow-card: 0 1px 2px oklch(17% 0.008 265 / 0.05);
   --shadow-raised: 0 12px 32px -16px oklch(17% 0.008 265 / 0.22);
   --shadow-nav: 0 8px 28px -20px oklch(17% 0.008 265 / 0.4);
+  /* A playable tile sits between the two: enough lift to read as a surface a
+     reader may touch, softer than a figure that is only being looked at. */
+  --shadow-tile:
+    0 1px 2px oklch(17% 0.008 265 / 0.04), 0 12px 24px -18px oklch(17% 0.008 265 / 0.14);
 
   /* Named z-scale — no ad-hoc 9999s. The nav out-paints in-page sticky boxes. */
   --z-raised: 10;

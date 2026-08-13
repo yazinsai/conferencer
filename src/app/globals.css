@@ -135,6 +135,124 @@ h6 {
   animation-delay: calc(var(--i, 0) * 60ms);
 }
 
+/* --------------------------------------------- marketing motion (design.md
+   § Motion · marketing surfaces). Eleven primitives, itemised there; items 4,
+   7, 8, 10 and 11 are the CSS-only ones and live here. Items 5 and 6 are React
+   <ViewTransition>s and only need the pseudo-element rules further down. */
+
+/* 4 · Scroll reveal. CSS-driven, so there is no observer and no client
+   component behind it. Behind @supports because the element starts invisible:
+   in a browser without scroll-driven animations the rule never applies and the
+   content is simply there, which is the only acceptable failure mode for a
+   reveal (design.md § Motion, last bullet). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hm-reveal {
+      opacity: 0;
+      animation: hm-reveal var(--dur-reveal) var(--ease-out) both;
+      animation-timeline: view();
+      /* Starts as the element's top edge enters and finishes a fifth of the way
+         up the viewport, so a reader scrolling at any speed sees it arrive
+         rather than catching it mid-fade. */
+      animation-range: entry 8% cover 20%;
+    }
+  }
+}
+
+/* 7 · Insert reveal — a row that arrives after first paint (a show-when
+   question, an added question, a bulk-action bar). One rule, no JS timers. */
+@starting-style {
+  .hm-insert {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.hm-insert {
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
+}
+
+/* 8 · Draw-on check. The stroke length is set on the path itself so one
+   keyframe serves every size. */
+@keyframes hm-draw {
+  from {
+    stroke-dashoffset: var(--hm-draw-length, 24);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hm-check path,
+.hm-check polyline {
+  stroke-dasharray: var(--hm-draw-length, 24);
+  animation: hm-draw var(--dur-reveal) var(--ease-out) forwards;
+}
+
+/* 10 · Tile lift. A translate and a border step — never a scale, and no shadow
+   bloom. Fine pointers only, so a tap on a phone does not leave a tile stuck in
+   its hover state. */
+@media (hover: hover) and (pointer: fine) {
+  .hm-lift {
+    transition:
+      transform var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out);
+  }
+
+  .hm-lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-rule-2);
+  }
+}
+
+/* 11 · Drag affordance. The tilt is what makes a card feel picked up. */
+.hm-grab {
+  cursor: grab;
+}
+
+.hm-grab:active {
+  cursor: grabbing;
+}
+
+.hm-dragging {
+  transform: rotate(1.5deg);
+  opacity: 0.55;
+}
+
+/* 5 and 6 · The <ViewTransition> pseudo-elements. `.morph` is the talk moving
+   from the tray into a grid cell; `.fade` is the panel crossfade behind the tab
+   strip and the publish flip. Recipes follow
+   node_modules/next/dist/docs/01-app/02-guides/view-transitions.md. */
+::view-transition-group(.morph) {
+  animation-duration: var(--dur-reveal);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(.fade) {
+  animation: hm-vt-fade var(--dur-short) var(--ease-in) both reverse;
+}
+
+::view-transition-new(.fade) {
+  animation: hm-vt-fade var(--dur-reveal) var(--ease-out) var(--dur-short) both;
+}
+
+@keyframes hm-vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A transition's overlay swallows clicks for its whole duration, which on a page
+   whose point is that you can play with it would eat the second drag. */
+::view-transition {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -148,6 +266,24 @@ h6 {
   .reveal {
     transform: none;
     animation-delay: 0ms;
+  }
+
+  /* Nothing on a marketing surface translates or rotates under reduced motion;
+     the reveals collapse to the opacity change the base rule already does. */
+  .hm-insert,
+  .hm-dragging {
+    transform: none;
+  }
+
+  .hm-lift:hover {
+    transform: none;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
 
