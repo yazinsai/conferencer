@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Chip, buttonClass, cx } from "@/components/ui";
+import { Chip, cx } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import type { DemoSubmission } from "@/lib/demo-conference";
 

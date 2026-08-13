@@ -126,23 +126,31 @@ export function Head({
 }
 
 /**
- * One cell of the bento. Mixed spans are the grid's rhythm, so `span` is the
- * knob that matters; tracks are declared `minmax(0, 1fr)` by the parent so an
- * over-wide child scrolls inside its own cell rather than pushing the viewport
- * sideways (gate 50).
+ * One cell of the bento.
+ *
+ * Width is the only span knob, and that is deliberate. A row span looks right in a
+ * mock-up and wrong in a browser: a tile spanning two content-sized rows is as tall
+ * as both of them plus the gap, and unless its content happens to be exactly that
+ * tall it leaves a hole. Two tiles side by side in one row stretch to match each
+ * other, which is what a bento is supposed to look like. So `wide` tiles take the
+ * full row and everything else pairs up.
+ *
+ * Tracks are declared `minmax(0, 1fr)` by the parent so an over-wide child scrolls
+ * inside its own cell rather than pushing the viewport sideways (gate 50).
  */
 export function Tile({
   children,
   title,
   body,
-  span = "1x1",
+  wide = false,
   className,
   bare = false,
 }: {
   children?: ReactNode;
   title?: ReactNode;
   body?: ReactNode;
-  span?: "1x1" | "2x1" | "1x2" | "2x2";
+  /** Take the whole row rather than half of it. */
+  wide?: boolean;
   className?: string;
   /** Skip the padded header/body frame — the child owns the whole tile. */
   bare?: boolean;
@@ -151,9 +159,7 @@ export function Tile({
     <article
       className={cx(
         "hm-reveal hm-lift flex min-w-0 flex-col overflow-hidden rounded-tile border border-rule bg-paper shadow-[var(--shadow-tile)]",
-        span === "2x1" && "sm:col-span-2",
-        span === "1x2" && "lg:row-span-2",
-        span === "2x2" && "sm:col-span-2 lg:row-span-2",
+        wide && "sm:col-span-2",
         className,
       )}
     >
@@ -200,7 +206,10 @@ export function Playable({
   className?: string;
 }) {
   return (
-    <div className={cx("min-w-0", className)}>
+    // A column with the footnote pushed to the bottom, so a short playable in a
+    // tile that stretched to match its neighbour distributes the slack rather than
+    // leaving a block of white beneath itself.
+    <div className={cx("flex h-full min-w-0 flex-col", className)}>
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <Chip tone="blue">
           <span className="inline-flex items-center gap-1.5">
@@ -211,9 +220,9 @@ export function Playable({
         {hint ? <p className="min-w-0 text-sm text-neutral">{hint}</p> : null}
       </div>
 
-      {children}
+      <div className="min-w-0">{children}</div>
 
-      <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+      <p className="mt-auto pt-3 text-xs leading-relaxed text-muted-foreground">
         {note}{" "}
         <Link
           href={href}

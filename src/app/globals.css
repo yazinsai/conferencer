@@ -140,23 +140,33 @@ h6 {
    7, 8, 10 and 11 are the CSS-only ones and live here. Items 5 and 6 are React
    <ViewTransition>s and only need the pseudo-element rules further down. */
 
-/* 4 · Scroll reveal. CSS-driven, so there is no observer and no client
-   component behind it. Behind @supports because the element starts invisible:
-   in a browser without scroll-driven animations the rule never applies and the
-   content is simply there, which is the only acceptable failure mode for a
-   reveal (design.md § Motion, last bullet). */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .hm-reveal {
-      opacity: 0;
-      animation: hm-reveal var(--dur-reveal) var(--ease-out) both;
-      animation-timeline: view();
-      /* Starts as the element's top edge enters and finishes a fifth of the way
-         up the viewport, so a reader scrolling at any speed sees it arrive
-         rather than catching it mid-fade. */
-      animation-range: entry 8% cover 20%;
-    }
-  }
+/* 4 · Scroll reveal — one-shot and **sticky**.
+ *
+ * This started as a pure-CSS `animation-timeline: view()` reveal, which is the
+ * prettier implementation and the wrong one. A view() timeline is a *function of
+ * scroll position*, so an element below the fold sits at progress 0 — invisible —
+ * and returns to invisible every time it leaves the viewport again. Measured on
+ * this page: 36 of 41 revealed elements were still at opacity 0 after scrolling
+ * the whole document and back. Anything that reads the page without sitting at
+ * the right scroll offset — a full-page screenshot, `npm run shots`, an audit
+ * measuring geometry, a print stylesheet — sees a blank page.
+ *
+ * So the state is driven once by an IntersectionObserver
+ * (components/marketing/reveal.tsx) and never taken away. The default is
+ * *visible*: the attribute only exists after the observer has marked an element,
+ * so server-rendered HTML, a JS-off reader and any tool that never runs the
+ * observer all get the content, and the animation is purely additive. */
+.hm-reveal[data-reveal-state="pending"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.hm-reveal[data-reveal-state="in"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-reveal) var(--ease-out),
+    transform var(--dur-reveal) var(--ease-out);
 }
 
 /* 7 · Insert reveal — a row that arrives after first paint (a show-when
@@ -268,10 +278,12 @@ h6 {
     animation-delay: 0ms;
   }
 
-  /* Nothing on a marketing surface translates or rotates under reduced motion;
-     the reveals collapse to the opacity change the base rule already does. */
+  /* Nothing on a marketing surface translates or rotates under reduced motion.
+     The reveal is not marked pending at all in that case (the observer bails),
+     so these only have to neutralise the transforms. */
   .hm-insert,
-  .hm-dragging {
+  .hm-dragging,
+  .hm-reveal[data-reveal-state="pending"] {
     transform: none;
   }
 

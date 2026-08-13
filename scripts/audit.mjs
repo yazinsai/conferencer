@@ -397,6 +397,24 @@ async function main() {
             expression: "document.fonts.ready.then(() => 1)",
             awaitPromise: true,
           });
+
+          // Scroll the document once, then return to the top. Marketing surfaces
+          // reveal their sections on first sight (design.md § Motion · marketing
+          // surfaces, item 4); the reveals are one-shot and sticky, so one pass
+          // leaves every section measurable. Without it this audit would only ever
+          // check the first viewport of a long page.
+          await tab.send("Runtime.evaluate", {
+            expression: `(async () => {
+              const step = Math.max(200, window.innerHeight * 0.75);
+              for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+                window.scrollTo(0, y);
+                await new Promise((r) => requestAnimationFrame(r));
+              }
+              window.scrollTo(0, 0);
+              await new Promise((r) => setTimeout(r, 400));
+            })()`,
+            awaitPromise: true,
+          });
           await sleep(250);
 
           const { result } = await tab.send("Runtime.evaluate", {
@@ -432,10 +450,48 @@ async function main() {
             // is the pixel that actually lands behind each glyph. Hide the text,
             // photograph the surface, and read the worst case underneath it.
             if (page.scrim) {
+              // Only text inside the viewport can be measured against the pixels
+              // behind it, so each scrim is scrolled into view and measured in
+              // turn. Before this, a scrim below the fold scored "0 runs" and the
+              // check passed without having looked at anything.
+              const { result: scrimCount } = await tab.send("Runtime.evaluate", {
+                expression: `document.querySelectorAll(${JSON.stringify(page.scrim)}).length`,
+                returnByValue: true,
+              });
+              const scrimRuns = [];
+              const scrimFailures = [];
+
+              for (let index = 0; index < scrimCount.value; index += 1) {
+              await tab.send("Runtime.evaluate", {
+                expression: `(async () => {
+                  const el = document.querySelectorAll(${JSON.stringify(page.scrim)})[${index}];
+                  if (!el) return;
+                  el.scrollIntoView({ block: "center", behavior: "instant" });
+                  await new Promise((r) => setTimeout(r, 350));
+                })()`,
+                awaitPromise: true,
+              });
               const measured = await tab.send("Runtime.evaluate", {
                 expression: `(() => {
                   const runs = [];
-                  for (const scrim of document.querySelectorAll(${JSON.stringify(page.scrim)})) {
+                  // Resolve the text colour to sRGB bytes in the browser. This used
+                  // to be a regex for rgb() in Node, which silently fell back to
+                  // white for any colour Chrome reports in another space — and
+                  // every colour in this product is an oklch() custom property, so
+                  // Chrome reports oklab(). White ink assumed over a white pill
+                  // scored 1.00 and failed a surface that is actually 18:1.
+                  const probe = document.createElement("canvas");
+                  probe.width = probe.height = 1;
+                  const ctx = probe.getContext("2d", { willReadFrequently: true });
+                  const toRgb = (color) => {
+                    ctx.clearRect(0, 0, 1, 1);
+                    ctx.fillStyle = "#000";
+                    ctx.fillStyle = color;
+                    ctx.fillRect(0, 0, 1, 1);
+                    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+                    return [r, g, b];
+                  };
+                  for (const scrim of [document.querySelectorAll(${JSON.stringify(page.scrim)})[${index}]].filter(Boolean)) {
                     for (const el of scrim.querySelectorAll("h1,h2,h3,p,dd,dt,span,a")) {
                       const text = (el.textContent || "").trim();
                       if (!text) continue;
@@ -444,12 +500,27 @@ async function main() {
                       const s = getComputedStyle(el);
                       const size = parseFloat(s.fontSize);
                       const large = size >= 24 || (size >= 18.66 && parseInt(s.fontWeight, 10) >= 700);
-                      // Per-line boxes, not the union: a wrapped inline's bounding
-                      // box covers empty space the text never reaches.
-                      for (const r of el.getClientRects()) {
+                      // Measure the **glyphs**, not the element box. A padded pill
+                      // is the case that matters: its box includes 24px of padding
+                      // and two rounded corners, and the corners show the surface
+                      // behind the pill rather than the pill's own fill — so the
+                      // worst pixel in the box was the dark band outside a white
+                      // button, and an 18:1 label scored 1.01. Text-node rects also
+                      // give one box per line for free, where the element's box
+                      // covers space a wrapped inline never reaches.
+                      const rects = [];
+                      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                      let textNode;
+                      while ((textNode = walker.nextNode())) {
+                        if (!textNode.nodeValue.trim()) continue;
+                        const range = document.createRange();
+                        range.selectNodeContents(textNode);
+                        rects.push(...range.getClientRects());
+                      }
+                      for (const r of rects) {
                         if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > innerHeight) continue;
                         runs.push({
-                          text: text.slice(0, 32), color: s.color, large,
+                          text: text.slice(0, 32), color: s.color, rgb: toRgb(s.color), large,
                           rect: {
                             x: Math.round(r.x), y: Math.round(r.y + r.height * 0.2),
                             w: Math.round(r.width), h: Math.max(1, Math.round(r.height * 0.6)),
@@ -477,12 +548,15 @@ async function main() {
 
               if (process.env.AUDIT_DUMP) {
                 const { writeFileSync } = await import("node:fs");
-                writeFileSync(`/tmp/scrim-${page.name.replace(/\W+/g, "-")}.png`, Buffer.from(shot.data, "base64"));
+                writeFileSync(
+                  `/tmp/scrim-${page.name.replace(/\W+/g, "-")}-${index}.png`,
+                  Buffer.from(shot.data, "base64"),
+                );
               }
               const image = decodePng(Buffer.from(shot.data, "base64"));
               const failures = [];
               for (const run of runs) {
-                const rgb = /rgba?\(([^)]+)\)/.exec(run.color)?.[1].split(",").map(Number) ?? [255, 255, 255];
+                const rgb = run.rgb ?? [255, 255, 255];
                 const ink =
                   0.2126 * channelLuminance(rgb[0]) +
                   0.7152 * channelLuminance(rgb[1]) +
@@ -498,12 +572,35 @@ async function main() {
                   }
                 }
                 const min = run.large ? 3 : 4.5;
-                if (worst < min) failures.push(`"${run.text}" ${worst.toFixed(2)} < ${min}`);
+                // The rect and the resolved ink are in the message because the two
+                // ways this check goes wrong are both invisible otherwise: it
+                // measured the wrong pixels, or it resolved the wrong text colour.
+                if (worst < min) {
+                  failures.push(
+                    `"${run.text}" ${worst.toFixed(2)} < ${min} · ink rgb(${run.rgb.join(",")}) · at ${run.rect.x},${run.rect.y} ${run.rect.w}x${run.rect.h}`,
+                  );
+                }
               }
-              if (!failures.length) {
-                ok("text over photography clears its threshold", `${runs.length} runs`);
+              scrimRuns.push(...runs);
+              scrimFailures.push(...failures);
+              }
+
+              await tab.send("Runtime.evaluate", { expression: "window.scrollTo(0, 0)" });
+              await sleep(200);
+
+              if (scrimFailures.length) {
+                fail("text over photography clears its threshold", scrimFailures.join(" | "));
+              } else if (!scrimRuns.length) {
+                // Never report a pass for a check that measured nothing.
+                fail(
+                  "text over photography clears its threshold",
+                  `no text runs found inside ${page.scrim} — the check measured nothing`,
+                );
               } else {
-                fail("text over photography clears its threshold", failures.join(" | "));
+                ok(
+                  "text over photography clears its threshold",
+                  `${scrimRuns.length} runs across ${scrimCount.value} scrim${scrimCount.value === 1 ? "" : "s"}`,
+                );
               }
             }
 
@@ -518,6 +615,11 @@ async function main() {
                     const s = getComputedStyle(header);
                     return { bg: s.backgroundColor, top: Math.round(header.getBoundingClientRect().top) };
                   };
+                  // Establish the rest state rather than assuming the page is
+                  // already in it: earlier checks scroll, and the frost has a
+                  // 180ms transition, so reading immediately catches it mid-fade.
+                  window.scrollTo(0, 0);
+                  setTimeout(() => {
                   const rest = read();
                   window.scrollTo(0, 700);
                   setTimeout(() => {
@@ -525,6 +627,7 @@ async function main() {
                     window.scrollTo(0, 0);
                     setTimeout(() => resolve({ rest, moved }), 500);
                   }, 900);
+                  }, 600);
                 })`,
                 awaitPromise: true,
                 returnByValue: true,

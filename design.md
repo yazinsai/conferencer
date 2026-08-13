@@ -272,8 +272,18 @@ page explains what the software does. **The rules below hold on both sides. Only
 - **Focus rings never transition.** They appear instantly (gate 15).
 - `prefers-reduced-motion: reduce` collapses every animation to a ≤ 150 ms opacity change — including
   every `::view-transition-*` pseudo-element.
-- Nothing may be *hidden* by an animation a browser might not support. A reveal that starts at
-  `opacity: 0` sits behind `@supports` for the property that will bring it back.
+- **Nothing may be hidden by default.** A reveal is additive: the server sends the content visible and
+  the animation only hides what it is about to bring back, one shot, and never hides it again. A
+  reader with JavaScript off, a crawler, a print stylesheet and a full-page screenshot all see the
+  page.
+
+  This rule is written from a real failure. The scroll reveal was first built on CSS
+  `animation-timeline: view()`, which is the prettier implementation and the wrong one: a view()
+  timeline is a *function of scroll position*, so an element below the fold sits at progress 0 and
+  goes back to progress 0 every time it leaves the viewport. Measured on `/`, 36 of 41 revealed
+  elements were still at `opacity: 0` after scrolling the whole document and back, and
+  `npm run shots` captured a blank page. `@supports` does not save you here, because the property
+  *is* supported — it is doing exactly what it says. Sticky one-shot reveals only.
 
 ### Motion · app and public-event surfaces
 
@@ -293,7 +303,7 @@ this list does not ship. Items 1–3 are the same three primitives as above.
 | 1 | Nav frost on scroll | every marketing page | as above |
 | 2 | Hero entrance stagger | the `/` fold | `.reveal`, staggered by DOM index, capped at 300 ms |
 | 3 | Button press | every control | `translateY(1px)` on `:active` |
-| 4 | Scroll reveal | section heads and tiles | `.hm-reveal`: CSS `animation-timeline: view()` behind `@supports`, opacity + `translateY(12px)`, `--dur-reveal`. No JavaScript, no IntersectionObserver, and content is never hidden where the property is unsupported |
+| 4 | Scroll reveal | section heads and tiles | `.hm-reveal`: opacity + `translateY(12px)`, `--dur-reveal`, **one-shot and sticky**, driven by a single `IntersectionObserver` in `components/marketing/reveal.tsx`. The default state is *visible* — the CSS only hides an element the observer has marked, and only if it was off-screen at mount |
 | 5 | Shared-element morph | a talk dragged from the tray into a grid cell | `<ViewTransition name="talk-…" share="morph" default="none">` with the state update inside `startTransition`; `--dur-reveal` |
 | 6 | Crossfade | the three-step panel; the publish flip | `<ViewTransition key>` with `enter`/`share="auto"`, `default="none"` |
 | 7 | Insert reveal | a row arriving (a show-when question, an added question, a bulk-action bar) | `@starting-style`, opacity + `translateY(-4px)`, `--dur-short` |

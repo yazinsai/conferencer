@@ -216,12 +216,12 @@ export function AgendaPlayground({
                               .filter(Boolean)
                               .join(" · ")}
                           </p>
+
+                          {/* The pointer-free path, and the one the real board also
+                              ships (R-AGN-3): a native disclosure, two selects. */}
+                          <PlaceMenu talk={talk} rooms={rooms} slots={slots} onPlace={place} />
                         </div>
                       </ViewTransition>
-
-                      {/* The pointer-free path, and the one the real board also
-                          ships (R-AGN-3): a native disclosure with two selects. */}
-                      <PlaceMenu talk={talk} rooms={rooms} slots={slots} onPlace={place} />
                     </li>
                   ))}
                   {!tray.length ? (
@@ -238,7 +238,9 @@ export function AgendaPlayground({
                   className="grid min-w-[30rem] gap-px"
                   style={{
                     gridTemplateColumns: `3.25rem repeat(${rooms.length}, minmax(0, 1fr))`,
-                    gridTemplateRows: `auto repeat(${slots.length}, 2.5rem)`,
+                    // 3rem a slot: a 30-minute talk's card has to hold a clamped
+                    // title and its time line without either being cut off.
+                    gridTemplateRows: `auto repeat(${slots.length}, 3rem)`,
                   }}
                 >
                   <div aria-hidden />
@@ -254,7 +256,7 @@ export function AgendaPlayground({
                   {slots.map((slot, slotIndex) => (
                     <div
                       key={`t-${slot}`}
-                      className="wordmark tnum pr-2 text-right text-[11px] leading-[2.5rem] text-muted-foreground"
+                      className="wordmark tnum pr-2 text-right text-[11px] leading-[3rem] text-muted-foreground"
                       style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
                     >
                       {slot}
@@ -299,15 +301,13 @@ export function AgendaPlayground({
                     const slotIndex = slots.indexOf(at.slot);
                     if (roomIndex < 0 || slotIndex < 0) return null;
                     const clash = clashing.has(talk.id);
+                    const rows = Math.min(spanOf(talk), slots.length - slotIndex);
                     return (
                       <div
                         key={talk.id}
                         style={{
                           gridColumn: roomIndex + 2,
-                          gridRow: `${slotIndex + 2} / span ${Math.min(
-                            spanOf(talk),
-                            slots.length - slotIndex,
-                          )}`,
+                          gridRow: `${slotIndex + 2} / span ${rows}`,
                         }}
                         className="min-w-0 p-px"
                       >
@@ -326,7 +326,14 @@ export function AgendaPlayground({
                               borderLeftColor: talk.trackColor ?? "var(--color-rule-2)",
                             }}
                           >
-                            <p className="line-clamp-2 text-[11px] font-semibold leading-tight text-ink">
+                            {/* A one-slot card has room for one line of title and
+                                its time; a longer talk gets its whole span. */}
+                            <p
+                              className={cx(
+                                "text-[11px] font-semibold leading-tight text-ink",
+                                rows > 1 ? "line-clamp-2" : "truncate",
+                              )}
+                            >
                               {clash ? (
                                 <span
                                   aria-hidden
@@ -335,7 +342,7 @@ export function AgendaPlayground({
                               ) : null}
                               {talk.title}
                             </p>
-                            <p className="wordmark tnum mt-auto truncate text-[10px] text-muted-foreground">
+                            <p className="wordmark tnum mt-auto truncate text-[10px] leading-tight text-muted-foreground">
                               {at.slot} · {talk.speakers}
                             </p>
                             <button
@@ -412,7 +419,7 @@ function PlaceMenu({
     "h-8 w-full min-w-0 rounded-input border border-input bg-paper px-2 text-[11px] text-ink";
 
   return (
-    <details className="mt-1">
+    <details className="mt-1.5 border-t border-rule pt-1.5">
       <summary className="nowrap-affordance cursor-pointer list-none text-[11px] font-medium text-neutral underline decoration-rule-2 underline-offset-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
         Place…
       </summary>
