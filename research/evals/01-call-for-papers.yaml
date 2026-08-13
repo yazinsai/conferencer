@@ -28,7 +28,7 @@ scenarios:
       1. Navigate to the app root. Find the organizer/admin entry point — try obvious
          routes (/admin, /dashboard, /organizer) and nav links ("Admin", "Dashboard",
          "Organizer", "Sign up", "Get started"). If open signup exists, sign up as the
-         organizer identity Jordan Alvarez from the sample data; otherwise sign in with
+         organizer identity Minerva McGonagall from the sample data; otherwise sign in with
          the organizer fixture credentials.
       2. Create the event "DevFlow Conf 2027" (2027-05-12 to 2027-05-14, Moscone West,
          San Francisco) if no event exists yet. If the clone is single-event or comes
@@ -83,7 +83,7 @@ scenarios:
       1. Open the public CFP portal (the URL recorded in CFP-S1; otherwise find it from
          the app's public homepage — look for "Submit a talk", "Call for Papers",
          "CFP", "Apply", or "Submissions").
-      2. Create a submitter account as the speaker identity Priya Raman from the sample
+      2. Create a submitter account as the speaker identity Hermione Granger from the sample
          data (signup may happen before the form or as part of submitting). Screenshot
          the signup/login step.
       3. Draft test: start a new submission and enter ONLY the title "Taming 40-Minute
@@ -102,7 +102,7 @@ scenarios:
          visible, switch to "Talk (30 min)" and screenshot it hidden.
       6. Complete the full "Taming 40-Minute CI" proposal from the sample data:
          abstract, track "Platform & Infra", format "Talk (30 min)", audience level
-         "Intermediate", speaker bio from Priya's fixture bio, and for "Key takeaway"
+         "Intermediate", speaker bio from Hermione's fixture bio, and for "Key takeaway"
          enter "A decision framework for which incremental-build investments pay off".
          Screenshot the filled form, then submit.
       7. Screenshot the confirmation state (confirmation page, banner, or thank-you
@@ -131,22 +131,22 @@ scenarios:
     name: Organizer assigns a reviewer; reviewer scores
     persona: organizer
     steps: |
-      1. Sign in as the organizer Jordan Alvarez.
+      1. Sign in as the organizer Minerva McGonagall.
       2. Open the submissions list for the event. Verify both proposals from CFP-S2 are
          listed. Screenshot the list. Open the "Taming 40-Minute CI" submission detail
          and verify the field values round-tripped intact (title, track "Platform &
          Infra", format, audience level) AND that the abstract ends with "Updated: now
          includes 2026 benchmark data." (the speaker's edit). Screenshot the detail.
       3. Find reviewer management — "Reviewers", "Committee", "Review", "Evaluations",
-         "Assignments". Create or invite a reviewer for Sam Whitfield using the
+         "Assignments". Create or invite a reviewer for Severus Snape using the
          reviewer fixture identity. If the flow lets you set a password directly, use
          the fixture password; if it is invite-by-email only, look for a copyable
          invite/magic link or any way to provision credentials, and record exactly
          what the flow offers.
-      4. Assign Sam Whitfield ONLY the "Taming 40-Minute CI" submission — explicitly
+      4. Assign Severus Snape ONLY the "Taming 40-Minute CI" submission — explicitly
          not the "AI Pair Programmer" one. Screenshot the assignment screen showing
          which submissions are assigned to him.
-      5. Sign out. Sign in as the reviewer Sam Whitfield (fixture credentials, or the
+      5. Sign out. Sign in as the reviewer Severus Snape (fixture credentials, or the
          invite link captured in step 3).
       6. Screenshot the reviewer dashboard. Verify it lists exactly one submission
          ("Taming 40-Minute CI") and exposes no admin navigation. Attempt to reach the
@@ -163,7 +163,7 @@ scenarios:
          chip, checkmark, or moved to a done list). Screenshot it.
     success_signals:
       - Organizer submissions list with both fixture proposals and intact field values
-      - Assignment screen mapping Sam Whitfield to exactly one submission
+      - Assignment screen mapping Severus Snape to exactly one submission
       - Reviewer dashboard showing only the assigned submission; blocked/absent access
         to the unassigned one
       - Filled scorecard (rating 4 + comment) and post-submit completed state
@@ -171,8 +171,8 @@ scenarios:
     name: Organizer decides, notifies, hands off, and closes the CFP
     persona: organizer
     steps: |
-      1. Sign in as the organizer Jordan Alvarez and open the "Taming 40-Minute CI"
-         submission. Verify Sam Whitfield's review is visible — the rating of 4 and his
+      1. Sign in as the organizer Minerva McGonagall and open the "Taming 40-Minute CI"
+         submission. Verify Severus Snape's review is visible — the rating of 4 and his
          comment text from CFP-S3. Screenshot it.
       2. Record decisions: mark "Taming 40-Minute CI" as Accepted and "Your AI Pair
          Programmer Is Lying to You" as Rejected (per-row status control, detail-page
@@ -188,7 +188,7 @@ scenarios:
          log). If no notification feature exists, record its absence.
       4. Navigate to the sessions/agenda area of the event ("Sessions", "Agenda",
          "Schedule", "Program"). Verify a session titled "Taming 40-Minute CI:
-         Incremental Builds at Monorepo Scale" exists with speaker Priya Raman and
+         Incremental Builds at Monorepo Scale" exists with speaker Hermione Granger and
          track "Platform & Infra" carried over. If the UI requires an explicit
          "convert to session" / "move to agenda" action on the accepted submission,
          perform it first. Screenshot the session entry.
@@ -197,7 +197,7 @@ scenarios:
       6. Sign out. Load the public portal URL logged-out and verify it now shows a
          closed state — a "submissions closed" message or otherwise no way to start a
          new submission. Screenshot it.
-      7. Sign in as the speaker Priya Raman. Screenshot her dashboard showing "Taming
+      7. Sign in as the speaker Hermione Granger. Screenshot her dashboard showing "Taming
          40-Minute CI" as Accepted and "Your AI Pair Programmer Is Lying to You" as
          Rejected (record the exact status labels used).
       8. Open one of her submissions and verify editing is no longer possible now that
@@ -290,8 +290,8 @@ rubric:
     type: scoping
     testability: auto
     scenarios: [CFP-S3]
-    pass_criteria: "Sam Whitfield is created/invited with credentials the agent can use, signs in successfully, and lands on a reviewer-facing dashboard that exposes no admin navigation or organizer capability. Whether his queue contains exactly the assigned submissions is graded once, by ABS-05 — do not double-count it here."
-    evidence: "Screenshot of the reviewer provisioning/invite flow; screenshot of the reviewer dashboard signed in as Sam showing a reviewer-scoped view with no admin navigation"
+    pass_criteria: "Severus Snape is created/invited with credentials the agent can use, signs in successfully, and lands on a reviewer-facing dashboard that exposes no admin navigation or organizer capability. Whether his queue contains exactly the assigned submissions is graded once, by ABS-05 — do not double-count it here."
+    evidence: "Screenshot of the reviewer provisioning/invite flow; screenshot of the reviewer dashboard signed in as Severus showing a reviewer-scoped view with no admin navigation"
   - id: CFP-11
     criterion: "A reviewer can record a review on an assigned submission (a rating plus a text comment) and the recorded review is visible to the organizer, with completion state updating on the reviewer dashboard. Scorecard field-type depth (numeric/dropdown/free-text criteria editors) is graded by abstract-management's ABS-03, not here."
     weight: 2
@@ -314,7 +314,7 @@ rubric:
     type: roundtrip
     testability: auto
     scenarios: [CFP-S4]
-    pass_criteria: "Signed in as Priya Raman after decisions were recorded, her dashboard shows the CI talk as Accepted and the AI talk as Rejected (or unambiguous equivalents of those statuses)"
+    pass_criteria: "Signed in as Hermione Granger after decisions were recorded, her dashboard shows the CI talk as Accepted and the AI talk as Rejected (or unambiguous equivalents of those statuses)"
     evidence: "Screenshot of the speaker dashboard with both status labels visible; recorded exact status wording"
   - id: CFP-14
     criterion: "The platform can send (or queue) acceptance and rejection notification emails to decided submitters, with the UI confirming dispatch"
@@ -331,7 +331,7 @@ rubric:
     type: handoff
     testability: auto
     scenarios: [CFP-S4]
-    pass_criteria: "After acceptance (plus an explicit convert/move action only if the UI requires one), the sessions/agenda area contains a session titled 'Taming 40-Minute CI: Incremental Builds at Monorepo Scale' with speaker Priya Raman and track 'Platform & Infra' carried over with no manual re-typing of those fields"
+    pass_criteria: "After acceptance (plus an explicit convert/move action only if the UI requires one), the sessions/agenda area contains a session titled 'Taming 40-Minute CI: Incremental Builds at Monorepo Scale' with speaker Hermione Granger and track 'Platform & Infra' carried over with no manual re-typing of those fields"
     evidence: "Screenshot of the accepted submission detail; screenshot of the matching session entry in the sessions/agenda area showing the same title, speaker, and track"
   - id: CFP-16
     criterion: "Submission editing locks after the CFP close date: the speaker can no longer modify a submission once the call is closed"

@@ -10,7 +10,6 @@ export type Contact = {
   first_name: string;
   last_name: string;
   email: string;
-  alt_email: string | null;
   headshot_url: string | null;
   biography: string | null;
   job_title: string | null;
@@ -75,10 +74,8 @@ export function getContact(contactId: string): Contact | undefined {
 export function findContactByEmail(orgId: string, email: string): Contact | undefined {
   if (!email) return undefined;
   return get<Contact>(
-    `SELECT * FROM contacts WHERE org_id = ?
-       AND (email = ? COLLATE NOCASE OR alt_email = ? COLLATE NOCASE)`,
+    `SELECT * FROM contacts WHERE org_id = ? AND email = ? COLLATE NOCASE`,
     orgId,
-    email.trim(),
     email.trim(),
   );
 }
@@ -95,7 +92,6 @@ const WRITABLE = [
   "first_name",
   "last_name",
   "email",
-  "alt_email",
   "headshot_url",
   "biography",
   "job_title",

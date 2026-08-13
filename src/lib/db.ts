@@ -27,6 +27,13 @@ function schemaSql(): string {
   throw new Error("schema.sql not found (looked in " + candidates.join(", ") + ")");
 }
 
+function dropLegacyColumns(database: Database.Database) {
+  const cols = database.prepare("PRAGMA table_info(contacts)").all() as Array<{ name: string }>;
+  if (cols.some((c) => c.name === "alt_email")) {
+    database.exec("ALTER TABLE contacts DROP COLUMN alt_email");
+  }
+}
+
 function open(): Database.Database {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -35,6 +42,7 @@ function open(): Database.Database {
   database.pragma("synchronous = NORMAL");
   database.pragma("foreign_keys = ON");
   database.exec(schemaSql());
+  dropLegacyColumns(database);
   return database;
 }
 

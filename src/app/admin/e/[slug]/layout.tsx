@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { buttonClass, cx } from "@/components/ui";
-import { Icon } from "@/components/ui/icon";
 import { requireOrganizer, roleSet } from "@/lib/guards";
 import { fullName } from "@/lib/auth";
 import { AccountMenu, Sidebar, SidebarSheet, type NavGroup } from "@/components/admin/shell";
+import { CommandPalette } from "@/components/admin/command-search";
+import { commandsFromNav, type CommandItem } from "@/components/admin/command-search.routes";
+import { all } from "@/lib/db";
 import { statusCounts } from "@/lib/repo/submissions";
 import { listAssignments } from "@/lib/repo/tasks";
 
@@ -68,6 +70,37 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
     },
   ];
 
+  // The palette filters a fixed index in the browser, so it stays a single
+  // render with no search endpoint behind it. Anything past these recents is
+  // what the full search page is for.
+  const commands: CommandItem[] = [
+    ...commandsFromNav(groups),
+    ...all<{ id: string; title: string }>(
+      "SELECT id, title FROM submissions WHERE event_id = ? ORDER BY updated_at DESC LIMIT 8",
+      event.id,
+    ).map((row) => ({
+      id: `submission-${row.id}`,
+      label: row.title,
+      href: `${base}/submissions/${row.id}`,
+      icon: "submissions" as const,
+      group: "Recent" as const,
+      hint: "Submission",
+    })),
+    ...all<{ id: string; name: string }>(
+      `SELECT c.id, c.first_name || ' ' || c.last_name AS name
+         FROM contacts c JOIN event_contacts ec ON ec.contact_id = c.id
+        WHERE ec.event_id = ? ORDER BY c.last_name LIMIT 8`,
+      event.id,
+    ).map((row) => ({
+      id: `speaker-${row.id}`,
+      label: row.name,
+      href: `${base}/speakers/${row.id}`,
+      icon: "speakers" as const,
+      group: "Recent" as const,
+      hint: "Speaker",
+    })),
+  ];
+
   const accountLinks = [
     { href: "/portal", label: "Speaker portal" },
     ...(roles.has("reviewer") || roles.has("organizer")
@@ -84,28 +117,10 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/ad
         {/* z-sticky-nav so an in-page sticky element can never paint over the bar. */}
         <header className="sticky top-0 z-[300] border-b border-rule bg-paper/85 backdrop-blur-md">
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-            {/* Styled to read like a command bar, but it is a plain form posting
-                to the search page — it works with JavaScript switched off. */}
-            <form action={`${base}/search`} role="search" className="min-w-0 flex-1 sm:max-w-sm">
-              <label htmlFor="global-search" className="sr-only">
-                Search submissions, speakers and sessions
-              </label>
-              {/* The shell carries the focus ring, so it draws around the whole
-                  control rather than inside the pill. */}
-              <div className="flex h-9 items-center gap-2 rounded-pill border border-rule bg-paper-2 pl-3 pr-1.5 outline-2 outline-offset-2 outline-transparent focus-within:border-ink-2 focus-within:bg-paper focus-within:outline-ring">
-                <Icon name="search" size={16} className="text-muted-foreground" />
-                <input
-                  id="global-search"
-                  name="q"
-                  type="search"
-                  placeholder="Search submissions, speakers…"
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                />
-                <kbd className="wordmark hidden shrink-0 rounded-md border border-rule bg-paper px-1.5 py-0.5 text-[0.625rem] text-muted-foreground sm:block">
-                  Enter
-                </kbd>
-              </div>
-            </form>
+            {/* Still the plain form posting to the search page — it works with
+                JavaScript switched off. Hydration upgrades it into the command
+                palette (⌘K), which jumps straight to a page or record. */}
+            <CommandPalette trigger="searchbar" slug={event.slug} items={commands} />
             <div className="flex items-center gap-1">
               <Link
                 href="/portal"

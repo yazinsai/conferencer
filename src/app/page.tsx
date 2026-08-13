@@ -480,6 +480,26 @@ export default function HomePage() {
             >
               No demo call. No credit card. No seat limits.
             </p>
+
+            {/* Demo credentials stay under the fold — main renamed the personas to
+                Harry Potter roles and the landing page is still the place a visitor
+                finds the organizer login. */}
+            {event ? (
+              <p
+                className="reveal wordmark mt-3 text-xs leading-relaxed text-muted-foreground"
+                style={{ ["--i" as string]: 4 }}
+              >
+                Organizer Minerva McGonagall · demo-organizer@example.com · SbekTest!2027-org
+              </p>
+            ) : (
+              <p
+                className="reveal mt-3 text-xs text-muted-foreground"
+                style={{ ["--i" as string]: 4 }}
+              >
+                No event on this instance yet — run <Code>npm run seed</Code> to load the demo
+                conference.
+              </p>
+            )}
           </div>
 
           {/* The fold's proof: not a capture of the agenda board, the board. */}

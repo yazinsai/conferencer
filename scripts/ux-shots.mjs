@@ -20,8 +20,8 @@ const CHROME =
   ["/usr/local/bin/google-chrome", "/usr/bin/google-chrome", "/usr/bin/chromium"].find(Boolean);
 
 const ACCOUNTS = {
-  organizer: { email: "sbek-organizer@example.com", password: "SbekTest!2027-org" },
-  speaker: { email: "sbek-speaker@example.com", password: "SbekTest!2027-spk" },
+  organizer: { email: "demo-organizer@example.com", password: "SbekTest!2027-org" },
+  speaker: { email: "demo-speaker@example.com", password: "SbekTest!2027-spk" },
 };
 
 const args = process.argv.slice(2);

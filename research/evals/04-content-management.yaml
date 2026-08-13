@@ -28,20 +28,20 @@ scenarios:
       1. Navigate to the site root. Find the organizer/admin area - try obvious
          routes (/admin, /dashboard, /organizer) and nav links labeled Admin,
          Dashboard, Manage, or Organizer.
-      2. Sign in as organizer Jordan Alvarez using the fixture credentials. If
+      2. Sign in as organizer Minerva McGonagall using the fixture credentials. If
          no account exists and the clone offers open signup, sign up first with
-         Jordan's fixture identity and email.
+         Minerva's fixture identity and email.
       3. Find or create the event "DevFlow Conf 2027" (2027-05-12 to
          2027-05-14, Moscone West SF) from the sample data.
       4. Ensure at least two sessions with two DISTINCT speakers exist. For
-         Priya Raman: reuse the accepted "Taming 40-Minute CI: Incremental
+         Hermione Granger: reuse the accepted "Taming 40-Minute CI: Incremental
          Builds at Monorepo Scale" session if it exists from earlier areas;
          otherwise create it directly as an accepted/confirmed session (Talk,
-         Platform & Infra) with her fixture email. For Marcus Okafor: if
+         Platform & Infra) with her fixture email. For Harry Potter: if
          "Your AI Pair Programmer Is Lying to You" already exists from earlier
-         areas it belongs to Priya Raman (and may carry a Rejected decision) —
+         areas it belongs to Hermione Granger (and may carry a Rejected decision) —
          do NOT reassign or reuse it. Instead create a NEW accepted session
-         owned by Marcus from fixture values: "Lightning: Agents in Production
+         owned by Harry from fixture values: "Lightning: Agents in Production
          Q&A" (Lightning Talk (10 min), track AI Engineering) with his fixture
          email — the same extra session area 05 (ai-agenda) uses. Use the
          fixture emails so speaker accounts link to these sessions. Screenshot
@@ -72,7 +72,7 @@ scenarios:
     name: Speaker uploads and versions a deliverable
     persona: speaker
     steps: |
-      1. Navigate to the site root. Sign in as speaker Priya Raman using the
+      1. Navigate to the site root. Sign in as speaker Hermione Granger using the
          fixture credentials; if no account exists, sign up with her fixture
          identity/email, or follow any speaker invite link the clone surfaces
          in its own UI (do not rely on emailed links - email is not readable).
@@ -93,7 +93,7 @@ scenarios:
          timestamps and the latest clearly marked. Screenshot the version list.
       7. If there is an explicit mark-complete action on the presentation task,
          use it. Deliberately leave "Upload Final Headshot (print quality)" incomplete.
-      8. Scoping check: browse the portal for any trace of Marcus Okafor's
+      8. Scoping check: browse the portal for any trace of Harry Potter's
          sessions or tasks and screenshot the portal navigation/scope. Then try
          to open organizer/admin routes directly (/admin, /organizer,
          /dashboard variants, and any admin-looking links). Screenshot the
@@ -111,10 +111,10 @@ scenarios:
     name: Organizer tracks, reviews, approves, and exports
     persona: organizer
     steps: |
-      1. Sign in as organizer Jordan Alvarez (fixture credentials).
+      1. Sign in as organizer Minerva McGonagall (fixture credentials).
       2. Open the deliverables tracking dashboard. Verify statuses reflect S2:
-         Priya Raman shows "Upload Session Presentation" complete/uploaded and
-         "Upload Final Headshot (print quality)" incomplete; Marcus Okafor shows both incomplete.
+         Hermione Granger shows "Upload Session Presentation" complete/uploaded and
+         "Upload Final Headshot (print quality)" incomplete; Harry Potter shows both incomplete.
          Screenshot the unfiltered dashboard.
       3. Apply a filter (incomplete, overdue, or by task) and screenshot the
          filtered view to show the visible set changed.
@@ -127,7 +127,7 @@ scenarios:
          speaker association, upload date, and a version count of 2. Screenshot
          the library. If sessions have a per-session Files tab, open it on
          "Taming 40-Minute CI" and screenshot it too.
-      6. Open the uploaded file's detail. Verify Priya's S2 comment is visible
+      6. Open the uploaded file's detail. Verify Hermione's S2 comment is visible
          with her name and timestamp, then reply "Thanks - please confirm the
          final version by Tuesday." Screenshot the thread. Confirm the version
          list shows both versions with the latest marked and the older version
@@ -141,17 +141,17 @@ scenarios:
       8. Make a second distinct edit to the same abstract (append "Attendees
          should bring a laptop.") and save.
       9. Open the session's version/change history or activity panel. Verify at
-         least two timestamped entries attributed to Jordan Alvarez. Restore
+         least two timestamped entries attributed to Minerva McGonagall. Restore
          the version prior to the second edit and verify the abstract loses the
          "Attendees should bring a laptop." sentence but keeps the live-demo
          sentence. Screenshot the history panel and the restored abstract.
-      10. Speaker profile editing: open Priya Raman's speaker record, append to
-          her bio "Priya leads the developer-productivity group at Latticework
-          Systems." and replace/upload her photo using the headshot.png
+      10. Speaker profile editing: open Hermione Granger's speaker record, append to
+          her bio "Hermione leads the developer-productivity group at Hogwarts Buildworks."
+          and replace/upload her photo using the headshot.png
           fixture. Save, reload, and screenshot the updated record.
       11. Approval: set the "Taming 40-Minute CI" session's content status to
           Approved (or the clone's equivalent published/final state) and leave
-          Marcus's session unapproved. Screenshot the status control on both
+          Harry's session unapproved. Screenshot the status control on both
           sessions.
       12. Open the public agenda/schedule page - may be /agenda, /schedule, a
           "public page" or "preview" link, or an embed preview. Verify the
@@ -203,7 +203,7 @@ rubric:
     type: crud
     testability: auto
     scenarios: [CNT-S2]
-    pass_criteria: Priya's portal shows both assigned tasks with due dates and status; uploading slides.pdf succeeds and the file appears attached to the presentation task/session with the task status updating to uploaded/complete.
+    pass_criteria: Hermione's portal shows both assigned tasks with due dates and status; uploading slides.pdf succeeds and the file appears attached to the presentation task/session with the task status updating to uploaded/complete.
     evidence: Before/after screenshots of the portal task list and the post-upload state showing the slides.pdf filename against the task.
   - id: CNT-03
     criterion: Speaker access is scoped to their own sessions and tasks, and organizer/admin views are blocked for speaker accounts.
@@ -211,8 +211,8 @@ rubric:
     type: scoping
     testability: auto
     scenarios: [CNT-S2]
-    pass_criteria: Priya's portal shows no sessions or tasks belonging to Marcus Okafor, and direct navigation to admin/organizer routes is denied, redirected, or shows no admin capability while signed in as the speaker.
-    evidence: Screenshot of the portal scope (only Priya's session/tasks visible) and of the blocked/redirected admin route.
+    pass_criteria: Hermione's portal shows no sessions or tasks belonging to Harry Potter, and direct navigation to admin/organizer routes is denied, redirected, or shows no admin capability while signed in as the speaker.
+    evidence: Screenshot of the portal scope (only Hermione's session/tasks visible) and of the blocked/redirected admin route.
   - id: CNT-04
     criterion: Re-uploading a deliverable creates a new file version, with the latest clearly marked and previous versions still accessible.
     weight: 2
@@ -227,7 +227,7 @@ rubric:
     type: roundtrip
     testability: auto
     scenarios: [CNT-S2, CNT-S3]
-    pass_criteria: The speaker's comment ("Draft deck - final version coming Friday.") appears with Priya's name and a timestamp, the organizer sees the same thread on the same file, and the organizer's reply is added to it. Do not require email notification of comments (SessionBoard itself sends none).
+    pass_criteria: The speaker's comment ("Draft deck - final version coming Friday.") appears with Hermione's name and a timestamp, the organizer sees the same thread on the same file, and the organizer's reply is added to it. Do not require email notification of comments (SessionBoard itself sends none).
     evidence: Screenshots of the comment thread from the speaker account (S2) and the organizer account showing the original comment plus reply (S3).
   - id: CNT-06
     criterion: The upload UI communicates file constraints (accepted types and/or a maximum file size) to the speaker at the point of upload.
@@ -243,7 +243,7 @@ rubric:
     type: roundtrip
     testability: auto
     scenarios: [CNT-S1, CNT-S3]
-    pass_criteria: "The dashboard shows all speaker-task pairs as incomplete in S1, and in S3 accurately reflects the S2 state: Priya's presentation task complete/uploaded (either label passes - clones without an explicit mark-complete action must not be penalized), her headshot task incomplete, Marcus's tasks incomplete; applying a filter visibly changes the displayed set."
+    pass_criteria: "The dashboard shows all speaker-task pairs as incomplete in S1, and in S3 accurately reflects the S2 state: Hermione's presentation task complete/uploaded (either label passes - clones without an explicit mark-complete action must not be penalized), her headshot task incomplete, Harry's tasks incomplete; applying a filter visibly changes the displayed set."
     evidence: S1 screenshot of the all-incomplete dashboard; S3 screenshots of the updated dashboard unfiltered and filtered.
   - id: CNT-08
     criterion: Organizer can trigger bulk reminder emails to speakers with outstanding tasks and receives a send confirmation.
@@ -253,7 +253,7 @@ rubric:
     scenarios: [CNT-S3]
     pass_criteria: A bulk reminder action is available from the dashboard for incomplete/outstanding tasks (with or without a template picker) and the UI confirms the send (toast, dialog, or sent count). Actual delivery is verified manually.
     evidence: Screenshot of the reminder action being invoked on the filtered incomplete set and of the send confirmation.
-    manual_instructions: Check the inboxes for the fixture speaker addresses (Priya Raman and Marcus Okafor at sbek-test.example.com) or, if those are not real mailboxes, the clone's outbound-mail log / mail-catcher. Confirm each speaker with outstanding tasks received a reminder naming the outstanding task ("Upload Final Headshot (print quality)" and, for Marcus, "Upload Session Presentation") and its due date.
+    manual_instructions: Check the inboxes for the fixture speaker addresses (Hermione Granger at demo-speaker@example.com and Harry Potter at demo-speaker2@example.com) or, if those are not real mailboxes, the clone's outbound-mail log / mail-catcher. Confirm each speaker with outstanding tasks received a reminder naming the outstanding task ("Upload Final Headshot (print quality)" and, for Harry, "Upload Session Presentation") and its due date.
   - id: CNT-09
     criterion: Organizer can edit a session's title and abstract from a central admin view and the changes persist.
     weight: 2
@@ -268,7 +268,7 @@ rubric:
     type: crud
     testability: auto
     scenarios: [CNT-S3]
-    pass_criteria: Priya's bio shows the appended sentence and her record displays the newly uploaded headshot.png image after save and reload.
+    pass_criteria: Hermione's bio shows the appended sentence and her record displays the newly uploaded headshot.png image after save and reload.
     evidence: Before/after screenshots of the speaker record showing the updated bio and photo.
   - id: CNT-11
     criterion: Content edits are recorded in a version/change history with editor attribution and timestamps, and a prior version can be restored.
@@ -276,7 +276,7 @@ rubric:
     type: depth
     testability: auto
     scenarios: [CNT-S3]
-    pass_criteria: The history panel lists at least two distinct timestamped entries attributed to Jordan Alvarez, and restoring the earlier version removes the second edit's sentence while keeping the first edit.
+    pass_criteria: The history panel lists at least two distinct timestamped entries attributed to Minerva McGonagall, and restoring the earlier version removes the second edit's sentence while keeping the first edit.
     evidence: Screenshot of the history/activity panel with who/when entries and of the abstract after restore.
   - id: CNT-12
     criterion: Sessions carry a content approval/review status the organizer can set, and unapproved content is excluded from the public agenda output. (This item grades the approval GATE, not the public widget rendering itself — that is graded by public-widgets EMB-06.)

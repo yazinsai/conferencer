@@ -32,5 +32,5 @@ never reshuffles who is who.
 
 Total 57 KB across 11 portraits.
 
-One speaker — Jonas Lindqvist — has no portrait on purpose, so the speaker gallery's no-photo
+One speaker — Ron Weasley — has no portrait on purpose, so the speaker gallery's no-photo
 fallback stays visible in the demo.

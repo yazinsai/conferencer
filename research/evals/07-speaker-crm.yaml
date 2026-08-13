@@ -21,8 +21,8 @@ scenarios:
     name: Build and organize the speaker database
     persona: organizer
     steps: |
-      1. Navigate to the clone's base URL. Sign in as organizer Jordan Alvarez
-         (jordan.organizer@sbek-test.example.com, fixture password); if no account
+      1. Navigate to the clone's base URL. Sign in as organizer Minerva McGonagall
+         (demo-organizer@example.com, fixture password); if no account
          exists yet, sign up with the organizer fixture identity. Try obvious
          organizer routes: /admin, /dashboard, /organizer, or nav links.
       2. Look for an ORGANIZATION-LEVEL speaker database area that lives outside any
@@ -43,11 +43,11 @@ scenarios:
          Screenshot any column-mapping or validation step (including any rows
          flagged with issues), then complete the import. If no import UI exists,
          record that, and instead manually create the 3 contacts from the
-         speakers.csv fixture data (Priya Raman, Marcus Okafor, Dana Kowalski —
+         speakers.csv fixture data (Hermione Granger, Harry Potter, Fleur Delacour —
          each row carries name, email, job title, company, bio).
       4. Screenshot the populated directory table showing multiple contacts with at
          least name and email visible. Record roughly how many rows are listed.
-      5. Type an imported contact's name (e.g. "Priya") into the directory search
+      5. Type an imported contact's name (e.g. "Hermione") into the directory search
          box. Screenshot the narrowed result, then clear the search and confirm the
          full list returns.
       6. Open the filter control if one exists (a "Filter" button or panel near the
@@ -75,7 +75,7 @@ scenarios:
          "AI" to the contact instead and screenshot it. If neither exists, record
          that.
       10. Manually create one new contact with the SAME name as an existing contact
-          but a different email (e.g. "Priya Raman" / priya.raman.alt@sbek-test.example.com).
+          but a different email (e.g. "Hermione Granger" / hermione.granger.alt@sbek-test.example.com).
           Look for a duplicate warning or a "Merge Duplicates" / "Merge" action on
           the profile or in the directory. If found, run the merge: select both
           records, designate the original as primary, choose field values if a
@@ -97,10 +97,10 @@ scenarios:
     name: Source a speaker through the pipeline and reuse across events
     persona: organizer
     steps: |
-      1. Sign in as organizer Jordan Alvarez (jordan.organizer@sbek-test.example.com,
+      1. Sign in as organizer Minerva McGonagall (demo-organizer@example.com,
          fixture password) — the same account used in CRM-S1. If the directory from
          CRM-S1 is empty or missing, first create the 3 contacts from the
-         speakers.csv fixture data (Priya Raman, Marcus Okafor, Dana Kowalski) so
+         speakers.csv fixture data (Hermione Granger, Harry Potter, Fleur Delacour) so
          the pipeline and outreach steps have material to work with.
       2. Make sure the event "DevFlow Conf 2027" (2027-05-12 to 2027-05-14, Moscone
          West SF) exists; create it from the fixture data if it does not.
@@ -110,7 +110,7 @@ scenarios:
          target has open stages like Researching/Identified/Contacted/Interested
          plus terminal Confirmed and Declined; renamed equivalents are fine). If no
          pipeline exists anywhere, record that explicitly and skip to step 7.
-      4. Enroll a directory contact (use Marcus Okafor) into the pipeline via
+      4. Enroll a directory contact (use Harry Potter) into the pipeline via
          "+ Enroll" / "Add prospect" / "Add card", choosing a starting stage
          (Identified or the first open stage). If the dialog offers a score and
          rationale, enter score 85 and rationale "Strong platform-engineering track
@@ -128,7 +128,7 @@ scenarios:
          the note (and history) persisted.
       7. Reuse across events: from the pipeline card (an "Assign to event" action)
          or from the directory (select the contact's checkbox and look for
-         "+ Add To Event" / "Invite to Event" / "Add to..."), add Marcus Okafor to
+         "+ Add To Event" / "Invite to Event" / "Add to..."), add Harry Potter to
          "DevFlow Conf 2027". Screenshot the event-picker or confirmation dialog.
          Then navigate into DevFlow Conf 2027's speakers/contacts area and
          screenshot the contact listed there — note whether name, email, company,

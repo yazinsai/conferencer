@@ -22,9 +22,9 @@ scenarios:
       1. Navigate to the site root. Find the organizer/admin area -- try obvious
          routes (/admin, /dashboard, /organizer) and nav links labeled Dashboard,
          Admin, Organizer, or Manage Events. If authentication is required, sign in
-         as organizer Jordan Alvarez (jordan.organizer@sbek-test.example.com, fixture
-         password); if that account does not exist yet, sign up with the Jordan
-         Alvarez fixture identity.
+         as organizer Minerva McGonagall (demo-organizer@example.com, fixture
+         password); if that account does not exist yet, sign up with the Minerva
+         McGonagall fixture identity.
       2. Open the event "DevFlow Conf 2027" (2027-05-12 to 2027-05-14, Moscone West
          SF). If no event exists yet, create it with those fixture dates and venue.
       3. Find the agenda/schedule builder -- it may be called Agenda, Schedule,
@@ -54,17 +54,17 @@ scenarios:
          still be Pending), first change their status to Accepted as the organizer
          so they become schedulable; only create fresh sessions with the fixture
          titles, formats, and tracks if the proposals are absent entirely.
-      6. Ensure two of those sessions share the speaker Priya Raman -- assign her to
+      6. Ensure two of those sessions share the speaker Hermione Granger -- assign her to
          the "Taming 40-Minute CI" session and also add her as a speaker on the
          "Your AI Pair Programmer" session (edit the session's speaker list; if
-         speakers cannot be edited on a session, create an extra session with Priya
+         speakers cannot be edited on a session, create an extra session with Hermione
          as speaker). Record whether sessions can carry speaker assignments at all.
       7. Place the "Taming 40-Minute CI" session into Day 1 (May 12) at 10:00 in
          Room 2A, using drag-and-drop or whatever click-to-assign mechanism the UI
          offers. Screenshot the grid with the session card visible in that slot.
       8. Now place the "Your AI Pair Programmer" session at the SAME day and
          overlapping time (Day 1, 10:00) in a DIFFERENT room (Room 2B). Both
-         sessions now overlap while sharing speaker Priya Raman. Look carefully for
+         sessions now overlap while sharing speaker Hermione Granger. Look carefully for
          any speaker double-booking indicator: a badge or highlight on the session
          cards, a warning toast/dialog, or an entry in a conflicts panel. Screenshot
          it and record its exact wording. If nothing appears, record that explicitly.
@@ -83,23 +83,23 @@ scenarios:
       - Builder view shows a time dimension, day navigation across three days, and rooms/tracks
       - Newly created rooms and tracks appear as schedulable options in the builder
       - A session card renders in its assigned day/time/room slot and survives a reload
-      - A visible speaker double-booking warning while the two Priya Raman sessions overlap
+      - A visible speaker double-booking warning while the two Hermione Granger sessions overlap
       - Room double-booking is blocked or visibly flagged
       - Conflict indicators clear after the sessions are moved apart
   - id: AIA-S2
     name: Auto-schedule assist and publish the agenda
     persona: organizer
     steps: |
-      1. Sign in as organizer Jordan Alvarez (as in AIA-S1) and open the
+      1. Sign in as organizer Minerva McGonagall (as in AIA-S1) and open the
          "DevFlow Conf 2027" agenda builder. It should contain the placements from
          AIA-S1; if state was not retained, place at least two fixture sessions into
          slots first so the agenda is non-empty.
       2. Ensure at least one session remains unscheduled in the pool/sidebar. The
          pool will usually be empty here, since AIA-S1 schedules all three fixture
-         sessions -- in that case use the extra Marcus Okafor session "Lightning:
+         sessions -- in that case use the extra Harry Potter session "Lightning:
          Agents in Production Q&A" if it already exists from area 04
          (content-management creates it), or create it from fixture values: format
-         "Lightning Talk (10 min)", track "AI Engineering", speaker Marcus Okafor.
+         "Lightning Talk (10 min)", track "AI Engineering", speaker Harry Potter.
          Leave it unplaced.
       3. Search the builder for any assisted/auto-scheduling capability -- possible
          labels include Auto-schedule, AI Scheduler, Auto-place, Smart Schedule,
@@ -159,7 +159,7 @@ rubric:
     type: rule
     testability: auto
     scenarios: [AIA-S1]
-    pass_criteria: When the two Priya Raman sessions overlap at Day 1 10:00 (different rooms), a conflict indicator appears without requiring a manual page refresh (or at latest on save) and identifies the double-booked speaker or the clashing sessions; agent observations record its wording.
+    pass_criteria: When the two Hermione Granger sessions overlap at Day 1 10:00 (different rooms), a conflict indicator appears without requiring a manual page refresh (or at latest on save) and identifies the double-booked speaker or the clashing sessions; agent observations record its wording.
     evidence: Screenshot from step 8 showing the conflict badge/highlight/toast/panel while both sessions overlap, with the recorded warning text naming the speaker or sessions.
   - id: AIA-05
     criterion: Placing two sessions in the same room at overlapping times is blocked or visibly flagged as a room conflict.

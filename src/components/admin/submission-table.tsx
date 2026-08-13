@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 
-import { buttonClass, Chip, cx, Icon, Td, Th } from "@/components/ui";
+import { buttonClass, Chip, cx, Icon, Select, Td, Th } from "@/components/ui";
 import type { SubmissionRow } from "@/lib/repo/submissions";
 import { APPROVAL_LABELS, STATUS_LABELS, statusTone } from "@/lib/status";
 
 import { ALL_COLUMNS } from "@/lib/columns";
 
 const COLUMN_WIDTH: Record<string, string> = {
-  status: "w-[8.5rem]",
+  status: "min-w-[10.5rem] w-[10.5rem]",
   form: "w-36",
   title: "min-w-[16rem] w-[22rem]",
   description: "min-w-[14rem] w-64",
@@ -67,10 +67,10 @@ export function SubmissionTable({
             <label htmlFor="bulk-status" className="text-xs text-ink-2">
               Set status
             </label>
-            <select
+            <Select
               id="bulk-status"
               name="status"
-              className="rounded-input border border-field bg-paper px-2 py-1 text-xs"
+              className="h-8 w-auto py-0 text-xs"
               defaultValue="accepted"
             >
               {statuses.map((s) => (
@@ -78,7 +78,7 @@ export function SubmissionTable({
                   {STATUS_LABELS[s as keyof typeof STATUS_LABELS] ?? s}
                 </option>
               ))}
-            </select>
+            </Select>
             <button type="submit" className={buttonClass("primary", "sm")}>
               Apply
             </button>
@@ -91,10 +91,10 @@ export function SubmissionTable({
             <label htmlFor="bulk-approval" className="text-xs text-ink-2">
               Content approval
             </label>
-            <select
+            <Select
               id="bulk-approval"
               name="approval_status"
-              className="rounded-input border border-field bg-paper px-2 py-1 text-xs"
+              className="h-8 w-auto py-0 text-xs"
               defaultValue="approved"
             >
               {approvals.map((s) => (
@@ -102,7 +102,7 @@ export function SubmissionTable({
                   {APPROVAL_LABELS[s] ?? s}
                 </option>
               ))}
-            </select>
+            </Select>
             <button type="submit" className={buttonClass("secondary", "sm")}>
               Apply
             </button>
@@ -175,7 +175,7 @@ export function SubmissionTable({
                     title="Quick edit"
                     aria-label={`Edit ${row.title}`}
                     className={cx(
-                      "inline-flex size-9 items-center justify-center rounded-input text-muted-foreground",
+                      "inline-flex size-8 items-center justify-center rounded-input text-muted-foreground",
                       "transition-colors duration-[120ms] ease-out",
                       "hover:bg-paper-3 hover:text-ink",
                       "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
@@ -186,28 +186,14 @@ export function SubmissionTable({
                 </Td>
                 {show("status") ? (
                   <Td className={COLUMN_WIDTH.status}>
-                    <form action={setStatusAction} className="flex items-center gap-1">
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="id" value={row.id} />
-                      <select
-                        name="status"
-                        defaultValue={row.status}
-                        aria-label={`Status for ${row.title}`}
-                        className="w-full rounded-input border border-field bg-paper px-1.5 py-1 text-xs text-ink"
-                        onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                      >
-                        {statuses.map((s) => (
-                          <option key={s} value={s}>
-                            {STATUS_LABELS[s as keyof typeof STATUS_LABELS] ?? s}
-                          </option>
-                        ))}
-                      </select>
-                      <noscript>
-                        <button type="submit" className="text-xs text-signal underline">
-                          Save
-                        </button>
-                      </noscript>
-                    </form>
+                    <InlineStatusSelect
+                      slug={slug}
+                      id={row.id}
+                      title={row.title}
+                      status={row.status}
+                      statuses={statuses}
+                      action={setStatusAction}
+                    />
                   </Td>
                 ) : null}
                 {show("form") ? (
@@ -217,17 +203,19 @@ export function SubmissionTable({
                 ) : null}
                 {show("title") ? (
                   <Td className={COLUMN_WIDTH.title}>
-                    <Link
-                      href={`${base}/${row.id}`}
-                      className="font-medium text-ink hover:text-signal"
-                    >
-                      {row.title}
-                    </Link>
-                    {showKind ? (
-                      <span className="ml-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
-                        {row.kind}
-                      </span>
-                    ) : null}
+                    <div className="flex items-baseline gap-1.5">
+                      <Link
+                        href={`${base}/${row.id}`}
+                        className="min-w-0 font-medium text-ink hover:text-signal"
+                      >
+                        {row.title}
+                      </Link>
+                      {showKind ? (
+                        <span className="shrink-0 text-[11px] uppercase tracking-wide text-muted-foreground">
+                          {row.kind}
+                        </span>
+                      ) : null}
+                    </div>
                   </Td>
                 ) : null}
                 {show("description") ? (
@@ -333,6 +321,65 @@ export function SubmissionTable({
       </p>
       <StatusLegend />
     </div>
+  );
+}
+
+function InlineStatusSelect({
+  slug,
+  id,
+  title,
+  status,
+  statuses,
+  action,
+}: {
+  slug: string;
+  id: string;
+  title: string;
+  status: string;
+  statuses: string[];
+  action: (formData: FormData) => Promise<void>;
+}) {
+  const [value, setValue] = useState(status);
+  const [serverStatus, setServerStatus] = useState(status);
+
+  if (status !== serverStatus) {
+    setServerStatus(status);
+    setValue(status);
+  }
+
+  return (
+    <form action={action} className="flex items-center gap-1">
+      <input type="hidden" name="slug" value={slug} />
+      <input type="hidden" name="id" value={id} />
+      <Select
+        name="status"
+        value={value}
+        aria-label={`Status for ${title}`}
+        className="h-8 px-2 py-0 text-xs"
+        onChange={(e) => {
+          const next = e.target.value;
+          setValue(next);
+          const fd = new FormData();
+          fd.set("slug", slug);
+          fd.set("id", id);
+          fd.set("status", next);
+          startTransition(() => {
+            void action(fd);
+          });
+        }}
+      >
+        {statuses.map((s) => (
+          <option key={s} value={s}>
+            {STATUS_LABELS[s as keyof typeof STATUS_LABELS] ?? s}
+          </option>
+        ))}
+      </Select>
+      <noscript>
+        <button type="submit" className="text-xs text-signal underline">
+          Save
+        </button>
+      </noscript>
+    </form>
   );
 }
 

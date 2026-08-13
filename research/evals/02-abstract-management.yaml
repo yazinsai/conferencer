@@ -28,10 +28,10 @@ scenarios:
          Proposals, and may live behind the event "DevFlow Conf 2027" if the site hosts
          multiple events. CHAINED-RUN PRECONDITION: if the portal shows a CLOSED state
          (area 01 deliberately closes the CFP at its end), first sign in as the organizer
-         Jordan Alvarez (jordan.organizer@sbek-test.example.com, fixture password), move
+         Minerva McGonagall (demo-organizer@example.com, fixture password), move
          the CFP close date back into the future (e.g. 2027-04-30), save, sign out, and
          return here before continuing.
-      2. Sign up as the speaker identity Priya Raman (priya.speaker@sbek-test.example.com,
+      2. Sign up as the speaker identity Hermione Granger (demo-speaker@example.com,
          fixture password, title/company/bio from the sample data). If the account already
          exists (e.g. created in area 01), sign in instead.
       3. Ensure the "Taming 40-Minute CI: Incremental Builds at Monorepo Scale" proposal
@@ -40,8 +40,8 @@ scenarios:
          EDITING the existing submission. Otherwise submit it fresh from the sample data
          (format Talk, track Platform & Infra, abstract and audience-level text from the
          fixture). Either way, look for an add co-author / co-presenter / additional
-         speaker / participant control. If present, add Marcus Okafor from the sample data
-         (marcus.speaker@sbek-test.example.com, Staff Developer Advocate at Cloudreach
+         speaker / participant control. If present, add Harry Potter from the sample data
+         (demo-speaker2@example.com, Staff Developer Advocate at Order of the Phoenix
          Labs) and assign him a role if role labels are offered (Co-author, Co-speaker,
          Co-presenter, or similar). Screenshot the form or edited submission INCLUDING the
          participants/co-author section before saving/submitting, then screenshot the
@@ -57,19 +57,19 @@ scenarios:
       6. Open the speaker's submissions list / dashboard and screenshot it showing all
          three submissions with their status labels.
       7. Open the detail view of "Taming 40-Minute CI" and screenshot the participants
-         list. Record whether Marcus Okafor appears with a role label alongside Priya
-         Raman.
+         list. Record whether Harry Potter appears with a role label alongside Hermione
+         Granger.
     success_signals:
       - Three submissions visible in the speaker dashboard with status labels
-      - Submission detail shows both Priya Raman and Marcus Okafor, each with a role label
+      - Submission detail shows both Hermione Granger and Harry Potter, each with a role label
       - Screenshot of the co-author control in the submission form or edit view
   - id: ABS-S2
     name: Organizer configures rounds, pools, assignments, reminders
     persona: organizer
     steps: |
       1. Navigate to the target site and find the organizer/admin area — try obvious nav
-         links first, then routes like /admin, /dashboard, /organizer. Sign up as Jordan
-         Alvarez (jordan.organizer@sbek-test.example.com, fixture password) if the site
+         links first, then routes like /admin, /dashboard, /organizer. Sign up as Minerva
+         McGonagall (demo-organizer@example.com, fixture password) if the site
          has open signup; otherwise sign in with the fixture organizer credentials.
       2. Locate the event "DevFlow Conf 2027". If it does not exist, create it from the
          sample data (2027-05-12 to 2027-05-14, Moscone West SF, tracks AI Engineering /
@@ -92,25 +92,25 @@ scenarios:
          round a pool distinct from round 1 (it may be empty or contain only the
          organizer). Save everything, then reload the evaluation-plan page and screenshot
          it showing both rounds with their distinct names, date ranges, and scorecards.
-      6. Add Sam Whitfield (sam.reviewer@sbek-test.example.com, fixture identity) as a
+      6. Add Severus Snape (demo-reviewer@example.com, fixture identity) as a
          reviewer in the Round 1 "Initial Review" pool — via invite reviewer, add reviewer,
          or team/committee management. If an invitation link is displayed on screen,
-         record it as an observation. Screenshot the reviewer-pool state showing Sam
-         Whitfield attached to Round 1 and, if pools are per-round, Round 2's separate
+         record it as an observation. Screenshot the reviewer-pool state showing Severus
+         Snape attached to Round 1 and, if pools are per-round, Round 2's separate
          (possibly empty) pool; if reviewers can only be added globally rather than
          per round, record that observation explicitly.
       7. Open the reviewer-assignment area. Assign exactly TWO of the three submissions to
-         Sam Whitfield: "Taming 40-Minute CI" and "Your AI Pair Programmer Is Lying to
+         Severus Snape: "Taming 40-Minute CI" and "Your AI Pair Programmer Is Lying to
          You". Deliberately leave "Docs That Answer Back" unassigned. While here, look for
          at-scale assignment tooling — a per-reviewer cap / max-assignments setting,
          auto-distribute / auto-assign, or assign-by-track filtering. Exercise whichever
          exists (e.g. set a cap of 5, or filter by track before assigning) and screenshot
          it. Confirm the assignments and screenshot the final assignment state.
       8. Open the review progress dashboard / monitoring view. Screenshot the baseline
-         state showing Sam Whitfield with 2 assigned and 0 completed (or equivalent
+         state showing Severus Snape with 2 assigned and 0 completed (or equivalent
          counts/percentages).
-      9. From the progress view (or reviewer list), select the lagging reviewer Sam
-         Whitfield and trigger the bulk / send-reminder action. Screenshot the
+      9. From the progress view (or reviewer list), select the lagging reviewer Severus
+         Snape and trigger the bulk / send-reminder action. Screenshot the
          confirmation that a reminder was sent. Do not expect to verify the email itself.
       10. If the site advertises AI evaluation / AI triage / AI reviewer features, enable
           or run it on "Taming 40-Minute CI" (configuring a persona if required).
@@ -121,21 +121,21 @@ scenarios:
         after reload
       - Scorecard editor screenshot showing numeric, dropdown, and text fields (and
         weights if supported)
-      - Assignment state shows exactly 2 submissions assigned to Sam Whitfield
-      - Progress dashboard shows 2 assigned / 0 complete for Sam
+      - Assignment state shows exactly 2 submissions assigned to Severus Snape
+      - Progress dashboard shows 2 assigned / 0 complete for Severus
       - Reminder-sent confirmation captured
   - id: ABS-S3
     name: Reviewer scores blind; organizer checks aggregates and export
     persona: reviewer
     steps: |
-      1. Navigate to the target site and sign in as Sam Whitfield
-         (sam.reviewer@sbek-test.example.com, fixture password). If no account exists yet,
+      1. Navigate to the target site and sign in as Severus Snape
+         (demo-reviewer@example.com, fixture password). If no account exists yet,
          sign up with the fixture reviewer identity, or use any reviewer-invitation link
          that was displayed on screen during ABS-S2. If the reviewer portal is
          magic-link-only (no reviewer password sign-in or signup anywhere), sign in as
-         the organizer Jordan Alvarez (jordan.organizer@sbek-test.example.com, fixture
+         the organizer Minerva McGonagall (demo-organizer@example.com, fixture
          password), look for a copyable reviewer-portal link or a "view as reviewer" /
-         impersonate control for Sam Whitfield, record it, sign out, and open that link.
+         impersonate control for Severus Snape, record it, sign out, and open that link.
          If no such on-screen path exists either, record that reviewer access requires
          an emailed link that cannot be verified, and stop this scenario.
       2. Open the reviewer queue / review portal. Screenshot it. Record exactly which
@@ -143,8 +143,8 @@ scenarios:
          40-Minute CI..." and "Your AI Pair Programmer...") and must NOT list the
          unassigned "Docs That Answer Back".
       3. Open the review view for "Taming 40-Minute CI". Scan the entire visible page for
-         the author identity: the names "Priya Raman" and "Marcus Okafor" and the company
-         "Latticework Systems". Screenshot the page and record explicitly whether author
+         the author identity: the names "Hermione Granger" and "Harry Potter" and the company
+         "Hogwarts Buildworks". Screenshot the page and record explicitly whether author
          identity is hidden (round 1 was configured as blinded in ABS-S2) and whether any
          other reviewer's scores are visible.
       4. While in the review view, look for a conflict-of-interest control — "Declare
@@ -154,7 +154,7 @@ scenarios:
          Record its absence otherwise.
       5. Fill the round-1 scorecard for "Taming 40-Minute CI": Originality = 4 (the sample
          review rating), Relevance = 2, Recommendation = Accept (the sample decision), and
-         paste the sample review comment into Comments. If Sam already reviewed this
+         paste the sample review comment into Comments. If Severus already reviewed this
          submission in an earlier area (CFP-S3 records an all-4s review), submit this
          scorecard within the Round 1 "Initial Review" plan created in ABS-S2 — and if the
          clone allows only one review per reviewer per submission, edit/replace the prior
@@ -166,8 +166,8 @@ scenarios:
          Originality = 5, Relevance = 5, Recommendation = Accept, brief comment "Excellent
          fit for the AI Engineering track." Screenshot, submit, and screenshot the queue
          showing both items complete.
-      7. Sign out. Sign in as the organizer Jordan Alvarez
-         (jordan.organizer@sbek-test.example.com, fixture password) and open the review
+      7. Sign out. Sign in as the organizer Minerva McGonagall
+         (demo-organizer@example.com, fixture password) and open the review
          results / scores / decisions area for DevFlow Conf 2027.
       8. Verify an aggregate (average/total) score is displayed per submission. Record the
          displayed aggregates for both reviewed submissions. Note for the judge: with
@@ -182,10 +182,10 @@ scenarios:
          record the row order each time ("Your AI Pair Programmer" should rank above
          "Taming 40-Minute CI" on score).
       10. Open "Taming 40-Minute CI" in the organizer's review/results context and
-          screenshot the participants: author identity (Priya Raman, Marcus Okafor with
-          his role, Latticework Systems) should be fully visible to the organizer, in
+          screenshot the participants: author identity (Hermione Granger, Harry Potter with
+          his role, Hogwarts Buildworks) should be fully visible to the organizer, in
           contrast to the blinded reviewer view from step 3.
-      11. Open the progress dashboard again and screenshot it now showing Sam Whitfield
+      11. Open the progress dashboard again and screenshot it now showing Severus Snape
           with 2 of 2 reviews complete (or 100%).
       12. Find an export / download control for scores or review results (CSV/XLSX), in
           the results table or a reports area. Trigger it, screenshot the control and any
@@ -216,8 +216,8 @@ rubric:
     type: scoping
     testability: auto
     scenarios: [ABS-S2]
-    pass_criteria: The UI attaches reviewers (or a pool/committee) to a specific round rather than only globally, and Sam Whitfield could be added to the Round 1 pool while Round 2 shows a different (possibly empty) pool.
-    evidence: Screenshots of per-round reviewer-pool configuration showing Round 1 containing Sam Whitfield and Round 2 configured separately; agent observation of where reviewer membership is scoped.
+    pass_criteria: The UI attaches reviewers (or a pool/committee) to a specific round rather than only globally, and Severus Snape could be added to the Round 1 pool while Round 2 shows a different (possibly empty) pool.
+    evidence: Screenshots of per-round reviewer-pool configuration showing Round 1 containing Severus Snape and Round 2 configured separately; agent observation of where reviewer membership is scoped.
   - id: ABS-03
     criterion: The scorecard editor supports numeric rating, dropdown, and free-text criteria, and all three field types render on the reviewer side and store submitted values.
     weight: 3
@@ -240,7 +240,7 @@ rubric:
     type: scoping
     testability: auto
     scenarios: [ABS-S2, ABS-S3]
-    pass_criteria: "Sam Whitfield's queue lists 'Taming 40-Minute CI' and 'Your AI Pair Programmer' and does NOT list the unassigned 'Docs That Answer Back'; a portal that exposes all submissions to every reviewer fails."
+    pass_criteria: "Severus Snape's queue lists 'Taming 40-Minute CI' and 'Your AI Pair Programmer' and does NOT list the unassigned 'Docs That Answer Back'; a portal that exposes all submissions to every reviewer fails."
     evidence: ABS-S2 assignment-state screenshot plus the ABS-S3 reviewer-queue screenshot; agent's recorded list of titles visible in the queue.
   - id: ABS-06
     criterion: Assignment tooling works at scale — at least one of per-reviewer caps/limits, auto-distribution of submissions across reviewers, or track-filtered bulk assignment is present and functional.
@@ -256,16 +256,16 @@ rubric:
     type: scoping
     testability: auto-partial
     scenarios: [ABS-S2, ABS-S3]
-    pass_criteria: "A per-round anonymization/blind setting exists (ABS-S2 step 4) and the blinded reviewer view of 'Taming 40-Minute CI' contains none of 'Priya Raman', 'Marcus Okafor', or 'Latticework Systems', while the organizer view (ABS-S3 step 10) shows them; author names leaking anywhere in the reviewer view fails."
+    pass_criteria: "A per-round anonymization/blind setting exists (ABS-S2 step 4) and the blinded reviewer view of 'Taming 40-Minute CI' contains none of 'Hermione Granger', 'Harry Potter', or 'Hogwarts Buildworks', while the organizer view (ABS-S3 step 10) shows them; author names leaking anywhere in the reviewer view fails."
     evidence: "Contrasting screenshots: blinded reviewer view vs organizer view of the same submission; agent's explicit observation from scanning for the three identity strings."
-    manual_instructions: "Cross-reviewer isolation needs a second simultaneous account: invite a second reviewer you control to the same round, assign them 'Taming 40-Minute CI', log in as them in a separate browser, and confirm they cannot see Sam Whitfield's scores or comments before submitting their own."
+    manual_instructions: "Cross-reviewer isolation needs a second simultaneous account: invite a second reviewer you control to the same round, assign them 'Taming 40-Minute CI', log in as them in a separate browser, and confirm they cannot see Severus Snape's scores or comments before submitting their own."
   - id: ABS-08
     criterion: A review progress dashboard shows per-reviewer completion counts or percentages that match the actual review state in real time.
     weight: 2
     type: roundtrip
     testability: auto
     scenarios: [ABS-S2, ABS-S3]
-    pass_criteria: "The dashboard showed Sam Whitfield at 2 assigned / 0 complete before any reviews (ABS-S2 step 8) and 2 of 2 complete (or 100%) after both evaluations were submitted (ABS-S3 step 11); stale or absent counts fail."
+    pass_criteria: "The dashboard showed Severus Snape at 2 assigned / 0 complete before any reviews (ABS-S2 step 8) and 2 of 2 complete (or 100%) after both evaluations were submitted (ABS-S3 step 11); stale or absent counts fail."
     evidence: Before/after progress-dashboard screenshots from the two scenarios with matching reviewer name and counts.
   - id: ABS-09
     criterion: Organizer can select reviewers with outstanding reviews and send them a bulk reminder from the progress or reviewer view.
@@ -273,9 +273,9 @@ rubric:
     type: bulk
     testability: auto-partial
     scenarios: [ABS-S2]
-    pass_criteria: A reminder/nudge action is available against the lagging reviewer (Sam at 0 of 2 complete), and triggering it reports success (confirmation toast, sent status, or log entry).
+    pass_criteria: A reminder/nudge action is available against the lagging reviewer (Severus at 0 of 2 complete), and triggering it reports success (confirmation toast, sent status, or log entry).
     evidence: Screenshot of the reminder control and the sent confirmation from ABS-S2 step 9.
-    manual_instructions: Check the sam.reviewer@sbek-test.example.com inbox (or the clone's outbound-mail log if it exposes one) and confirm a reminder email arrived referencing the pending reviews.
+    manual_instructions: Check the demo-reviewer@example.com inbox (or the clone's outbound-mail log if it exposes one) and confirm a reminder email arrived referencing the pending reviews.
   - id: ABS-10
     criterion: Organizer sees an aggregate score per submission in a results table and can sort submissions by that score.
     weight: 3
@@ -290,7 +290,7 @@ rubric:
     type: crud
     testability: auto
     scenarios: [ABS-S1, ABS-S3]
-    pass_criteria: "Marcus Okafor appears alongside Priya Raman on 'Taming 40-Minute CI' with a role label in the speaker-side detail (ABS-S1) and in the organizer's review/results context (ABS-S3 step 10); no co-author support at all fails; partial credit if co-authors persist but without role labels."
+    pass_criteria: "Harry Potter appears alongside Hermione Granger on 'Taming 40-Minute CI' with a role label in the speaker-side detail (ABS-S1) and in the organizer's review/results context (ABS-S3 step 10); no co-author support at all fails; partial credit if co-authors persist but without role labels."
     evidence: Submission-detail screenshots from both scenarios showing the participants list with names and roles.
   - id: ABS-12
     criterion: "Reviewer can declare a conflict of interest / recuse themselves on an assigned submission (inferred — not documented in SessionBoard marketing; category norm from peer review tools)."
