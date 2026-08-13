@@ -10,6 +10,7 @@ import { readJson } from "@/lib/db";
 import { buildIcs } from "@/lib/ics";
 import { formatRange, formatTime } from "@/lib/datetime";
 import { stripHtml } from "@/lib/fields";
+import { publicOrigin } from "@/lib/public-url";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export async function GET(
   if (!embed || embed.event_id !== event.id) return new Response("Not found", { status: 404 });
 
   const url = new URL(request.url);
+  const origin = publicOrigin(request);
   const format = (url.searchParams.get("format") || suffix || embed.format) as string;
   const config = readJson<{ track?: string; format?: string; accent?: string }>(embed.config, {});
 
@@ -52,7 +54,7 @@ export async function GET(
           location: session.room_name ?? event.location,
           start: session.pub_starts_at,
           end: session.pub_ends_at,
-          url: `${url.origin}/e/${event.slug}/sessions/${session.id}`,
+          url: `${origin}/e/${event.slug}/sessions/${session.id}`,
         })),
       { calendarName: event.name, timezone: event.timezone },
     );
@@ -72,7 +74,7 @@ export async function GET(
               job_title: speaker.job_title,
               company: speaker.company,
               biography: stripHtml(speaker.biography ?? ""),
-              headshot_url: speaker.headshot_url ? `${url.origin}${speaker.headshot_url}` : null,
+              headshot_url: speaker.headshot_url ? `${origin}${speaker.headshot_url}` : null,
               sessions: publicSessionsForSpeaker(event.id, speaker.id).map((s) => ({
                 id: s.id,
                 title: s.title,
@@ -83,7 +85,7 @@ export async function GET(
           }
         : {
             event: eventPayload(event),
-            sessions: sessions.map((session) => sessionPayload(session, speakerMap, url.origin, event.slug)),
+            sessions: sessions.map((session) => sessionPayload(session, speakerMap, origin, event.slug)),
           };
     return Response.json(payload, { headers: { "Cache-Control": cache } });
   }
@@ -112,7 +114,7 @@ ${sessions
   }
 
   const accent = config.accent ?? event.accent_color;
-  const html = renderHtml(embed.type, event.name, sessions, speakerMap, accent, url.origin, event.slug);
+  const html = renderHtml(embed.type, event.name, sessions, speakerMap, accent, origin, event.slug);
 
   if (format === "styled_html" || format === "js") {
     // A single <script> tag that injects the widget into the host page.

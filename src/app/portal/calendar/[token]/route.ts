@@ -2,6 +2,7 @@ import { getContact } from "@/lib/repo/contacts";
 import { defaultEvent } from "@/lib/repo/events";
 import { publicSessionsForSpeaker, submissionsForContact } from "@/lib/repo/submissions";
 import { buildIcs } from "@/lib/ics";
+import { publicOrigin } from "@/lib/public-url";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export async function GET(
   const event = defaultEvent();
   if (!contact || !event) return new Response("Not found", { status: 404 });
 
-  const url = new URL(request.url);
+  const origin = publicOrigin(request);
   const published = publicSessionsForSpeaker(event.id, contact.id);
   const mine = submissionsForContact(event.id, contact.id).filter(
     (s) => s.status === "accepted" && s.starts_at,
@@ -41,7 +42,7 @@ export async function GET(
       start: session.pub_starts_at ?? session.starts_at,
       end: session.pub_ends_at ?? session.ends_at,
       sequence: session.ics_sequence,
-      url: `${url.origin}/e/${event.slug}/sessions/${session.id}`,
+      url: `${origin}/e/${event.slug}/sessions/${session.id}`,
     }))
     .filter((entry) => entry.start);
 

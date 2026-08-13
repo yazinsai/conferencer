@@ -1,3 +1,5 @@
+import { publicOrigin } from "@/lib/public-url";
+
 export const dynamic = "force-dynamic";
 
 const RESOURCES = [
@@ -20,7 +22,7 @@ const RESOURCES = [
 ];
 
 export async function GET(request: Request) {
-  const origin = new URL(request.url).origin;
+  const origin = publicOrigin(request);
 
   const paths: Record<string, unknown> = {};
   for (const resource of RESOURCES) {

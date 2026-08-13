@@ -2,6 +2,7 @@ import { get, run } from "./db";
 import { id } from "./ids";
 import { nowIso } from "./datetime";
 import { renderMerge, type MergeContext } from "./merge";
+import { publicUrl } from "./public-url";
 import { getTemplate } from "./repo/emails";
 import { stripHtml } from "./fields";
 
@@ -24,11 +25,7 @@ export type SendInput = {
 };
 
 export function appUrl(path = ""): string {
-  const base =
-    process.env.APP_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    `http://localhost:${process.env.PORT ?? 3000}`;
-  return `${base.replace(/\/$/, "")}${path}`;
+  return publicUrl(path);
 }
 
 /**

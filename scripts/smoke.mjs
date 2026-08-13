@@ -251,6 +251,24 @@ async function main() {
     }
   }
 
+  {
+    const leaving = new Session("sign-out");
+    await leaving.signIn(ACCOUNTS.organizer);
+    const response = await leaving.request("/sign-out", { method: "POST" });
+    const location = response.headers.get("location") ?? "";
+    if (![302, 303].includes(response.status)) {
+      fail("sign-out status", `got ${response.status}, expected 302/303`);
+    } else if (/0\.0\.0\.0|127\.0\.0\.1/.test(location)) {
+      fail("sign-out redirect", location);
+    } else {
+      const dest = new URL(location, BASE);
+      if (dest.origin !== new URL(BASE).origin) fail("sign-out redirect", location);
+      else ok("sign-out redirect", location);
+    }
+    if (leaving.cookies.has("cf_session")) fail("sign-out clears session");
+    else ok("sign-out clears session");
+  }
+
   const organizer = new Session("organizer");
   await organizer.signIn(ACCOUNTS.organizer);
   const speaker = new Session("speaker");

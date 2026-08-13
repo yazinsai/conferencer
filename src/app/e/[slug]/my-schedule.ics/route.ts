@@ -1,6 +1,7 @@
 import { getEventBySlug } from "@/lib/repo/events";
 import { publicSessions } from "@/lib/repo/submissions";
 import { buildIcs } from "@/lib/ics";
+import { publicOrigin } from "@/lib/public-url";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export async function GET(
   if (!event) return new Response("Not found", { status: 404 });
 
   const url = new URL(request.url);
+  const origin = publicOrigin(request);
   const ids = (url.searchParams.get("ids") ?? "").split(",").filter(Boolean);
   const sessions = publicSessions(event.id).filter(
     (s) => s.pub_starts_at && (ids.length === 0 || ids.includes(s.id)),
@@ -26,7 +28,7 @@ export async function GET(
       location: s.room_name ?? event.location,
       start: s.pub_starts_at,
       end: s.pub_ends_at,
-      url: `${url.origin}/e/${event.slug}/sessions/${s.id}`,
+      url: `${origin}/e/${event.slug}/sessions/${s.id}`,
     })),
     { calendarName: `${event.name} — my schedule`, timezone: event.timezone },
   );
