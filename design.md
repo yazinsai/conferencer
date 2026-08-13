@@ -264,6 +264,7 @@ page explains what the software does. **The rules below hold on both sides. Only
 --dur-short   180ms
 --dur-long    320ms
 --dur-reveal  320ms
+--dur-morph   400ms   marketing only — the shared-element morph, the ceiling of the budget
 ```
 
 - Only `transform`, `opacity` and `filter` are animated. Never a layout property.
@@ -304,8 +305,8 @@ this list does not ship. Items 1–3 are the same three primitives as above.
 | 2 | Hero entrance stagger | the `/` fold | `.reveal`, staggered by DOM index, capped at 300 ms |
 | 3 | Button press | every control | `translateY(1px)` on `:active` |
 | 4 | Scroll reveal | section heads and tiles | `.hm-reveal`: opacity + `translateY(12px)`, `--dur-reveal`, **one-shot and sticky**, driven by a single `IntersectionObserver` in `components/marketing/reveal.tsx`. The default state is *visible* — the CSS only hides an element the observer has marked, and only if it was off-screen at mount |
-| 5 | Shared-element morph | a talk dragged from the tray into a grid cell | `<ViewTransition name="talk-…" share="morph" default="none">` with the state update inside `startTransition`; `--dur-reveal` |
-| 6 | Crossfade | the three-step panel; the publish flip | `<ViewTransition key>` with `enter`/`share="auto"`, `default="none"` |
+| 5 | Shared-element morph | a talk moving from the tray into a grid cell | `view-transition-name` on the card plus `document.startViewTransition` with `flushSync` inside it, at `--dur-morph` (400 ms) with a 2 px blur mid-flight via `view-transition-class: hm-morph`. The browser API directly rather than React's `<ViewTransition>`: the pair is two different subtrees rather than one keyed boundary, and reduced motion has to skip the transition rather than shorten it |
+| 6 | Crossfade | the three-step panel; the publish flip | React `<ViewTransition key>` with `enter`/`share="auto"`, `default="none"`, at `--dur-reveal` |
 | 7 | Insert reveal | a row arriving (a show-when question, an added question, a bulk-action bar) | `@starting-style`, opacity + `translateY(-4px)`, `--dur-short` |
 | 8 | Draw-on check | publish; a task completing | SVG `stroke-dashoffset`, `--dur-reveal`, once, never looping |
 | 9 | Count-up | the four live figures | one `IntersectionObserver`, 700 ms, `tnum` so the column cannot jitter; renders the final value immediately under reduced motion and whenever the figure is an em dash |
@@ -517,7 +518,8 @@ everything below is a translation of it.
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:  cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-micro: 120ms; --dur-short: 180ms; --dur-long: 320ms; --dur-reveal: 320ms;
+  --dur-micro: 120ms; --dur-short: 180ms; --dur-long: 320ms;
+  --dur-reveal: 320ms; --dur-morph: 400ms;
 
   --rule-hair: 1px; --rule-fine: 2px;
   --radius-card: 12px; --radius-tile: 16px; --radius-pill: 999px; --radius-input: 10px;
@@ -605,7 +607,8 @@ everything below is a translation of it.
     "micro":  { "$value": "120ms", "$type": "duration" },
     "short":  { "$value": "180ms", "$type": "duration" },
     "long":   { "$value": "320ms", "$type": "duration" },
-    "reveal": { "$value": "320ms", "$type": "duration" }
+    "reveal": { "$value": "320ms", "$type": "duration" },
+    "morph":  { "$value": "400ms", "$type": "duration" }
   }
 }
 ```

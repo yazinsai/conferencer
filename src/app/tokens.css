@@ -151,10 +151,14 @@
   --dur-micro: 120ms;
   --dur-short: 180ms;
   --dur-long: 320ms;
-  /* The marketing surfaces' scroll reveal, shared-element morph and check draw
-     all run at one duration, so a page that reveals a head and morphs a card in
-     the same scroll reads as one system moving (design.md § Motion · marketing). */
+  /* The marketing surfaces' scroll reveal, crossfades and check draw all run at one
+     duration, so a page that reveals a head and swaps a panel in the same scroll
+     reads as one system moving (design.md § Motion · marketing). */
   --dur-reveal: 320ms;
+  /* The shared-element morph gets the longest step in the budget. It is the one
+     animation on the page carrying information — *this* card went *there* — and at
+     320ms over a couple of hundred pixels it reads as a pop rather than a move. */
+  --dur-morph: 400ms;
 
   --rule-hair: 1px;
   --rule-fine: 2px;

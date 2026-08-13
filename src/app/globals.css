@@ -253,6 +253,33 @@ h6 {
   animation-timing-function: var(--ease-out);
 }
 
+/* The one transition that carries information — a talk moving from the tray into
+   its slot — is given its own class so it can be slower than the crossfades and can
+   blur mid-flight. `view-transition-class` is how a set of named participants share
+   one rule; without it these fall back to the `*` rules above. The blur hides the
+   pixel interpolation while the card changes shape, and it is also what makes the
+   movement legible at all in a screen recording that samples every 50ms. */
+.hm-morph {
+  view-transition-class: hm-morph;
+}
+
+::view-transition-group(.hm-morph) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-image-pair(.hm-morph) {
+  animation-name: hm-vt-blur;
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-out);
+}
+
+@keyframes hm-vt-blur {
+  40% {
+    filter: blur(2px);
+  }
+}
+
 /* A transition's overlay swallows clicks for its whole duration, which on a page
    whose point is that you can play with it would eat the second drag. */
 ::view-transition {

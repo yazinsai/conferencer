@@ -291,7 +291,7 @@ export function AgendaPlayground({
                           setHovered(null);
                         }}
                         className={cx(
-                          "hm-grab rounded-lg border border-rule bg-paper p-2 shadow-[var(--shadow-card)]",
+                          "hm-grab hm-morph rounded-lg border border-rule bg-paper p-2 shadow-[var(--shadow-card)]",
                           dragging === talk.id && "hm-dragging",
                         )}
                         style={{
@@ -444,7 +444,7 @@ export function AgendaPlayground({
                           onDragStart={() => setDragging(talk.id)}
                           onDragEnd={() => setDragging(null)}
                           className={cx(
-                            "hm-grab group/card relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border bg-paper px-1.5 py-1 shadow-[var(--shadow-card)]",
+                            "hm-grab hm-morph group/card relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border bg-paper px-1.5 py-1 shadow-[var(--shadow-card)]",
                             clash ? "border-warn/50" : "border-rule",
                             dragging === talk.id && "hm-dragging",
                             // Refusal is signalled before the drop, not only after
