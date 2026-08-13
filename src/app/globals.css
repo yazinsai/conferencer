@@ -231,30 +231,26 @@ h6 {
   opacity: 0.55;
 }
 
-/* 5 and 6 · The <ViewTransition> pseudo-elements. `.morph` is the talk moving
-   from the tray into a grid cell; `.fade` is the panel crossfade behind the tab
-   strip and the publish flip. Recipes follow
-   node_modules/next/dist/docs/01-app/02-guides/view-transitions.md. */
-::view-transition-group(.morph) {
+/* 5 and 6 · View transitions. Two mechanisms, one look.
+ *
+ * The tab-strip crossfade and the publish flip are React `<ViewTransition>`s; the
+ * talk card travelling from the tray into its slot is the browser's API driven
+ * directly (see the note in demo/agenda-playground.tsx — React's version does not
+ * activate for an element moving between subtrees inside an already-keyed
+ * boundary). Both end up as `::view-transition-*` pseudo-elements, so styling every
+ * group rather than a named class covers both and cannot drift apart.
+ *
+ * The browser's default is 250ms `ease`; this is the system's own duration and
+ * easing (design.md § Motion — never the browser default `ease`). */
+::view-transition-group(*) {
   animation-duration: var(--dur-reveal);
   animation-timing-function: var(--ease-out);
 }
 
-::view-transition-old(.fade) {
-  animation: hm-vt-fade var(--dur-short) var(--ease-in) both reverse;
-}
-
-::view-transition-new(.fade) {
-  animation: hm-vt-fade var(--dur-reveal) var(--ease-out) var(--dur-short) both;
-}
-
-@keyframes hm-vt-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: var(--dur-reveal);
+  animation-timing-function: var(--ease-out);
 }
 
 /* A transition's overlay swallows clicks for its whole duration, which on a page

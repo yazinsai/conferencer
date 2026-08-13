@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { Chip, buttonClass, cx } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
@@ -29,7 +30,49 @@ import { ViewTransition } from "./view-transition";
 type Placement = { roomId: string; slot: string };
 
 /** How many half-hour rows a talk covers, the way the real rooms grid spans them. */
-const spanOf = (talk: DemoTalk) => Math.max(1, Math.ceil(talk.durationMinutes / 30));
+const spanOf = (talk: DemoTalk) =>
+  Math.max(1, Math.ceil(talk.durationMinutes / 30));
+
+type WithViewTransition = Document & {
+  startViewTransition?: (callback: () => void | Promise<void>) => {
+    finished: Promise<void>;
+  };
+};
+
+/**
+ * Run a state update as a **shared-element morph**: the card the reader dropped
+ * travels from the tray to its slot instead of vanishing from one and appearing in
+ * the other.
+ *
+ * This uses the browser's View Transition API directly rather than React's
+ * `<ViewTransition name>`, which drives the tab crossfade and the publish flip
+ * elsewhere on this page. Three reasons to be explicit here: the pairing is between
+ * two different subtrees rather than one keyed boundary, so it wants a name on the
+ * element rather than a React boundary around it; reduced motion has to opt out of
+ * the transition itself, not just shorten it; and it keeps the one animation that
+ * carries meaning off an experimental API. `flushSync` inside the callback is what
+ * makes React's DOM write land inside the transition's capture.
+ *
+ * Verified by counting `document.startViewTransition` calls: placing a talk fires
+ * exactly one, and a refused drop fires none — which is right, because nothing moved.
+ *
+ * The names live on the cards themselves (`view-transition-name`), so the browser
+ * pairs the old and new position by name and interpolates between them. Degrades to
+ * a plain update where the API is missing or motion is reduced.
+ */
+function morph(update: () => void) {
+  const doc = document as WithViewTransition;
+  if (
+    typeof doc.startViewTransition !== "function" ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    startTransition(update);
+    return;
+  }
+  doc.startViewTransition(() => {
+    flushSync(update);
+  });
+}
 
 export function AgendaPlayground({
   talks,
@@ -46,7 +89,14 @@ export function AgendaPlayground({
   // page that has not loaded, and a reader should see what a placed talk looks
   // like before they have to make one themselves.
   const [placed, setPlaced] = useState<Record<string, Placement>>(() =>
-    talks[0] ? { [talks[0].id]: { roomId: rooms[0]?.id ?? "", slot: slots[0] ?? "09:00" } } : {},
+    talks[0]
+      ? {
+          [talks[0].id]: {
+            roomId: rooms[0]?.id ?? "",
+            slot: slots[0] ?? "09:00",
+          },
+        }
+      : {},
   );
   const [dragging, setDragging] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -60,7 +110,10 @@ export function AgendaPlayground({
   const [refusedTalk, setRefusedTalk] = useState<string | null>(null);
   const [published, setPublished] = useState(false);
 
-  const byId = useMemo(() => new Map(talks.map((talk) => [talk.id, talk])), [talks]);
+  const byId = useMemo(
+    () => new Map(talks.map((talk) => [talk.id, talk])),
+    [talks],
+  );
   const tray = talks.filter((talk) => !placed[talk.id]);
   const placedList = talks
     .filter((talk) => placed[talk.id])
@@ -106,7 +159,11 @@ export function AgendaPlayground({
     if (!talk) return;
     const start = slots.indexOf(slot);
     // Refuse if any row this talk would cover is taken by a different talk.
-    for (let i = 0; i < spanOf(talk) && start + i >= 0 && start + i < slots.length; i += 1) {
+    for (
+      let i = 0;
+      i < spanOf(talk) && start + i >= 0 && start + i < slots.length;
+      i += 1
+    ) {
       const holder = occupied.get(`${roomId}-${slots[start + i]}`);
       if (holder && holder !== talkId) {
         const clashedWith = byId.get(holder);
@@ -117,20 +174,40 @@ export function AgendaPlayground({
       }
     }
     setRefusedTalk(null);
-    startTransition(() => {
+    morph(() => {
       setPlaced((current) => ({ ...current, [talkId]: { roomId, slot } }));
     });
   }
 
   function unplace(talkId: string) {
     setRefusedTalk(null);
-    startTransition(() => {
+    morph(() => {
       setPlaced((current) => {
         const next = { ...current };
         delete next[talkId];
         return next;
       });
     });
+  }
+
+  /**
+   * The first slot a talk would actually fit in. The place menu opens on this
+   * rather than on the first room and the first time, because the board starts with
+   * a talk on Main Stage at 09:00 and a menu whose default action is refused is a
+   * menu that looks broken.
+   */
+  function freeSlotFor(talk: DemoTalk): Placement {
+    for (const slot of slots) {
+      for (const room of rooms) {
+        const start = slots.indexOf(slot);
+        let fits = true;
+        for (let i = 0; i < spanOf(talk) && start + i < slots.length; i += 1) {
+          if (occupied.has(`${room.id}-${slots[start + i]}`)) fits = false;
+        }
+        if (fits) return { roomId: room.id, slot };
+      }
+    }
+    return { roomId: rooms[0]?.id ?? "", slot: slots[0] ?? "09:00" };
   }
 
   const conflictCount = clashing.size;
@@ -157,7 +234,9 @@ export function AgendaPlayground({
             {/* ------------------------------------------------ board header -- */}
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-rule bg-paper-2 px-4 py-3">
               <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
-                <h3 className="display text-sm text-ink">Agenda · {formatDate(day)}</h3>
+                <h3 className="display text-sm text-ink">
+                  Agenda · {formatDate(day)}
+                </h3>
                 {refusedTalk ? (
                   <Chip tone="red" title="Two talks cannot share one room">
                     <span className="inline-flex items-center gap-1">
@@ -166,10 +245,14 @@ export function AgendaPlayground({
                     </span>
                   </Chip>
                 ) : conflictCount ? (
-                  <Chip tone="amber" title="A speaker is in two rooms at the same time">
+                  <Chip
+                    tone="amber"
+                    title="A speaker is in two rooms at the same time"
+                  >
                     <span className="inline-flex items-center gap-1">
                       <Icon name="warning" size={12} />
-                      {conflictCount} speaker clash{conflictCount === 1 ? "" : "es"}
+                      {conflictCount} speaker clash
+                      {conflictCount === 1 ? "" : "es"}
                     </span>
                   </Chip>
                 ) : (
@@ -180,7 +263,10 @@ export function AgendaPlayground({
                 type="button"
                 disabled={!placedList.length}
                 onClick={() => startTransition(() => setPublished(true))}
-                className={cx(buttonClass("primary", "sm"), "nowrap-affordance")}
+                className={cx(
+                  buttonClass("primary", "sm"),
+                  "nowrap-affordance",
+                )}
               >
                 Publish agenda
               </button>
@@ -191,41 +277,49 @@ export function AgendaPlayground({
               <div className="shrink-0 border-b border-rule p-3 lg:w-60 lg:border-b-0 lg:border-r">
                 <p className="text-xs font-medium text-ink">Unscheduled</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                  {tray.length} accepted session{tray.length === 1 ? "" : "s"} with no slot. Drag one
-                  onto the grid.
+                  {tray.length} accepted session{tray.length === 1 ? "" : "s"}{" "}
+                  with no slot. Drag one onto the grid.
                 </p>
                 <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
                   {tray.map((talk) => (
                     <li key={talk.id} className="min-w-0">
-                      <ViewTransition name={`talk-${talk.id}`} share="morph" default="none">
-                        <div
-                          draggable
-                          onDragStart={() => setDragging(talk.id)}
-                          onDragEnd={() => {
-                            setDragging(null);
-                            setHovered(null);
-                          }}
-                          className={cx(
-                            "hm-grab rounded-lg border border-rule bg-paper p-2 shadow-[var(--shadow-card)]",
-                            dragging === talk.id && "hm-dragging",
-                          )}
-                          style={{
-                            borderLeftWidth: 3,
-                            borderLeftColor: talk.trackColor ?? "var(--color-rule-2)",
-                          }}
-                        >
-                          <p className="line-clamp-2 text-xs font-medium text-ink">{talk.title}</p>
-                          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                            {[talk.format, `${talk.durationMinutes} min`]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </p>
+                      <div
+                        draggable
+                        onDragStart={() => setDragging(talk.id)}
+                        onDragEnd={() => {
+                          setDragging(null);
+                          setHovered(null);
+                        }}
+                        className={cx(
+                          "hm-grab rounded-lg border border-rule bg-paper p-2 shadow-[var(--shadow-card)]",
+                          dragging === talk.id && "hm-dragging",
+                        )}
+                        style={{
+                          borderLeftWidth: 3,
+                          borderLeftColor:
+                            talk.trackColor ?? "var(--color-rule-2)",
+                          viewTransitionName: `talk-${talk.id}`,
+                        }}
+                      >
+                        <p className="line-clamp-2 text-xs font-medium text-ink">
+                          {talk.title}
+                        </p>
+                        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                          {[talk.format, `${talk.durationMinutes} min`]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
 
-                          {/* The pointer-free path, and the one the real board also
+                        {/* The pointer-free path, and the one the real board also
                               ships (R-AGN-3): a native disclosure, two selects. */}
-                          <PlaceMenu talk={talk} rooms={rooms} slots={slots} onPlace={place} />
-                        </div>
-                      </ViewTransition>
+                        <PlaceMenu
+                          talk={talk}
+                          rooms={rooms}
+                          slots={slots}
+                          onPlace={place}
+                          preset={freeSlotFor(talk)}
+                        />
+                      </div>
                     </li>
                   ))}
                   {!tray.length ? (
@@ -280,7 +374,9 @@ export function AgendaPlayground({
                             setHovered(key);
                           }}
                           onDragLeave={() =>
-                            setHovered((current) => (current === key ? null : current))
+                            setHovered((current) =>
+                              current === key ? null : current,
+                            )
                           }
                           onDrop={(event) => {
                             event.preventDefault();
@@ -288,11 +384,15 @@ export function AgendaPlayground({
                             if (dragging) place(dragging, room.id, slot);
                             setDragging(null);
                           }}
-                          style={{ gridColumn: roomIndex + 2, gridRow: slotIndex + 2 }}
+                          style={{
+                            gridColumn: roomIndex + 2,
+                            gridRow: slotIndex + 2,
+                          }}
                           className={cx(
                             "rounded-md border border-dashed border-transparent bg-paper-2/60 transition-colors duration-[120ms] ease-out",
                             !taken && hovered === key && "dropzone-active",
-                            flash === key && "border-destructive bg-danger-soft",
+                            flash === key &&
+                              "border-destructive bg-danger-soft",
                           )}
                         />
                       );
@@ -301,11 +401,16 @@ export function AgendaPlayground({
 
                   {/* Placed talks, laid over their cells with a real row span. */}
                   {placedList.map(({ talk, at }) => {
-                    const roomIndex = rooms.findIndex((room) => room.id === at.roomId);
+                    const roomIndex = rooms.findIndex(
+                      (room) => room.id === at.roomId,
+                    );
                     const slotIndex = slots.indexOf(at.slot);
                     if (roomIndex < 0 || slotIndex < 0) return null;
                     const clash = clashing.has(talk.id);
-                    const rows = Math.min(spanOf(talk), slots.length - slotIndex);
+                    const rows = Math.min(
+                      spanOf(talk),
+                      slots.length - slotIndex,
+                    );
                     return (
                       <div
                         key={talk.id}
@@ -328,61 +433,62 @@ export function AgendaPlayground({
                         onDrop={(event) => {
                           event.preventDefault();
                           setHovered(null);
-                          if (dragging && dragging !== talk.id) place(dragging, at.roomId, at.slot);
+                          if (dragging && dragging !== talk.id)
+                            place(dragging, at.roomId, at.slot);
                           setDragging(null);
                         }}
                         className="min-w-0 p-px"
                       >
-                        <ViewTransition name={`talk-${talk.id}`} share="morph" default="none">
-                          <div
-                            draggable
-                            onDragStart={() => setDragging(talk.id)}
-                            onDragEnd={() => setDragging(null)}
-                            className={cx(
-                              "hm-grab group/card relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border bg-paper px-1.5 py-1 shadow-[var(--shadow-card)]",
-                              clash ? "border-warn/50" : "border-rule",
-                              dragging === talk.id && "hm-dragging",
-                              // Refusal is signalled before the drop, not only after
-                              // it: hovering a foreign card over this slot marks it.
-                              dragging &&
-                                dragging !== talk.id &&
-                                hovered === `${at.roomId}-${at.slot}` &&
-                                "outline outline-2 outline-offset-1 outline-destructive",
-                            )}
-                            style={{
-                              borderLeftWidth: 3,
-                              borderLeftColor: talk.trackColor ?? "var(--color-rule-2)",
-                            }}
-                          >
-                            {/* A one-slot card has room for one line of title and
+                        <div
+                          draggable
+                          onDragStart={() => setDragging(talk.id)}
+                          onDragEnd={() => setDragging(null)}
+                          className={cx(
+                            "hm-grab group/card relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border bg-paper px-1.5 py-1 shadow-[var(--shadow-card)]",
+                            clash ? "border-warn/50" : "border-rule",
+                            dragging === talk.id && "hm-dragging",
+                            // Refusal is signalled before the drop, not only after
+                            // it: hovering a foreign card over this slot marks it.
+                            dragging &&
+                              dragging !== talk.id &&
+                              hovered === `${at.roomId}-${at.slot}` &&
+                              "outline outline-2 outline-offset-1 outline-destructive",
+                          )}
+                          style={{
+                            borderLeftWidth: 3,
+                            borderLeftColor:
+                              talk.trackColor ?? "var(--color-rule-2)",
+                            viewTransitionName: `talk-${talk.id}`,
+                          }}
+                        >
+                          {/* A one-slot card has room for one line of title and
                                 its time; a longer talk gets its whole span. */}
-                            <p
-                              className={cx(
-                                "text-[11px] font-semibold leading-tight text-ink",
-                                rows > 1 ? "line-clamp-2" : "truncate",
-                              )}
-                            >
-                              {clash ? (
-                                <span
-                                  aria-hidden
-                                  className="mr-1 inline-block size-1.5 rounded-full bg-warn align-middle"
-                                />
-                              ) : null}
-                              {talk.title}
-                            </p>
-                            <p className="wordmark tnum mt-auto truncate text-[10px] leading-tight text-muted-foreground">
-                              {at.slot} · {talk.speakers}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => unplace(talk.id)}
-                              aria-label={`Unschedule ${talk.title}`}
-                              className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-md text-muted-foreground opacity-0 transition-opacity duration-[120ms] ease-out hover:bg-paper-3 hover:text-ink focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus group-hover/card:opacity-100"
-                            >
-                              <Icon name="close" size={12} />
-                            </button>
-                          </div>
-                        </ViewTransition>
+                          <p
+                            className={cx(
+                              "text-[11px] font-semibold leading-tight text-ink",
+                              rows > 1 ? "line-clamp-2" : "truncate",
+                            )}
+                          >
+                            {clash ? (
+                              <span
+                                aria-hidden
+                                className="mr-1 inline-block size-1.5 rounded-full bg-warn align-middle"
+                              />
+                            ) : null}
+                            {talk.title}
+                          </p>
+                          <p className="wordmark tnum mt-auto truncate text-[10px] leading-tight text-muted-foreground">
+                            {at.slot} · {talk.speakers}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => unplace(talk.id)}
+                            aria-label={`Unschedule ${talk.title}`}
+                            className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-md text-muted-foreground opacity-0 transition-opacity duration-[120ms] ease-out hover:bg-paper-3 hover:text-ink focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus group-hover/card:opacity-100"
+                          >
+                            <Icon name="close" size={12} />
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -397,26 +503,36 @@ export function AgendaPlayground({
                 >
                   {refusedTalk ? (
                     <>
-                      <Icon name="error" size={13} className="mt-px shrink-0 text-destructive" />
+                      <Icon
+                        name="error"
+                        size={13}
+                        className="mt-px shrink-0 text-destructive"
+                      />
                       <span className="text-destructive">
-                        <span className="font-medium">Blocked.</span> “{refusedTalk}” already has
-                        that room. Two talks in one room is never right, so the board refuses it
-                        instead of warning you.
+                        <span className="font-medium">Blocked.</span> “
+                        {refusedTalk}” already has that room. Two talks in one
+                        room is never right, so the board refuses it instead of
+                        warning you.
                       </span>
                     </>
                   ) : conflictCount ? (
                     <>
-                      <Icon name="warning" size={13} className="mt-px shrink-0 text-warn" />
+                      <Icon
+                        name="warning"
+                        size={13}
+                        className="mt-px shrink-0 text-warn"
+                      />
                       <span className="text-warn">
-                        <span className="font-medium">Flagged.</span> {clashName} is now in two rooms
-                        at once. A short overlap between rooms can be deliberate, so this one is
-                        flagged rather than blocked.
+                        <span className="font-medium">Flagged.</span>{" "}
+                        {clashName} is now in two rooms at once. A short overlap
+                        between rooms can be deliberate, so this one is flagged
+                        rather than blocked.
                       </span>
                     </>
                   ) : (
                     <span className="text-muted-foreground">
-                      Drag a talk into a slot — then try dropping one on top of another, or putting
-                      the same speaker in two rooms at once.
+                      Drag a talk into a slot — then try dropping one on top of
+                      another, or putting the same speaker in two rooms at once.
                     </span>
                   )}
                 </p>
@@ -435,14 +551,17 @@ function PlaceMenu({
   rooms,
   slots,
   onPlace,
+  preset,
 }: {
   talk: DemoTalk;
   rooms: DemoRoom[];
   slots: string[];
   onPlace: (talkId: string, roomId: string, slot: string) => void;
+  /** Where this talk would fit right now. */
+  preset: { roomId: string; slot: string };
 }) {
-  const [roomId, setRoomId] = useState(rooms[0]?.id ?? "");
-  const [slot, setSlot] = useState(slots[0] ?? "09:00");
+  const [roomId, setRoomId] = useState(preset.roomId);
+  const [slot, setSlot] = useState(preset.slot);
   const selectClass =
     "h-8 w-full min-w-0 rounded-input border border-input bg-paper px-2 text-[11px] text-ink";
 
@@ -479,7 +598,10 @@ function PlaceMenu({
         <button
           type="button"
           onClick={() => onPlace(talk.id, roomId, slot)}
-          className={cx(buttonClass("secondary", "sm"), "nowrap-affordance w-full")}
+          className={cx(
+            buttonClass("secondary", "sm"),
+            "nowrap-affordance w-full",
+          )}
         >
           Place
         </button>
@@ -503,7 +625,8 @@ function PublishedView({
   day: string;
   onReset: () => void;
 }) {
-  const roomName = (id: string) => rooms.find((room) => room.id === id)?.name ?? "";
+  const roomName = (id: string) =>
+    rooms.find((room) => room.id === id)?.name ?? "";
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-rule bg-paper-2 px-4 py-3">
@@ -538,14 +661,21 @@ function PublishedView({
 
       <ol className="divide-y divide-rule">
         {placed.map(({ talk, at }) => (
-          <li key={talk.id} className="flex min-w-0 items-start gap-3 px-4 py-3">
+          <li
+            key={talk.id}
+            className="flex min-w-0 items-start gap-3 px-4 py-3"
+          >
             <span className="wordmark tnum w-12 shrink-0 pt-0.5 text-xs text-muted-foreground">
               {at.slot}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-ink">{talk.title}</span>
+              <span className="block text-sm font-medium text-ink">
+                {talk.title}
+              </span>
               <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                {[roomName(at.roomId), talk.speakers, talk.track].filter(Boolean).join(" · ")}
+                {[roomName(at.roomId), talk.speakers, talk.track]
+                  .filter(Boolean)
+                  .join(" · ")}
               </span>
             </span>
           </li>
@@ -553,8 +683,9 @@ function PublishedView({
       </ol>
 
       <p className="border-t border-rule px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-        This is the attendee&rsquo;s view of {formatDate(day)} — no login, an <code>.ics</code> feed
-        per speaker, and a personal schedule anyone can export.
+        This is the attendee&rsquo;s view of {formatDate(day)} — no login, an{" "}
+        <code>.ics</code> feed per speaker, and a personal schedule anyone can
+        export.
       </p>
     </div>
   );
