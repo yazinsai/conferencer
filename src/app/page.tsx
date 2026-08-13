@@ -11,6 +11,8 @@ import { MarketingNav } from "@/components/marketing/nav";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Band, Faq, Shot } from "@/components/marketing/pieces";
+import { AgendaPlayground } from "@/components/marketing/demo/agenda-playground";
+import { landingDemo } from "@/lib/demo-conference";
 
 /* Hallmark · genre: modern-minimal · macrostructure: 05 Workbench ·
  * design-system: design.md · designed-as-app
@@ -421,6 +423,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 export default function HomePage() {
   const event = defaultEvent();
   const form = event ? defaultForm(event.id) : undefined;
+  const demo = landingDemo();
 
   // Every figure on this page is read out of the database at request time. When
   // the database is empty they render as em dashes with the same label — a
@@ -507,13 +510,11 @@ export default function HomePage() {
           </div>
 
           <div className="reveal min-w-0" style={{ ["--i" as string]: 2 }}>
-            <Shot
-              src="/screens/dashboard.webp"
-              alt="The organizer dashboard: 274 days until the event opens, then counts for submissions, accepted speakers, sessions scheduled and outstanding tasks."
-              caption="The organizer's view of the demo conference, on the day this was captured."
-              priority
-              width={1040}
-              height={680}
+            <AgendaPlayground
+              talks={demo.tray}
+              rooms={demo.rooms}
+              slots={demo.slots}
+              day={demo.day}
             />
           </div>
         </div>
