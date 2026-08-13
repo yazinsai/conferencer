@@ -538,7 +538,10 @@ export function Td({
   return (
     <TableCell
       colSpan={colSpan}
-      className={cn("border-b border-rule/70 px-3 py-2.5 align-top", className)}
+      className={cn(
+        "whitespace-normal border-b border-rule/70 px-3 py-2.5 align-middle",
+        className,
+      )}
     >
       {children}
     </TableCell>
