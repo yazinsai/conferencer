@@ -19,9 +19,15 @@ export function DecisionsDemo({ submissions }: { submissions: DemoSubmission[] }
   const [accepted, setAccepted] = useState<string[]>([]);
   const [preview, setPreview] = useState(0);
 
-  const chosen = submissions.filter((row) => picked.includes(row.id));
+  // While rows are ticked the panel previews what *would* go out; once they are
+  // accepted it keeps showing what *did*. Clearing it on accept threw away the
+  // whole point of the tile at the exact moment the reader had earned it.
+  const chosen = picked.length
+    ? submissions.filter((row) => picked.includes(row.id))
+    : submissions.filter((row) => accepted.includes(row.id));
   const previewing = chosen[Math.min(preview, Math.max(chosen.length - 1, 0))];
   const allPicked = picked.length === submissions.length;
+  const sent = !picked.length && accepted.length > 0;
 
   function toggle(id: string) {
     setPicked((current) =>
@@ -114,7 +120,9 @@ export function DecisionsDemo({ submissions }: { submissions: DemoSubmission[] }
       {/* ------------------------------------------------------------ email -- */}
       <div className="min-w-0 overflow-hidden rounded-card border border-rule bg-paper">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-rule bg-paper-2 px-3 py-2">
-          <p className="text-[11px] font-medium text-ink">Acceptance email</p>
+          <p className="text-[11px] font-medium text-ink">
+            {sent ? `Sent to ${chosen.length}` : "Acceptance email"}
+          </p>
           {chosen.length > 1 ? (
             <span className="flex items-center gap-1">
               <button
@@ -157,8 +165,9 @@ export function DecisionsDemo({ submissions }: { submissions: DemoSubmission[] }
               we need your bio, a headshot and your slides.
             </p>
             <p className="mt-3 border-t border-rule pt-2 text-[11px] text-muted-foreground">
-              Merge fields are filled per recipient, so you check the letters rather than the
-              template.
+              {sent
+                ? "Accepting also opens each speaker's portal and assigns their tasks."
+                : "Merge fields are filled per recipient, so you check the letters rather than the template."}
             </p>
           </div>
         ) : (
