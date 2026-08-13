@@ -140,11 +140,9 @@ export default async function PortalTaskDetail({
                 assignment.accepted_types || "pdf, images, slides, documents"
               } · maximum ${assignment.max_size_mb} MB per file.`}
             />
-            <form
-              action={uploadTaskFileAction}
-              encType="multipart/form-data"
-              className="space-y-3 p-4"
-            >
+            {/* No encType: a function action already posts multipart, and
+                setting it explicitly makes React warn that it is overridden. */}
+            <form action={uploadTaskFileAction} className="space-y-3 p-4">
               <input type="hidden" name="assignment_id" value={assignment.id} />
               <div>
                 <label htmlFor="file" className="block text-sm font-medium text-ink-2">
