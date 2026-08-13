@@ -1,27 +1,40 @@
 [
   {
+    "date": "2026-08-13",
+    "scope": "marketing",
+    "macrostructure": "01 Bento Grid — live product tiles (landing) · 05 Workbench (/vs)",
+    "theme": "studied-DNA (design.md locked)",
+    "genre": "modern-minimal",
+    "nav": "N1b (locked)",
+    "footer": "Ft5 (locked)",
+    "enrichment": "live product tiles — the running product replaces every screenshot on /",
+    "motion": "design.md § Motion · marketing surfaces: 11 itemised primitives (sticky scroll reveal, shared-element morph, crossfade, insert reveal, check draw, count-up, tile lift, drag tilt + the three app primitives)",
+    "design_system": "design.md (amended: Marketing family split, § Live product tiles, § Motion two budgets, § Marketing voice, allowances 9-11)",
+    "brief": "Landing page rebuilt to breathe like the studied reference and to be playable: the agenda board, form builder, submission form, scorecard, decisions table, portal tasks, embeds, public schedule and search all run in the page on the demo conference's own rows. Copy cut to six-word heads and one-sentence ledes."
+  },
+  {
     "date": "2026-08-12",
     "scope": "marketing",
-    "macrostructure": "05 Workbench (landing, simplicity-first re-order) \u00b7 sourced ledger (/vs)",
+    "macrostructure": "05 Workbench (landing, simplicity-first re-order) · sourced ledger (/vs)",
     "theme": "studied-DNA (design.md locked)",
     "genre": "modern-minimal",
     "nav": "N1b (locked)",
     "footer": "Ft5 (locked, extracted to components/marketing/footer.tsx)",
-    "enrichment": "none new \u2014 real product screenshots already in place",
+    "enrichment": "none new — real product screenshots already in place",
     "design_system": "design.md (amended: /compare evidence rule)",
     "brief": "Landing re-focused on simplicity & ease of use (simple by design section, spec sheet as the powerful beat); /vs index + 8 vendor comparison pages built from Firecrawl scrapes of vendor pricing/feature pages"
   },
   {
     "date": "2026-08-11",
     "scope": "app",
-    "macrostructure": "Workbench (marketing) \u00b7 Marquee Hero (public event) \u00b7 Stat-Led (app)",
+    "macrostructure": "Workbench (marketing) · Marquee Hero (public event) · Stat-Led (app)",
     "theme": "studied-DNA",
     "theme_axes": "light paper / grotesk-sans display / neutral accent (ink-as-accent)",
     "genre": "modern-minimal",
-    "nav": "N1b (marketing) \u00b7 N12 (public event) \u00b7 N3 (app)",
-    "footer": "Ft5 (marketing) \u00b7 Ft1 (public event) \u00b7 none (app)",
+    "nav": "N1b (marketing) · N12 (public event) · N3 (app)",
+    "footer": "Ft5 (marketing) · Ft1 (public event) · none (app)",
     "enrichment": "real product screenshots in hairline figures (no re-drawn chrome)",
     "design_system": "design.md",
-    "brief": "Conferencer \u00b7 open-source conference programme management \u2014 product landing page, public conference site and organizer dashboard redesigned from a user-supplied reference DNA"
+    "brief": "Conferencer · open-source conference programme management — product landing page, public conference site and organizer dashboard redesigned from a user-supplied reference DNA"
   }
 ]

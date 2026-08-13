@@ -663,30 +663,52 @@ function PublishedView({
         {placed.map(({ talk, at }) => (
           <li
             key={talk.id}
-            className="flex min-w-0 items-start gap-3 px-4 py-3"
+            className="flex min-w-0 items-stretch gap-3 px-4 py-3"
           >
-            <span className="wordmark tnum w-12 shrink-0 pt-0.5 text-xs text-muted-foreground">
+            <span className="wordmark tnum w-11 shrink-0 pt-0.5 text-xs text-muted-foreground">
               {at.slot}
             </span>
+            {/* The track's own colour, the way a public session card carries it. */}
+            <span
+              aria-hidden
+              className="w-[3px] shrink-0 rounded-full"
+              style={{
+                backgroundColor: talk.trackColor ?? "var(--color-rule-2)",
+              }}
+            />
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-ink">
+              <span className="block text-sm font-medium leading-snug text-ink">
                 {talk.title}
               </span>
-              <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                {[roomName(at.roomId), talk.speakers, talk.track]
-                  .filter(Boolean)
-                  .join(" · ")}
+              <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                <span className="truncate">
+                  {[roomName(at.roomId), talk.speakers]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+                {talk.track ? <Chip tone="slate">{talk.track}</Chip> : null}
               </span>
+            </span>
+            <span className="wordmark tnum shrink-0 self-center text-[10px] text-muted-foreground">
+              {talk.durationMinutes}m
             </span>
           </li>
         ))}
       </ol>
 
-      <p className="border-t border-rule px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-        This is the attendee&rsquo;s view of {formatDate(day)} — no login, an{" "}
-        <code>.ics</code> feed per speaker, and a personal schedule anyone can
-        export.
-      </p>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-rule bg-paper-2 px-4 py-3">
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+          The attendee&rsquo;s view of {formatDate(day)} — no login, and a
+          personal schedule anyone can export.
+        </p>
+        <span className="flex shrink-0 flex-wrap gap-1.5">
+          {["ics", "embed", "json"].map((format) => (
+            <Chip key={format} tone="slate">
+              <span className="wordmark">{format}</span>
+            </Chip>
+          ))}
+        </span>
+      </div>
     </div>
   );
 }
