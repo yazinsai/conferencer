@@ -15,6 +15,7 @@
 
 import { defaultEvent, listLookup } from "@/lib/repo/events";
 import { parseOptions } from "@/lib/fields";
+import { sharedSpeaker } from "@/lib/people";
 import { defaultForm, listQuestions } from "@/lib/repo/forms";
 import { listPlans, listRounds, listScorecard, planProgress } from "@/lib/repo/evaluations";
 import { unscheduledSessions, scheduledSessions } from "@/lib/repo/agenda";
@@ -321,6 +322,29 @@ const firstNameOf = (full: string) => full.trim().split(/\s+/)[0] ?? full;
 const isShowable = (row: { title: string; is_draft: number }) =>
   !row.is_draft && Boolean(row.title?.trim()) && !/^untitled/i.test(row.title);
 
+const sharesSpeaker = (a: string | null, b: string | null) => Boolean(sharedSpeaker(a, b));
+
+/**
+ * Three talks for the hero board, preferring a set where **two of them share a
+ * speaker**.
+ *
+ * The board's second lesson is that one speaker in two rooms at once is *flagged
+ * and allowed*, where two talks in one room is *refused*. With three talks by three
+ * different people that lesson is unreachable, and the panel would be inviting the
+ * reader to try something the data cannot do. The demo conference does have speakers
+ * on more than one accepted session, so pick a pair that does.
+ */
+function pickTray<T extends { id: string; speakers: string | null }>(rows: T[]): T[] {
+  for (let i = 0; i < rows.length; i += 1) {
+    for (let j = i + 1; j < rows.length; j += 1) {
+      if (!sharesSpeaker(rows[i].speakers, rows[j].speakers)) continue;
+      const third = rows.find((row) => row.id !== rows[i].id && row.id !== rows[j].id);
+      return third ? [rows[i], rows[j], third] : [rows[i], rows[j]];
+    }
+  }
+  return rows.slice(0, 3);
+}
+
 /**
  * Server-only. Reads the demo conference for the landing page's playables, and
  * returns the checked-in slice when this instance has no event yet.
@@ -347,7 +371,7 @@ export function landingDemo(): LandingDemo {
     const accepted = unscheduledSessions(event.id).filter(isShowable);
     const alreadyPlaced = scheduledSessions(event.id).filter(isShowable);
     const source = accepted.length >= 3 ? accepted : [...accepted, ...alreadyPlaced];
-    const tray: DemoTalk[] = source.slice(0, 3).map((row) => ({
+    const tray: DemoTalk[] = pickTray(source).map((row) => ({
       id: row.id,
       title: row.title,
       speakers: row.speakers ?? row.submitter_name ?? "",

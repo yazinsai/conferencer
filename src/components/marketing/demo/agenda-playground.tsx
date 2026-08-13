@@ -6,6 +6,7 @@ import { Chip, buttonClass, cx } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import { formatDate } from "@/lib/datetime";
 import type { DemoRoom, DemoTalk } from "@/lib/demo-conference";
+import { sharedSpeaker } from "@/lib/people";
 
 import { ViewTransition } from "./view-transition";
 
@@ -86,12 +87,15 @@ export function AgendaPlayground({
    * refusing it, so this one is a warning and the talk stays where it was put.
    */
   const clashing = useMemo(() => {
-    const flagged = new Set<string>();
+    const flagged = new Map<string, string>();
     for (const a of placedList) {
       for (const b of placedList) {
         if (a.talk.id === b.talk.id) continue;
-        if (!a.talk.speakers || a.talk.speakers !== b.talk.speakers) continue;
-        if (a.at.slot === b.at.slot && a.at.roomId !== b.at.roomId) flagged.add(a.talk.id);
+        if (a.at.slot !== b.at.slot || a.at.roomId === b.at.roomId) continue;
+        // Per person, not per session: a co-authored talk and a solo talk clash if
+        // they share one speaker, which is how the real conflict check reads it.
+        const shared = sharedSpeaker(a.talk.speakers, b.talk.speakers);
+        if (shared) flagged.set(a.talk.id, shared);
       }
     }
     return flagged;
@@ -130,7 +134,7 @@ export function AgendaPlayground({
   }
 
   const conflictCount = clashing.size;
-  const clashName = [...clashing].map((id) => byId.get(id)?.speakers).filter(Boolean)[0];
+  const clashName = [...clashing.values()][0];
 
   return (
     <ViewTransition
@@ -309,6 +313,24 @@ export function AgendaPlayground({
                           gridColumn: roomIndex + 2,
                           gridRow: `${slotIndex + 2} / span ${rows}`,
                         }}
+                        // A placed card is painted over the drop cell beneath it, so
+                        // without these the browser never fires a drop on an
+                        // occupied slot: HTML5 drag needs preventDefault on dragover
+                        // to allow one at all. The refusal is the most important
+                        // thing this panel demonstrates, and it was silently
+                        // unreachable by pointer — the card simply stayed put with
+                        // no explanation.
+                        onDragOver={(event) => {
+                          if (!dragging || dragging === talk.id) return;
+                          event.preventDefault();
+                          setHovered(`${at.roomId}-${at.slot}`);
+                        }}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          setHovered(null);
+                          if (dragging && dragging !== talk.id) place(dragging, at.roomId, at.slot);
+                          setDragging(null);
+                        }}
                         className="min-w-0 p-px"
                       >
                         <ViewTransition name={`talk-${talk.id}`} share="morph" default="none">
@@ -320,6 +342,12 @@ export function AgendaPlayground({
                               "hm-grab group/card relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border bg-paper px-1.5 py-1 shadow-[var(--shadow-card)]",
                               clash ? "border-warn/50" : "border-rule",
                               dragging === talk.id && "hm-dragging",
+                              // Refusal is signalled before the drop, not only after
+                              // it: hovering a foreign card over this slot marks it.
+                              dragging &&
+                                dragging !== talk.id &&
+                                hovered === `${at.roomId}-${at.slot}` &&
+                                "outline outline-2 outline-offset-1 outline-destructive",
                             )}
                             style={{
                               borderLeftWidth: 3,
