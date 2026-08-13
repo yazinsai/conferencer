@@ -203,8 +203,10 @@ export function SpeakerForm({
   const tags = contact ? readJson<string[]>(contact.tags, []) : [];
   const isNew = !contact;
 
+  // No encType on the form: a function action already posts multipart, and
+  // setting it explicitly makes React warn that it will be overridden.
   return (
-    <form action={saveSpeakerAction} className="space-y-4" encType="multipart/form-data">
+    <form action={saveSpeakerAction} className="space-y-4">
       <input type="hidden" name="slug" value={slug} />
       {contact ? <input type="hidden" name="contact_id" value={contact.id} /> : null}
 
