@@ -22,7 +22,7 @@ scenarios:
     persona: organizer
     steps: |
       1. Navigate to the clone's base URL. Sign in as organizer Minerva McGonagall
-         (minerva.organizer@sbek-test.example.com, fixture password); if no account
+         (demo-organizer@example.com, fixture password); if no account
          exists yet, sign up with the organizer fixture identity. Try obvious
          organizer routes: /admin, /dashboard, /organizer, or nav links.
       2. Look for an ORGANIZATION-LEVEL speaker database area that lives outside any
@@ -97,7 +97,7 @@ scenarios:
     name: Source a speaker through the pipeline and reuse across events
     persona: organizer
     steps: |
-      1. Sign in as organizer Minerva McGonagall (minerva.organizer@sbek-test.example.com,
+      1. Sign in as organizer Minerva McGonagall (demo-organizer@example.com,
          fixture password) — the same account used in CRM-S1. If the directory from
          CRM-S1 is empty or missing, first create the 3 contacts from the
          speakers.csv fixture data (Hermione Granger, Harry Potter, Fleur Delacour) so

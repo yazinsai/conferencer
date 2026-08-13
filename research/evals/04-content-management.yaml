@@ -253,7 +253,7 @@ rubric:
     scenarios: [CNT-S3]
     pass_criteria: A bulk reminder action is available from the dashboard for incomplete/outstanding tasks (with or without a template picker) and the UI confirms the send (toast, dialog, or sent count). Actual delivery is verified manually.
     evidence: Screenshot of the reminder action being invoked on the filtered incomplete set and of the send confirmation.
-    manual_instructions: Check the inboxes for the fixture speaker addresses (Hermione Granger and Harry Potter at sbek-test.example.com) or, if those are not real mailboxes, the clone's outbound-mail log / mail-catcher. Confirm each speaker with outstanding tasks received a reminder naming the outstanding task ("Upload Final Headshot (print quality)" and, for Harry, "Upload Session Presentation") and its due date.
+    manual_instructions: Check the inboxes for the fixture speaker addresses (Hermione Granger at demo-speaker@example.com and Harry Potter at demo-speaker2@example.com) or, if those are not real mailboxes, the clone's outbound-mail log / mail-catcher. Confirm each speaker with outstanding tasks received a reminder naming the outstanding task ("Upload Final Headshot (print quality)" and, for Harry, "Upload Session Presentation") and its due date.
   - id: CNT-09
     criterion: Organizer can edit a session's title and abstract from a central admin view and the changes persist.
     weight: 2

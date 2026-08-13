@@ -26,7 +26,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
   const demo = all<Demo>(
     `SELECT u.email, u.first_name, u.last_name, m.role
        FROM users u JOIN event_memberships m ON m.user_id = u.id
-      WHERE u.email LIKE 'sbek-%@example.com'
+      WHERE u.email LIKE 'demo-%@example.com'
       GROUP BY u.id
       ORDER BY CASE m.role WHEN 'organizer' THEN 0 WHEN 'reviewer' THEN 1 ELSE 2 END, u.email`,
   );

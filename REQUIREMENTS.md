@@ -1029,10 +1029,10 @@ Workshop (120 min) · Panel (45 min)
 
 | Role | Name | Email | Password |
 | --- | --- | --- | --- |
-| Organizer | Minerva McGonagall | `sbek-organizer@example.com` | `SbekTest!2027-org` |
-| Lead Speaker | Hermione Granger | `sbek-speaker@example.com` | `SbekTest!2027-spk` |
-| Speaker | Harry Potter | `sbek-speaker2@example.com` | `SbekTest!2027-spk2` |
-| Reviewer | Severus Snape | `sbek-reviewer@example.com` | `SbekTest!2027-rev` |
+| Organizer | Minerva McGonagall | `demo-organizer@example.com` | `SbekTest!2027-org` |
+| Lead Speaker | Hermione Granger | `demo-speaker@example.com` | `SbekTest!2027-spk` |
+| Speaker | Harry Potter | `demo-speaker2@example.com` | `SbekTest!2027-spk2` |
+| Reviewer | Severus Snape | `demo-reviewer@example.com` | `SbekTest!2027-rev` |
 
 Hermione: Lead Speaker · Principal Engineer, Hogwarts Buildworks, `@hermionebuilds`, vegetarian, size M.
 Harry: Speaker · Staff Developer Advocate, Order of the Phoenix Labs.

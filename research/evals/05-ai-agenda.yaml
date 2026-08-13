@@ -22,7 +22,7 @@ scenarios:
       1. Navigate to the site root. Find the organizer/admin area -- try obvious
          routes (/admin, /dashboard, /organizer) and nav links labeled Dashboard,
          Admin, Organizer, or Manage Events. If authentication is required, sign in
-         as organizer Minerva McGonagall (minerva.organizer@sbek-test.example.com, fixture
+         as organizer Minerva McGonagall (demo-organizer@example.com, fixture
          password); if that account does not exist yet, sign up with the Minerva
          McGonagall fixture identity.
       2. Open the event "DevFlow Conf 2027" (2027-05-12 to 2027-05-14, Moscone West

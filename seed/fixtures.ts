@@ -60,7 +60,6 @@ export type PersonSeed = {
   first: string;
   last: string;
   email: string;
-  altEmail?: string;
   password?: string;
   role: "organizer" | "reviewer" | "speaker";
   title?: string;
@@ -81,8 +80,7 @@ export const PEOPLE: PersonSeed[] = [
     key: "jordan",
     first: "Minerva",
     last: "McGonagall",
-    email: "sbek-organizer@example.com",
-    altEmail: "minerva.organizer@sbek-test.example.com",
+    email: "demo-organizer@example.com",
     password: "SbekTest!2027-org",
     role: "organizer",
     title: "Event Organizer · Program Director",
@@ -93,8 +91,7 @@ export const PEOPLE: PersonSeed[] = [
     key: "priya",
     first: "Hermione",
     last: "Granger",
-    email: "sbek-speaker@example.com",
-    altEmail: "hermione.speaker@sbek-test.example.com",
+    email: "demo-speaker@example.com",
     password: "SbekTest!2027-spk",
     role: "speaker",
     title: "Lead Speaker · Principal Engineer",
@@ -111,8 +108,7 @@ export const PEOPLE: PersonSeed[] = [
     key: "marcus",
     first: "Harry",
     last: "Potter",
-    email: "sbek-speaker2@example.com",
-    altEmail: "harry.speaker@sbek-test.example.com",
+    email: "demo-speaker2@example.com",
     password: "SbekTest!2027-spk2",
     role: "speaker",
     title: "Speaker · Staff Developer Advocate",
@@ -126,8 +122,7 @@ export const PEOPLE: PersonSeed[] = [
     key: "sam",
     first: "Severus",
     last: "Snape",
-    email: "sbek-reviewer@example.com",
-    altEmail: "severus.reviewer@sbek-test.example.com",
+    email: "demo-reviewer@example.com",
     password: "SbekTest!2027-rev",
     role: "reviewer",
     title: "Reviewer · Program Committee",
@@ -557,7 +552,7 @@ export const OTHER_SUBMISSIONS: Array<SessionSeed & { status: string }> = [
 ];
 
 export const SPEAKERS_CSV = `First Name,Last Name,Email,Job Title,Company,Biography,Speaker Status
-Hermione,Granger,sbek-speaker@example.com,Lead Speaker · Principal Engineer,Hogwarts Buildworks,"Hermione Granger is the Lead Speaker in this demo — a Principal Engineer at Hogwarts Buildworks who leads the build-tooling platform team.",Confirmed
-Harry,Potter,sbek-speaker2@example.com,Speaker · Staff Developer Advocate,Order of the Phoenix Labs,"Harry Potter is the secondary Speaker in this demo — a Staff Developer Advocate focused on AI agents in production.",Confirmed
+Hermione,Granger,demo-speaker@example.com,Lead Speaker · Principal Engineer,Hogwarts Buildworks,"Hermione Granger is the Lead Speaker in this demo — a Principal Engineer at Hogwarts Buildworks who leads the build-tooling platform team.",Confirmed
+Harry,Potter,demo-speaker2@example.com,Speaker · Staff Developer Advocate,Order of the Phoenix Labs,"Harry Potter is the secondary Speaker in this demo — a Staff Developer Advocate focused on AI agents in production.",Confirmed
 Fleur,Delacour,fleur.delacour@example.com,Speaker · Developer Experience Lead,Beauxbatons Cloud,"Fleur Delacour treats platform teams as product teams.",Invited
 `;

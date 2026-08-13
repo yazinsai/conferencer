@@ -63,7 +63,7 @@ scenarios:
     name: Organizer embed generation and data consistency
     persona: organizer
     steps: |
-      1. Navigate to the clone's base URL. Find the organizer/admin entry point — try nav links (Sign in, Log in, Organizer, Admin, Dashboard) and paths (/admin, /dashboard, /organizer, /login). If the clone offers open signup, sign up as organizer Minerva McGonagall (minerva.organizer@sbek-test.example.com) with the fixture password; otherwise sign in with the fixture organizer credentials.
+      1. Navigate to the clone's base URL. Find the organizer/admin entry point — try nav links (Sign in, Log in, Organizer, Admin, Dashboard) and paths (/admin, /dashboard, /organizer, /login). If the clone offers open signup, sign up as organizer Minerva McGonagall (demo-organizer@example.com) with the fixture password; otherwise sign in with the fixture organizer credentials.
       2. Open the event workspace for "DevFlow Conf 2027" if it exists. If the account is empty, note that and continue — the embed area's chrome can still be evaluated; only create a minimal event from the fixture data if the clone requires one to reach the embeds area and creation takes under a minute.
       3. Find the embed/share/publish area — it may be called Embeds, Widgets, Share, Publish, Website, Integrations, or live under a Deliver-style module. Screenshot the area's landing/list screen.
       4. Start creating a new embed (Add Embed / New Widget / similar). Record which widget types are offered (looking for equivalents of the five: sessions list, speakers list, agenda, schedule itinerary, speaker gallery) and which output formats (styled HTML/script tag, basic HTML, JSON, XML, iCal). Screenshot the type/format pickers.

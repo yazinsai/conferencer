@@ -14,16 +14,10 @@ const BASE = process.env.SMOKE_BASE ?? "http://localhost:3000";
 const SLUG = process.env.SMOKE_SLUG ?? "devflow-conf-2027";
 
 const ACCOUNTS = {
-  organizer: { email: "sbek-organizer@example.com", password: "SbekTest!2027-org" },
-  organizerAlt: {
-    email: "minerva.organizer@sbek-test.example.com",
-    password: "SbekTest!2027-org",
-  },
-  speaker: { email: "sbek-speaker@example.com", password: "SbekTest!2027-spk" },
-  speakerAlt: { email: "hermione.speaker@sbek-test.example.com", password: "SbekTest!2027-spk" },
-  speaker2: { email: "sbek-speaker2@example.com", password: "SbekTest!2027-spk2" },
-  reviewer: { email: "sbek-reviewer@example.com", password: "SbekTest!2027-rev" },
-  reviewerAlt: { email: "severus.reviewer@sbek-test.example.com", password: "SbekTest!2027-rev" },
+  organizer: { email: "demo-organizer@example.com", password: "SbekTest!2027-org" },
+  speaker: { email: "demo-speaker@example.com", password: "SbekTest!2027-spk" },
+  speaker2: { email: "demo-speaker2@example.com", password: "SbekTest!2027-spk2" },
+  reviewer: { email: "demo-reviewer@example.com", password: "SbekTest!2027-rev" },
 };
 
 let passed = 0;

@@ -150,7 +150,6 @@ CREATE TABLE IF NOT EXISTS contacts (
   first_name    TEXT NOT NULL DEFAULT '',
   last_name     TEXT NOT NULL DEFAULT '',
   email         TEXT NOT NULL COLLATE NOCASE,
-  alt_email     TEXT COLLATE NOCASE,   -- second login that maps to the same person
   headshot_url  TEXT,
   biography     TEXT,
   job_title     TEXT,

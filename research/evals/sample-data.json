@@ -27,8 +27,7 @@
   "identities": {
     "organizer": {
       "name": "Minerva McGonagall",
-      "email": "sbek-organizer@example.com",
-      "alt_email": "minerva.organizer@sbek-test.example.com",
+      "email": "demo-organizer@example.com",
       "password": "SbekTest!2027-org",
       "role": "Event Organizer / Admin",
       "title": "Event Organizer · Program Director",
@@ -36,8 +35,7 @@
     },
     "speaker": {
       "name": "Hermione Granger",
-      "email": "sbek-speaker@example.com",
-      "alt_email": "hermione.speaker@sbek-test.example.com",
+      "email": "demo-speaker@example.com",
       "password": "SbekTest!2027-spk",
       "role": "Lead Speaker",
       "title": "Lead Speaker · Principal Engineer",
@@ -50,8 +48,7 @@
     },
     "speaker2": {
       "name": "Harry Potter",
-      "email": "sbek-speaker2@example.com",
-      "alt_email": "harry.speaker@sbek-test.example.com",
+      "email": "demo-speaker2@example.com",
       "password": "SbekTest!2027-spk2",
       "role": "Speaker",
       "title": "Speaker · Staff Developer Advocate",
@@ -60,8 +57,7 @@
     },
     "reviewer": {
       "name": "Severus Snape",
-      "email": "sbek-reviewer@example.com",
-      "alt_email": "severus.reviewer@sbek-test.example.com",
+      "email": "demo-reviewer@example.com",
       "password": "SbekTest!2027-rev",
       "role": "Reviewer · Program Committee",
       "note": "Demo reviewer — scores abstracts and leaves actionable comments."
@@ -113,5 +109,5 @@
     "slides": "fixtures/slides.pdf",
     "speakers_csv": "fixtures/speakers.csv"
   },
-  "_email_note": "Placeholder addresses. To exercise email verification or magic-link flows, set personaEmails in evalconfig.json to inboxes you control (plus-addressing gives each persona a distinct account on one inbox, e.g. you+sbek-speaker@your-domain.com). Those values override the emails here at run time."
+  "_email_note": "Placeholder addresses. To exercise email verification or magic-link flows, set personaEmails in evalconfig.json to inboxes you control (plus-addressing gives each persona a distinct account on one inbox, e.g. you+demo-speaker@your-domain.com). Those values override the emails here at run time."
 }

@@ -28,10 +28,10 @@ scenarios:
          Proposals, and may live behind the event "DevFlow Conf 2027" if the site hosts
          multiple events. CHAINED-RUN PRECONDITION: if the portal shows a CLOSED state
          (area 01 deliberately closes the CFP at its end), first sign in as the organizer
-         Minerva McGonagall (minerva.organizer@sbek-test.example.com, fixture password), move
+         Minerva McGonagall (demo-organizer@example.com, fixture password), move
          the CFP close date back into the future (e.g. 2027-04-30), save, sign out, and
          return here before continuing.
-      2. Sign up as the speaker identity Hermione Granger (hermione.speaker@sbek-test.example.com,
+      2. Sign up as the speaker identity Hermione Granger (demo-speaker@example.com,
          fixture password, title/company/bio from the sample data). If the account already
          exists (e.g. created in area 01), sign in instead.
       3. Ensure the "Taming 40-Minute CI: Incremental Builds at Monorepo Scale" proposal
@@ -41,7 +41,7 @@ scenarios:
          (format Talk, track Platform & Infra, abstract and audience-level text from the
          fixture). Either way, look for an add co-author / co-presenter / additional
          speaker / participant control. If present, add Harry Potter from the sample data
-         (harry.speaker@sbek-test.example.com, Staff Developer Advocate at Order of the Phoenix
+         (demo-speaker2@example.com, Staff Developer Advocate at Order of the Phoenix
          Labs) and assign him a role if role labels are offered (Co-author, Co-speaker,
          Co-presenter, or similar). Screenshot the form or edited submission INCLUDING the
          participants/co-author section before saving/submitting, then screenshot the
@@ -69,7 +69,7 @@ scenarios:
     steps: |
       1. Navigate to the target site and find the organizer/admin area — try obvious nav
          links first, then routes like /admin, /dashboard, /organizer. Sign up as Minerva
-         McGonagall (minerva.organizer@sbek-test.example.com, fixture password) if the site
+         McGonagall (demo-organizer@example.com, fixture password) if the site
          has open signup; otherwise sign in with the fixture organizer credentials.
       2. Locate the event "DevFlow Conf 2027". If it does not exist, create it from the
          sample data (2027-05-12 to 2027-05-14, Moscone West SF, tracks AI Engineering /
@@ -92,7 +92,7 @@ scenarios:
          round a pool distinct from round 1 (it may be empty or contain only the
          organizer). Save everything, then reload the evaluation-plan page and screenshot
          it showing both rounds with their distinct names, date ranges, and scorecards.
-      6. Add Severus Snape (severus.reviewer@sbek-test.example.com, fixture identity) as a
+      6. Add Severus Snape (demo-reviewer@example.com, fixture identity) as a
          reviewer in the Round 1 "Initial Review" pool — via invite reviewer, add reviewer,
          or team/committee management. If an invitation link is displayed on screen,
          record it as an observation. Screenshot the reviewer-pool state showing Severus
@@ -129,11 +129,11 @@ scenarios:
     persona: reviewer
     steps: |
       1. Navigate to the target site and sign in as Severus Snape
-         (severus.reviewer@sbek-test.example.com, fixture password). If no account exists yet,
+         (demo-reviewer@example.com, fixture password). If no account exists yet,
          sign up with the fixture reviewer identity, or use any reviewer-invitation link
          that was displayed on screen during ABS-S2. If the reviewer portal is
          magic-link-only (no reviewer password sign-in or signup anywhere), sign in as
-         the organizer Minerva McGonagall (minerva.organizer@sbek-test.example.com, fixture
+         the organizer Minerva McGonagall (demo-organizer@example.com, fixture
          password), look for a copyable reviewer-portal link or a "view as reviewer" /
          impersonate control for Severus Snape, record it, sign out, and open that link.
          If no such on-screen path exists either, record that reviewer access requires
@@ -167,7 +167,7 @@ scenarios:
          fit for the AI Engineering track." Screenshot, submit, and screenshot the queue
          showing both items complete.
       7. Sign out. Sign in as the organizer Minerva McGonagall
-         (minerva.organizer@sbek-test.example.com, fixture password) and open the review
+         (demo-organizer@example.com, fixture password) and open the review
          results / scores / decisions area for DevFlow Conf 2027.
       8. Verify an aggregate (average/total) score is displayed per submission. Record the
          displayed aggregates for both reviewed submissions. Note for the judge: with
@@ -275,7 +275,7 @@ rubric:
     scenarios: [ABS-S2]
     pass_criteria: A reminder/nudge action is available against the lagging reviewer (Severus at 0 of 2 complete), and triggering it reports success (confirmation toast, sent status, or log entry).
     evidence: Screenshot of the reminder control and the sent confirmation from ABS-S2 step 9.
-    manual_instructions: Check the severus.reviewer@sbek-test.example.com inbox (or the clone's outbound-mail log if it exposes one) and confirm a reminder email arrived referencing the pending reviews.
+    manual_instructions: Check the demo-reviewer@example.com inbox (or the clone's outbound-mail log if it exposes one) and confirm a reminder email arrived referencing the pending reviews.
   - id: ABS-10
     criterion: Organizer sees an aggregate score per submission in a results table and can sort submissions by that score.
     weight: 3
