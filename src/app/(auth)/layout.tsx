@@ -9,6 +9,9 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
             Conferencer
           </Link>
           <nav className="flex items-center gap-4 text-sm text-slate-600">
+            <Link href="/demo" className="hover:text-slate-900">
+              Enter demo
+            </Link>
             <Link href="/sign-in" className="hover:text-slate-900">
               Sign in
             </Link>

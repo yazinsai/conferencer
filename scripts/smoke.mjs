@@ -225,6 +225,68 @@ async function main() {
     else fail(`alias ${path}`, `expected redirect, got ${response.status}`);
   }
 
+  section("Crawler front door (GET, no form, no inbox)");
+  {
+    const robots = await anon.request("/robots.txt");
+    const robotsType = robots.headers.get("content-type") ?? "";
+    const robotsBody = await robots.text();
+    if (robots.status === 200 && /text\/plain/i.test(robotsType) && !/<html/i.test(robotsBody)) {
+      ok("robots.txt is text/plain", robotsType);
+    } else {
+      fail("robots.txt is text/plain", `${robots.status} ${robotsType}`);
+    }
+    if (/User-agent:\s*\*/i.test(robotsBody) && /Allow:\s*\//.test(robotsBody) && /\/demo/.test(robotsBody)) {
+      ok("robots.txt allows crawl and points at /demo");
+    } else {
+      fail("robots.txt allows crawl and points at /demo", robotsBody.slice(0, 240));
+    }
+
+    const llms = await anon.request("/llms.txt");
+    const llmsType = llms.headers.get("content-type") ?? "";
+    const llmsBody = await llms.text();
+    if (llms.status === 200 && /text\/plain/i.test(llmsType) && /Follow .*\/demo/i.test(llmsBody)) {
+      ok("llms.txt tells the agent to follow /demo");
+    } else {
+      fail("llms.txt tells the agent to follow /demo", `${llms.status} ${llmsType}`);
+    }
+
+    if (landing?.includes('href="/demo"') || landing?.includes("href=/demo")) {
+      ok("landing page has an <a href=/demo>");
+    } else {
+      fail("landing page has an <a href=/demo>", "no GET demo door on the homepage");
+    }
+
+    const signIn = await anon.get("/sign-in");
+    const hasDemoLink =
+      /href="\/demo(?:\/[a-z0-9]+)?(?:\?[^"]*)?"/.test(signIn.body) ||
+      signIn.body.includes('href="/demo"');
+    const personaPost = /name="email"[^>]*value="demo-|value="demo-[^"]*"[^>]*name="email"/.test(
+      signIn.body,
+    );
+    if (hasDemoLink) ok("sign-in personas are <a href> GET doors");
+    else fail("sign-in personas are <a href> GET doors", "no /demo link on /sign-in");
+    if (!personaPost) ok("sign-in does not POST demo personas");
+    else fail("sign-in does not POST demo personas", "hidden demo email still posted");
+
+    const crawler = new Session("crawler");
+    const knocked = await crawler.request("/demo");
+    if ([303, 302, 307].includes(knocked.status) && crawler.cookies.has("cf_session")) {
+      ok("GET /demo sets a session", String(knocked.status));
+    } else {
+      fail("GET /demo sets a session", `${knocked.status} cookies=${[...crawler.cookies.keys()].join(",")}`);
+    }
+    const inside = await crawler.get("/demo");
+    if (inside.status === 200 && /Dashboard|Submissions/.test(inside.body)) {
+      ok("GET /demo lands inside the organizer product");
+    } else {
+      fail("GET /demo lands inside the organizer product", `status ${inside.status}`);
+    }
+
+    const missing = await anon.get("/this-page-does-not-exist-xyz");
+    if (missing.body.includes('href="/demo"')) ok("404 page links to /demo");
+    else fail("404 page links to /demo", "404 only offered a dead-end");
+  }
+
   section("Public call for speakers");
   const home = await anon.get(`/e/${SLUG}`);
   const formId = /\/submit\/([A-Za-z0-9]+)/.exec(home.body)?.[1];

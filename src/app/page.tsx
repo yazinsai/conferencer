@@ -7,6 +7,7 @@ import { publicSessions, publicSpeakers, statusCounts } from "@/lib/repo/submiss
 import { daysUntil, formatEventDates } from "@/lib/datetime";
 import { COMPARISONS_READ_DATE } from "@/lib/compare";
 import { landingDemo } from "@/lib/demo-conference";
+import { demoEnterHref } from "@/lib/demo-login";
 import { LinkButton } from "@/components/ui";
 import { MarketingNav } from "@/components/marketing/nav";
 import { MarketingFooter } from "@/components/marketing/footer";
@@ -349,9 +350,10 @@ export default function HomePage() {
       }
     : { sessions: "—", speakers: "—", submissions: "—", countdown: "—" };
 
-  const ctaHref = event ? `/e/${event.slug}` : "/sign-up";
-  const ctaLabel = event ? "Open the demo" : "Create an account";
+  const ctaHref = event ? demoEnterHref() : "/sign-up";
+  const ctaLabel = event ? "Enter the live product" : "Create an account";
   const adminHref = demo.slug ? `/admin/e/${demo.slug}` : "/sign-in";
+  const enter = (path: string) => demoEnterHref(path);
 
   const steps: Step[] = [
     {
@@ -363,7 +365,7 @@ export default function HomePage() {
         <Playable
           hint="Reorder a question, make it required, or switch its show-when rule off."
           note="The real builder saves to SQLite and versions the form; this panel keeps its changes in the browser."
-          href={`${adminHref}/forms`}
+          href={enter(`${adminHref}/forms`)}
           hrefLabel="Open the real builder"
         >
           <FormBuilderDemo questions={demo.questions} longFormat={demo.longFormat} />
@@ -399,7 +401,7 @@ export default function HomePage() {
         <Playable
           hint="Score it. The weighted total is computed by the product's own function."
           note="The real scorecard writes each review to the database and moves you to the next assignment."
-          href="/review"
+          href={demoEnterHref("/review", "reviewer")}
           hrefLabel="Open the real queue"
         >
           <ScorecardDemo
@@ -467,10 +469,14 @@ export default function HomePage() {
               style={{ ["--i" as string]: 2 }}
             >
               <LinkButton href={ctaHref} variant="primary" size="lg" className="nowrap-affordance">
-                {event ? "Open the live demo" : "Create an account"}
+                {event ? "Enter the live product" : "Create an account"}
               </LinkButton>
-              <LinkButton href="/sign-in" size="lg" className="nowrap-affordance">
-                Sign in as an organizer
+              <LinkButton
+                href={event ? `/e/${event.slug}` : "/sign-in"}
+                size="lg"
+                className="nowrap-affordance"
+              >
+                {event ? "Public event site" : "Sign in"}
               </LinkButton>
             </div>
 
@@ -489,7 +495,11 @@ export default function HomePage() {
                 className="reveal wordmark mt-3 text-xs leading-relaxed text-muted-foreground"
                 style={{ ["--i" as string]: 4 }}
               >
-                Organizer Minerva McGonagall · demo-organizer@example.com · SbekTest!2027-org
+                Follow{" "}
+                <Link href="/demo" className="underline decoration-rule-2 underline-offset-4">
+                  /demo
+                </Link>{" "}
+                to enter as organizer Minerva McGonagall.
               </p>
             ) : (
               <p
@@ -507,7 +517,7 @@ export default function HomePage() {
             <Playable
               hint="Drag a talk onto the grid, then try dropping one on top of another."
               note="The real board posts to a server action and recomputes conflicts in lib/repo/agenda.ts."
-              href={`${adminHref}/agenda`}
+              href={enter(`${adminHref}/agenda`)}
               hrefLabel="Open the real board"
             >
               <AgendaPlayground
@@ -554,7 +564,7 @@ export default function HomePage() {
           >
             <Playable
               note="The real screen writes the decision, queues the email and opens each speaker's portal."
-              href={`${adminHref}/submissions`}
+              href={enter(`${adminHref}/submissions`)}
               hrefLabel="Open the real table"
             >
               <DecisionsDemo submissions={demo.submissions} />
@@ -567,7 +577,7 @@ export default function HomePage() {
           >
             <Playable
               note="The real portal versions each upload and notifies the organizer."
-              href={`${adminHref}/tasks/deliverables`}
+              href={enter(`${adminHref}/tasks/deliverables`)}
               hrefLabel="Open the real matrix"
             >
               <PortalTasksDemo tasks={demo.tasks} speaker={demo.speakerName} />
@@ -580,7 +590,7 @@ export default function HomePage() {
           >
             <Playable
               note="The real embed is signed and cacheable, and the API is bearer-token REST with OpenAPI 3."
-              href={`${adminHref}/embeds`}
+              href={enter(`${adminHref}/embeds`)}
               hrefLabel="Open the real embeds"
             >
               <CopyEmbed slug={demo.slug} />
@@ -606,7 +616,7 @@ export default function HomePage() {
           >
             <Playable
               note="The real search queries SQLite, so it reaches abstracts and answers as well as titles."
-              href={`${adminHref}/search`}
+              href={enter(`${adminHref}/search`)}
               hrefLabel="Open the real search"
             >
               <SearchDemo rows={searchRows} />
