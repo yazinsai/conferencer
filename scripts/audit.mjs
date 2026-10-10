@@ -19,14 +19,21 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const BASE = process.env.AUDIT_BASE ?? "http://localhost:3000";
 const SLUG = process.env.AUDIT_SLUG ?? "devflow-conf-2027";
-const CHROME = process.env.CHROME_BIN ?? "/usr/local/bin/google-chrome";
+const CHROME =
+  process.env.CHROME_BIN ??
+  [
+    "/usr/local/bin/google-chrome",
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ].find((path) => existsSync(path));
 const ORGANIZER = { email: "demo-organizer@example.com", password: "SbekTest!2027-org" };
 
 const WIDTHS = [320, 375, 414, 768, 1280, 1440];

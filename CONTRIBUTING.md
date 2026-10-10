@@ -6,7 +6,7 @@ Thanks for helping out. Bug reports, fixes and focused features are all welcome.
 
 ```bash
 npm install
-npm run seed   # demo event + logins (see README → Demo data and logins)
+npm run seed   # demo event; logins are in the README
 npm run dev    # http://localhost:3000
 ```
 

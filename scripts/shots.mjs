@@ -20,7 +20,7 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -28,7 +28,12 @@ const BASE = process.env.SHOTS_BASE ?? "http://localhost:3000";
 const SLUG = process.env.SHOTS_SLUG ?? "devflow-conf-2027";
 const CHROME =
   process.env.CHROME_BIN ??
-  ["/usr/local/bin/google-chrome", "/usr/bin/google-chrome", "/usr/bin/chromium"].find(Boolean);
+  [
+    "/usr/local/bin/google-chrome",
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ].find((path) => existsSync(path));
 
 const ORGANIZER = { email: "demo-organizer@example.com", password: "SbekTest!2027-org" };
 
