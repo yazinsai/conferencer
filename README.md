@@ -220,8 +220,6 @@ what changed.
 schema.sql                 every table and index; applied at boot, idempotently
 components.json            shadcn config
 design.md                  the locked design system — read before changing any styling
-.agents/skills/hallmark/   the design skill the system was produced with (vendored)
-.hallmark/                 pre-flight findings + project memory the skill reads
 
 src/lib/
   db.ts                    better-sqlite3 singleton + all/get/run/tx helpers

@@ -2,7 +2,4 @@ node_modules
 .next
 data
 .git
-research
-google-doc.md
-discord.tsv
 *.log

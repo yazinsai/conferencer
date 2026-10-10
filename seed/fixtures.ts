@@ -1,5 +1,5 @@
 /**
- * Demo data for DevFlow Conf 2027 (REQUIREMENTS §15 / research/evals/sample-data.json).
+ * Demo data for DevFlow Conf 2027 (REQUIREMENTS §15).
  *
  * Personas are Harry Potter characters, picked so each demo role is obvious:
  *   Minerva McGonagall  → organizer (runs the programme)

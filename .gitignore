@@ -41,6 +41,17 @@ next-env.d.ts
 
 # project
 .firecrawl/
+bun.lock
+.git.original/
+
+# local agent tooling
+AGENTS.md
+CLAUDE.md
+.agents/
+.hallmark/
+.cursor/
+.claude/
+skills-lock.json
 
 # data
 /data/
